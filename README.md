@@ -9,7 +9,8 @@ erDiagram
     string email
     string encrypted_password
     string reset_password_token
-    enum kind
+    datetime reset_password_sent_at
+    enum role
     datetime created_at
     datetime updated_at
   }
@@ -23,7 +24,6 @@ erDiagram
   ARTICLE ||--o{ PUBLISHMENT : has_publishments
   ARTICLE{
     bigint id
-    bigint project_id
     string title
     string content
     enum status
@@ -58,8 +58,8 @@ erDiagram
     string name
     string manufacturer
   }
-  IMAGE_CATEGORY }o--|| CATEGORY : belongs_to
-  IMAGE_CATEGORY }o--|| IMAGE : belongs_to
+  IMAGE ||--o{ IMAGE_CATEGORY: has_many
+  CATEGORY ||--o{ IMAGE_CATEGORY: has_many
   CATEGORY{
     bigint id
     string name
