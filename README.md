@@ -4,12 +4,8 @@
 
 ```mermaid
 erDiagram
-   USER ||--o{ PROJECT : has_many
-  USER ||--o{ ARTICLE : writes
-  PROJECT ||--o{ ARTICLE : has_many
-  USER ||--o{ IMAGE : uploads
   USER{
-    int id
+    bigint id
     string email
     string encrypted_password
     string reset_password_token
@@ -18,49 +14,59 @@ erDiagram
     datetime updated_at
   }
   PROJECT{
-    int id
-    string article_URL
-    string thumbnail_URL
-    datetime published_at
+    bigint id
+    string link
+    string thumbnail_url
+    datetime created_at
+    datetime updated_at
   }
+  ARTICLE ||--o{ PUBLISHMENT : has_publishments
   ARTICLE{
-    int id
-    int project_id
+    bigint id
+    bigint project_id
     string title
     string content
+    enum status
+    datetime created_at
+    datetime updated_at
+  }
+  PUBLISHMENT{
+    bigint id
+    bigint article_id
     datetime published_at
-    datetime edited_at
-    bool is_published
   }
   IMAGE }o--|| CAMERA : uses
   IMAGE }o--|| LENS : uses
   IMAGE{
-    int id
+    bigint id
     string title
     string caption
-    datetime took_at
-    int camera_id
-    int lens_id
+    datetime taken_at
+    bigint camera_id
+    bigint lens_id
     int display_order
     bool is_published
+    datetime created_at
+    datetime updated_at
   }
   LENS{
-    int id
+    bigint id
     string name
   }
   CAMERA{
-    int id
+    bigint id
     string name
     string manufacturer
   }
   IMAGE_CATEGORY }o--|| CATEGORY : belongs_to
   IMAGE_CATEGORY }o--|| IMAGE : belongs_to
   CATEGORY{
-    int id
-    string category
+    bigint id
+    string name
   }
   IMAGE_CATEGORY{
-    int image_id
-    int category_id
+    bigint id
+    bigint image_id
+    bigint category_id
   }
 ```
