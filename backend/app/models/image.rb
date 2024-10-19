@@ -1,6 +1,6 @@
 class Image < ApplicationRecord
-  has_many :image_categories
-  has_many :categories through: :image_categories
+  has_many :image_categories, dependent: :destroy
+  has_many :categories, through: :image_categories
   belongs_to :camera
   belongs_to :lens
 
@@ -10,8 +10,6 @@ class Image < ApplicationRecord
   validates :title, presence: true
   validates :caption, presence: true
   validates :taken_at, presence: true
-  validates :camera, presence: true
-  validates :lens, presence: true
   validates :display_order, presence: true
   validates :is_published, inclusion: { in: [true, false] }
 
@@ -21,8 +19,7 @@ class Image < ApplicationRecord
 
   def taken_at_is_in_the_past
     return if taken_at.nil?
-    if taken_at > Time.zone.now
-      errors.add(:taken_at, "can't be in the future")
-    end
+
+    errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
   end
 end
