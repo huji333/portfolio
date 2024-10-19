@@ -5,4 +5,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   enum role: { guest: 0, admin: 1 }
+
+  validates :role, presence: true, inclusion: { in: roles.keys }
+  validates :email, presence: true
+  validates :encrypted_password, presence: true
 end

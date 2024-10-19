@@ -3,7 +3,6 @@ class CreateProjects < ActiveRecord::Migration[7.2]
     create_table :projects do |t|
       t.string :title, null: false
       t.string :link, null: false
-      t.string :thumbnail_url, null: false
 
       t.timestamps
     end
