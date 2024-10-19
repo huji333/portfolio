@@ -6,6 +6,5 @@ class CreatePublishments < ActiveRecord::Migration[7.2]
 
       t.timestamps
     end
-    add_foreign_key :publishments, :articles
   end
 end
