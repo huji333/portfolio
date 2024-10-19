@@ -16,6 +16,7 @@ erDiagram
   }
   PROJECT{
     bigint id
+    string title
     string link
     string thumbnail_url
     datetime created_at
@@ -25,7 +26,7 @@ erDiagram
   ARTICLE{
     bigint id
     string title
-    string content
+    text content
     enum status
     datetime created_at
     datetime updated_at
