@@ -10,6 +10,7 @@ erDiagram
     string encrypted_password
     string reset_password_token
     datetime reset_password_sent_at
+    datetime remember_created_at
     enum role
     datetime created_at
     datetime updated_at
@@ -18,7 +19,6 @@ erDiagram
     bigint id
     string title
     string link
-    string thumbnail_url
     datetime created_at
     datetime updated_at
   }
@@ -35,6 +35,8 @@ erDiagram
     bigint id
     bigint article_id
     datetime published_at
+    datetime created_at
+    datetime updated_at
   }
   IMAGE }o--|| CAMERA : uses
   IMAGE }o--|| LENS : uses
@@ -53,21 +55,29 @@ erDiagram
   LENS{
     bigint id
     string name
+    datetime created_at
+    datetime updated_at
   }
   CAMERA{
     bigint id
     string name
     string manufacturer
+    datetime created_at
+    datetime updated_at
   }
   IMAGE ||--o{ IMAGE_CATEGORY: has_many
   CATEGORY ||--o{ IMAGE_CATEGORY: has_many
   CATEGORY{
     bigint id
     string name
+    datetime created_at
+    datetime updated_at
   }
   IMAGE_CATEGORY{
     bigint id
     bigint image_id
     bigint category_id
+    datetime created_at
+    datetime updated_at
   }
 ```
