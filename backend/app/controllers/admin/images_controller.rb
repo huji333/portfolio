@@ -1,7 +1,7 @@
-class Admin::ImagesController < ApplicationController
+class Admin::ImagesController < Admin::Base
+
   def index
     @images = Image.all
-    render json: @images
   end
   def show
     @image = Image.find(params[:id])
