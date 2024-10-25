@@ -1,0 +1,26 @@
+%h1 image
+.row.py-1
+  .col-md-3.fw-bold Title
+  .col-md-9= @image.title
+.row.py-1
+  .col-md-3.fw-bold Caption
+  .col-md-9= @image.caption
+.row.py-1
+  .col-md-3.fw-bold Taken at
+  .col-md-9= @image.taken_at
+.row.py-1
+  .col-md-3.fw-bold Camera
+  .col-md-9= @image.camera_id
+.row.py-1
+  .col-md-3.fw-bold Lens
+  .col-md-9= @image.lens_id
+.row.py-1
+  .col-md-3.fw-bold Display order
+  .col-md-9= @image.display_order
+.row.py-1
+  .col-md-3.fw-bold Is published
+  .col-md-9= @image.is_published
+
+= link_to '編集', edit_image_path(@image)
+\|
+= link_to '戻る', images_path

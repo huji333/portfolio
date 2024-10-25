@@ -1,0 +1,34 @@
+= form_with(model: image, url: admin_images_path, local: true, multipart: true) do |form|
+  - if image.errors.any?
+    #error_explanation
+      %h2= "#{pluralize(image.errors.count, "error")} prohibited this image from being saved:"
+      %ul
+        - image.errors.full_messages.each do |message|
+          %li= message
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold image
+    .col-md-9= form.file_field :image, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold title
+    .col-md-9= form.text_field :title, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold caption
+    .col-md-9= form.text_area :caption, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold taken_at
+    .col-md-9= form.datetime_field :taken_at, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold camera_id
+    .col-md-9= form.number_field :camera_id, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold lens_id
+    .col-md-9= form.number_field :lens_id, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold display_order
+    .col-md-9= form.number_field :display_order, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold is_published
+    .col-md-9= form.check_box :is_published, class: 'form-control'
+  .row
+    .col
+      = form.submit '保存', class: 'btn btn-primary d-block w-100'

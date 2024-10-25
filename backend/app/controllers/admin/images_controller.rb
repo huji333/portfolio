@@ -11,10 +11,14 @@ class Admin::ImagesController < Admin::Base
   def create
     @image = Image.new(image_params)
     if @image.save
-      render json: @image, status: :created, location: @image
+      redirect_to @image, notice: 'Image was successfully created.'
     else
-      render json: @image.errors, status: :unprocessable_entity
+      redirect_to new_admin_image_path, alert: 'Image faild to create.'
     end
+  end
+
+  def new
+    @image = Image.new
   end
 
   def update
