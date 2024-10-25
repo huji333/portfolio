@@ -23,7 +23,7 @@ class Admin::ImagesControllerTest < ActionDispatch::IntegrationTest
 
   test 'logged out user should not get index' do
     get admin_images_path
-     assert_response :redirect
+    assert_response :redirect
     assert_redirected_to new_user_session_path
   end
 end

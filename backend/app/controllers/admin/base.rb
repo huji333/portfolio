@@ -5,8 +5,8 @@ class Admin::Base < ApplicationController
   private
 
   def check_admin
-    unless current_user&.role_admin?
-      render json: { error: 'You are not authorized to perform this action.' }, status: :unauthorized
-    end
+    return if current_user&.role_admin?
+
+    render json: { error: 'You are not authorized to perform this action.' }, status: :unauthorized
   end
 end
