@@ -1,0 +1,29 @@
+%h1 image一覧
+%table.table
+  %thead.table-light
+    %tr
+      %th Title
+      %th Caption
+      %th Taken at
+      %th Camera
+      %th Lens
+      %th Display order
+      %th Is published
+      %th
+
+  %tbody
+    %tr
+      %td{colspan: 8}= link_to 'image新規作成', new_image_path, class: 'btn btn-primary w-100'
+    - @images.each do |image|
+      %tr
+        %td= image.title
+        %td= image.caption
+        %td= image.taken_at
+        %td= image.camera_id
+        %td= image.lens_id
+        %td= image.display_order
+        %td= image.is_published
+        %td
+          = link_to '閲覧', image_path(image), class: 'btn btn-sm btn-outline-primary'
+          = link_to '編集', edit_image_path(image), class: 'btn btn-sm btn-outline-primary'
+          = link_to '削除', image_path(image), method: :delete, data: { confirm: '本当に削除してよろしいですか？' }, class: 'btn btn-sm btn-outline-danger'

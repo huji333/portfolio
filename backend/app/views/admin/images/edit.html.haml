@@ -1,6 +1,7 @@
-%h1 image編集
-= render "form", image: @image
+%h1 画像の情報を編集
 
-= link_to '閲覧', image_path(@image)
+= render 'form', image: @image, cameras: @cameras, lenses: @lenses, categories: @categories
+
+= link_to '閲覧', admin_image_path(@image)
 \|
 = link_to '戻る', admin_images_path

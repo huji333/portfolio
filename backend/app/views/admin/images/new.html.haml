@@ -1,4 +1,4 @@
 %h1 image新規作成
-= render "form", image: @image
+= render "form", image: @image, cameras: @cameras, lenses: @lenses, categories: @categories
 
 = link_to '戻る', admin_images_path

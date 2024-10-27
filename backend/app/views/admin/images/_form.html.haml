@@ -1,13 +1,13 @@
-= form_with(model: image, url: admin_images_path, local: true, multipart: true) do |form|
+= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true) do |form|
   - if image.errors.any?
-    #error_explanation
-      %h2= "#{pluralize(image.errors.count, "error")} prohibited this image from being saved:"
+    .alert.alert-danger
       %ul
         - image.errors.full_messages.each do |message|
           %li= message
-  .row.mb-3
-    .col-md-3.col-form-label.fw-bold image
-    .col-md-9= form.file_field :image, class: 'form-control'
+  - unless image.file.attached?
+    .row.mb-3
+      .col-md-3.col-form-label.fw-bold Image
+      .col-md-9= form.file_field :file, class: 'form-control'
   .row.mb-3
     .col-md-3.col-form-label.fw-bold title
     .col-md-9= form.text_field :title, class: 'form-control'
@@ -19,13 +19,19 @@
     .col-md-9= form.datetime_field :taken_at, class: 'form-control'
   .row.mb-3
     .col-md-3.col-form-label.fw-bold camera_id
-    .col-md-9= form.number_field :camera_id, class: 'form-control'
+    .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: false }, class: 'form-control'
   .row.mb-3
     .col-md-3.col-form-label.fw-bold lens_id
-    .col-md-9= form.number_field :lens_id, class: 'form-control'
+    .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control'
   .row.mb-3
     .col-md-3.col-form-label.fw-bold display_order
     .col-md-9= form.number_field :display_order, class: 'form-control'
+  %h3 カテゴリ
+  - categories.each do |category|
+    .form-check
+      = form.check_box :category_ids, { multiple: true, checked: image.categories.include?(category) }, category.id, nil
+      = form.label :category_ids, category.name, class: "form-check-label"
+
   .row.mb-3
     .col-md-3.col-form-label.fw-bold is_published
     .col-md-9= form.check_box :is_published, class: 'form-control'
