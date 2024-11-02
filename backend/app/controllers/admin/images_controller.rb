@@ -1,4 +1,5 @@
 class Admin::ImagesController < Admin::Base
+  before_action :set_cameras_and_lenses_and_categories, only: [:new, :edit, :create, :update]
   def index
     @images = Image.all
   end
@@ -9,16 +10,10 @@ class Admin::ImagesController < Admin::Base
 
   def new
     @image = Image.new
-    @cameras = Camera.all
-    @lenses = Lens.all
-    @categories = Category.all
   end
 
   def edit
     @image = Image.find(params[:id])
-    @cameras = Camera.all
-    @lenses = Lens.all
-    @categories = Category.all
   end
 
   def create
@@ -37,7 +32,7 @@ class Admin::ImagesController < Admin::Base
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
     else
       flash[:alert] = 'Image faild to update.'
-      Rails.logger.debug "Image faild to update.#{@image.errors.full_messages}"
+      Rails.logger.debug { "Image faild to update.#{@image.errors.full_messages}" }
       render :edit, status: :unprocessable_entity
     end
   end
@@ -52,6 +47,12 @@ class Admin::ImagesController < Admin::Base
   end
 
   private
+
+  def set_cameras_and_lenses_and_categories
+    @cameras = Camera.all
+    @lenses = Lens.all
+    @categories = Category.all
+  end
 
   def image_params
     params.require(:image).permit(:title, :caption, :taken_at, :camera_id, :lens_id, :display_order, :is_published, :file, category_ids: [])
