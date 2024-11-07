@@ -1,0 +1,7 @@
+%h1 画像の情報を編集
+
+= render 'form', image: @image, cameras: @cameras, lenses: @lenses, categories: @categories
+
+= link_to '閲覧', admin_image_path(@image)
+\|
+= link_to '戻る', admin_images_path
