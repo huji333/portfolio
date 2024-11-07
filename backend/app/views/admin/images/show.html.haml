@@ -2,7 +2,7 @@
 - if @image.file.attached?
   %p
     %strong Image:
-    = image_tag @image.file  # 画像を表示
+    = image_tag @image.file, width: '300'
 - else
   %p No image attached.
 .row.py-1

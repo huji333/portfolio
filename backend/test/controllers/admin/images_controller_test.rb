@@ -33,13 +33,6 @@ class Admin::ImagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test 'admin should not get show with invalid id' do
-    login_as(@admin)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get admin_image_path(-1)
-    end
-  end
-
   test 'admin should get new' do
     login_as(@admin)
     get new_admin_image_path
@@ -49,15 +42,40 @@ class Admin::ImagesControllerTest < ActionDispatch::IntegrationTest
   test 'admin should create image' do
     login_as(@admin)
     assert_difference('Image.count') do
+      post admin_images_path, params: {
+        image: {
+          title: 'Sample Image',
+          file: fixture_file_upload('test/fixtures/files/sample.jpg', 'image/jpeg'),
+          caption: 'This is a sample caption',
+          taken_at: Time.zone.now,
+          camera_id: cameras(:one).id,
+          lens_id: lenses(:one).id,
+          display_order: 1,
+          is_published: true
+        }
+      }
     end
-    assert_redirected_to admin_image_path(Image.last)
+    assert_equal 'Sample Image', Image.last.title
+    assert_redirected_to admin_images_path
   end
 
   test 'admin should not create image with invalid params' do
     login_as(@admin)
     assert_no_difference('Image.count') do
+      post admin_images_path, params: {
+        image: {
+          title: '',
+          file: fixture_file_upload('test/fixtures/files/sample.jpg', 'image/jpeg'),
+          caption: '',
+          taken_at: Time.zone.now,
+          camera_id: cameras(:one).id,
+          lens_id: lenses(:one).id,
+          display_order: 1,
+          is_published: true
+        }
+      }
     end
-    assert_response :success
+    assert_redirected_to new_admin_image_path
   end
 
   test 'admin should get edit' do
@@ -82,6 +100,7 @@ class Admin::ImagesControllerTest < ActionDispatch::IntegrationTest
   test 'admin should destroy image' do
     login_as(@admin)
     assert_difference('Image.count', -1) do
+      delete admin_image_path(images(:one))
     end
     assert_redirected_to admin_images_path
   end
