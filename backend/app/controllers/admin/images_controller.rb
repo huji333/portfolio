@@ -21,21 +21,21 @@ class Admin::ImagesController < Admin::Base
     @image = Image.new(image_params)
     if @image.save
       @image.categories = categories
-      redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
+      redirect_to admin_images_path, notice: 'Image was successfully created.'
     else
-      flash.now[:alert] = 'Image faild to create.'
-      render :new, status: :unprocessable_entity
+      flash.now[:alert] = 'Image failed to create.'
+      redirect_to new_admin_image_path
     end
   end
 
   def update
     @image = Image.find(params[:id])
     if @image.update(image_params)
-      redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
+      redirect_to admin_image_path(@image), notice: 'Image was successfully updated.'
     else
       flash[:alert] = 'Image failed to update.'
       Rails.logger.debug { "Image failed to update.#{@image.errors.full_messages}" }
-      render :edit, status: :unprocessable_entity
+      render :edit
     end
   end
 

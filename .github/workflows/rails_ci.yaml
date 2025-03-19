@@ -1,0 +1,57 @@
+name: Rails CI
+
+on: push
+
+jobs:
+  rails:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Install dependencies
+        working-directory: backend
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Set env
+        run: |
+          echo "RAILS_ENV=test" >> $GITHUB_ENV
+          echo "RAILS_HOST=localhost" >> $GITHUB_ENV
+          echo "TEST_PG_USER=postgres" >> $GITHUB_ENV
+          echo "TEST_PG_PASSWORD=postgres" >> $GITHUB_ENV
+          echo "TEST_PG_HOST=localhost" >> $GITHUB_ENV
+
+      - name: Run Rubocop
+        working-directory: backend
+        run: bundle exec rubocop
+
+      - name: Setup database
+        working-directory: backend
+        run: |
+          cp config/database.yml.ci config/database.yml
+          bundle exec rails db:create db:schema:load
+
+      - name: Run tests
+        working-directory: backend
+        run: bundle exec rspec

@@ -126,6 +126,11 @@ GEM
       rails (>= 3.0.0)
     drb (2.2.1)
     erubi (1.13.0)
+    factory_bot (6.5.1)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.4.4)
+      factory_bot (~> 6.5)
+      railties (>= 5.0.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
     haml (6.3.0)
@@ -277,10 +282,6 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.34.0)
       parser (>= 3.3.1.0)
-    rubocop-capybara (2.21.0)
-      rubocop (~> 1.41)
-    rubocop-factory_bot (2.26.1)
-      rubocop (~> 1.61)
     rubocop-performance (1.22.1)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
@@ -289,12 +290,7 @@ GEM
       rack (>= 1.1)
       rubocop (>= 1.52.0, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
-    rubocop-rspec (2.31.0)
-      rubocop (~> 1.40)
-      rubocop-capybara (~> 2.17)
-      rubocop-factory_bot (~> 2.22)
-      rubocop-rspec_rails (~> 2.28)
-    rubocop-rspec_rails (2.29.1)
+    rubocop-rspec (3.4.0)
       rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
@@ -356,6 +352,7 @@ DEPENDENCIES
   debug
   devise
   dockerfile-rails (>= 1.6)
+  factory_bot_rails
   haml-rails
   importmap-rails
   jbuilder
@@ -366,7 +363,7 @@ DEPENDENCIES
   rubocop (~> 1.50)
   rubocop-performance (~> 1.12)
   rubocop-rails (~> 2.12)
-  rubocop-rspec (~> 2.11)
+  rubocop-rspec (~> 3.2)
   selenium-webdriver
   sprockets-rails
   stimulus-rails
