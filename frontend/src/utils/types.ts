@@ -11,3 +11,5 @@ export type ImageType = {
   updated_at: string;
   file: string; // 画像のURL
 };
+
+export const Hoge = 'hoge';
