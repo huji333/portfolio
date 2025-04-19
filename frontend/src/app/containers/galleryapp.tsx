@@ -1,6 +1,7 @@
 import { ImageType } from '@/utils/types';
 import Image from 'next/image';
 import { use } from 'react';
+import ImageGrid from '../components/image/imagegrid';
 
 async function getImages(): Promise<ImageType[]> {
   const res = await fetch("http://localhost:3000/api/images")
@@ -15,15 +16,7 @@ export default function GalleryApp() {
   const images = use(getImages())
   return (
     <div>
-      {images.map((image) =>
-        <Image
-          key = { image.id }
-          src = { image.file }
-          alt = { image.title }
-          width = {500}
-          height = {400}
-        />
-      )}
+      <ImageGrid images={images} />
     </div>
   );
 }
