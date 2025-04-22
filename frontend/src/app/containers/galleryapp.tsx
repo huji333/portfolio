@@ -4,7 +4,7 @@ import { use } from 'react';
 import ImageGrid from '../components/image/imagegrid';
 
 async function getImages(): Promise<ImageType[]> {
-  const res = await fetch("http://localhost:3000/api/images")
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/images`)
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
@@ -15,8 +15,6 @@ async function getImages(): Promise<ImageType[]> {
 export default function GalleryApp() {
   const images = use(getImages())
   return (
-    <div>
-      <ImageGrid images={images} />
-    </div>
+    <ImageGrid images={images} />
   );
 }
