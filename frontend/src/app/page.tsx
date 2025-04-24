@@ -22,7 +22,7 @@ export default function Home() {
 
   return (
     <>
-      <Header />
+      <Header isIndexPage = {true}/>
       <div className="relative min-h-screen overflow-hidden bg-[#faf7f2]">
         {/* PC用画像: スライドショー */}
         {images.map((image, index) => (
