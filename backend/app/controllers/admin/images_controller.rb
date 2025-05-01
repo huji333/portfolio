@@ -18,7 +18,19 @@ class Admin::ImagesController < Admin::Base
 
   def create
     categories = Category.where(id: categories_params['category_ids'])
-    @image = Image.new(image_params)
+    @image = Image.new(image_params.except(:file))
+    # 長辺が1920px以内になるようにリサイズしたものを添付
+    if (uploaded = image_params[:file]).present?
+      processed_io = Image.resize_io(uploaded.tempfile)
+      processed_io.rewind                     # 念のため先頭へ
+
+      @image.file.attach(
+        io:          processed_io,
+        filename:    "#{uploaded.original_filename}_1920.jpg",
+        content_type: 'image/jpeg'
+      )
+    end
+
     if @image.save
       @image.categories = categories
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'

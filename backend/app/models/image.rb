@@ -22,4 +22,14 @@ class Image < ApplicationRecord
 
     errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
   end
+
+  def self.resize_io(io)
+    require 'image_processing/vips'
+    ImageProcessing::Vips
+      .source(io)
+      .resize_to_limit(1920, 1920)
+      .convert('jpg')
+      .call
+  end
+
 end
