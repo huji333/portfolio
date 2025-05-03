@@ -22,11 +22,11 @@ class Admin::ImagesController < Admin::Base
     # 長辺が1920px以内になるようにリサイズしたものを添付
     if (uploaded = image_params[:file]).present?
       processed_io = Image.resize_io(uploaded.tempfile)
-      processed_io.rewind                     # 念のため先頭へ
+      processed_io.rewind # 念のため先頭へ
 
       @image.file.attach(
-        io:          processed_io,
-        filename:    "#{uploaded.original_filename}_1920.jpg",
+        io: processed_io,
+        filename: "#{uploaded.original_filename}_1920.jpg",
         content_type: 'image/jpeg'
       )
     end

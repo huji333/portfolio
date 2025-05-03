@@ -15,14 +15,6 @@ class Image < ApplicationRecord
 
   validate :taken_at_is_in_the_past
 
-  private
-
-  def taken_at_is_in_the_past
-    return if taken_at.nil?
-
-    errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
-  end
-
   def self.resize_io(io)
     require 'image_processing/vips'
     ImageProcessing::Vips
@@ -32,4 +24,11 @@ class Image < ApplicationRecord
       .call
   end
 
+  private
+
+  def taken_at_is_in_the_past
+    return if taken_at.nil?
+
+    errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
+  end
 end
