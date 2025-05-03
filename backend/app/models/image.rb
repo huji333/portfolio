@@ -15,6 +15,15 @@ class Image < ApplicationRecord
 
   validate :taken_at_is_in_the_past
 
+  def self.resize_io(io)
+    require 'image_processing/vips'
+    ImageProcessing::Vips
+      .source(io)
+      .resize_to_limit(1920, 1920)
+      .convert('jpg')
+      .call
+  end
+
   private
 
   def taken_at_is_in_the_past

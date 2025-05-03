@@ -8,6 +8,9 @@ primary_region = 'nrt'
 console_command = '/rails/bin/rails console'
 
 [build]
+  [build.args]
+    BUILD_PACKAGES = "build-essential git libpq-dev libvips-dev pkg-config"
+    PROD_PACKAGES  = "libvips libvips-tools postgresql-client libjpeg-turbo8"
 
 [deploy]
   release_command = './bin/rails db:prepare'
