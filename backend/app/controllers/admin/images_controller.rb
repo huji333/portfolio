@@ -17,8 +17,8 @@ class Admin::ImagesController < Admin::Base
   end
 
   def create
-    categories = Category.where(id: categories_params['category_ids'])
     @image = Image.new(image_params.except(:file))
+    @image.category_ids = image_params[:category_ids] if image_params[:category_ids].present?
     # 長辺が1920px以内になるようにリサイズしたものを添付
     if (uploaded = image_params[:file]).present?
       processed_io = Image.resize_io(uploaded.tempfile)
@@ -32,7 +32,6 @@ class Admin::ImagesController < Admin::Base
     end
 
     if @image.save
-      @image.categories = categories
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
     else
       flash.now[:alert] = 'Image faild to create.'
@@ -69,10 +68,10 @@ class Admin::ImagesController < Admin::Base
   end
 
   def image_params
-    params.require(:image).permit(:title, :caption, :taken_at, :camera_id, :lens_id, :display_order, :is_published, :file)
-  end
-
-  def categories_params
-    params.require(:image).permit(category_ids: [])
+    params.require(:image).permit(
+      :title, :caption, :taken_at, :camera_id, :lens_id,
+      :display_order, :is_published, :file,
+      category_ids: []
+    )
   end
 end
