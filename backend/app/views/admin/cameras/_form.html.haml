@@ -1,0 +1,15 @@
+= form_with(model: camera, url: camera.new_record? ? admin_cameras_path : admin_camera_path(camera), local: true, multipart: true) do |form|
+  - if camera.errors.any?
+    .alert.alert-danger
+      %ul
+        - camera.errors.full_messages.each do |message|
+          %li= message
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold name
+    .col-md-9= form.text_field :name, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold manufacturer
+    .col-md-9= form.text_area :manufacturer, class: 'form-control'
+  .row
+    .col
+      = form.submit '保存', class: 'btn btn-primary d-block w-100'

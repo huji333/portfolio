@@ -1,0 +1,22 @@
+%h1 カメラ一覧
+
+- if flash.notice
+  .alert.alert-info= flash[:notice]
+
+.table-responsive
+  %table.table.table-striped
+    %thead
+      %tr
+        %th カメラ名
+        %th メーカー
+        %th 編集
+        %th 削除
+    %tbody
+      - @cameras.each do |camera|
+        %tr
+          %td= camera.name
+          %td= camera.manufacturer
+          %td= link_to '編集', edit_admin_camera_path(camera), class: 'btn btn-secondary btn-sm'
+          %td= button_to '削除', admin_camera_path(camera), method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'
+
+= link_to '新規作成', new_admin_camera_path, class: 'btn btn-primary mt-3'
