@@ -1,0 +1,12 @@
+= form_with(model: category, url: category.new_record? ? admin_categories_path : admin_category_path(category), local: true, multipart: true) do |form|
+  - if category.errors.any?
+    .alert.alert-danger
+      %ul
+        - category.errors.full_messages.each do |message|
+          %li= message
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold name
+    .col-md-9= form.text_field :name, class: 'form-control'
+  .row
+    .col
+      = form.submit '保存', class: 'btn btn-primary d-block w-100'

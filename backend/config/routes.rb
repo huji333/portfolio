@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   # root "posts#index"
   namespace :admin do
     resources :images
+    resources :cameras
+    resources :lenses
+    resources :categories
   end
   namespace :api do
     resources :images, only: %i[index show]
