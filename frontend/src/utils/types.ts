@@ -12,4 +12,9 @@ export type ImageType = {
   file: string; // 画像のURL
 };
 
-export const Hoge = 'hoge';
+export type CategoryType = {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+};

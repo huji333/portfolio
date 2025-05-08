@@ -1,10 +1,11 @@
 import React, { Suspense } from "react";
+import { useState } from 'react';
 import Header from "../components/layout/header";
 import GalleryApp from '../containers/galleryapp';
 
-const selectedCategories = [1, 2, 3, 4]; // Example categories
 
 export default function Page() {
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   return (
     <>
       <Header />
