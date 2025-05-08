@@ -1,10 +1,15 @@
 import { ImageType } from '@/utils/types';
-import Image from 'next/image';
 import { use } from 'react';
 import ImageGrid from '../components/image/imagegrid';
 
-async function getImages(): Promise<ImageType[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/images`)
+type Props = {
+  categories: number[];
+};
+
+async function getImages(categories : number[]): Promise<ImageType[]> {
+  const query = categories.length > 0 ? `?categories=${categories.join(',')}` : '';
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/images${query}`;
+  const res = await fetch(`${url}`)
   if (!res.ok) {
     throw new Error("Failed to fetch data");
   }
@@ -12,8 +17,8 @@ async function getImages(): Promise<ImageType[]> {
   return ImagesData;
 }
 
-export default function GalleryApp() {
-  const images = use(getImages())
+export default function GalleryApp({categories}: Props) {
+  const images = use(getImages(categories))
   return (
     <ImageGrid images={images} />
   );
