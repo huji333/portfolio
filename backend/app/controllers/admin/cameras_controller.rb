@@ -2,18 +2,22 @@ class Admin::CamerasController < Admin::Base
   def index
     @cameras = Camera.all
   end
-  def create
-    @camera = Camera.new(camera_params)
-    if @camera.save
-      redirect_to admin_cameras_path, notice: 'Camera was successfully created.'
-    end
-  end
+
   def new
     @camera = Camera.new
   end
+
   def edit
     @camera = Camera.find(params[:id])
   end
+
+  def create
+    @camera = Camera.new(camera_params)
+    return unless @camera.save
+
+    redirect_to admin_cameras_path, notice: 'Camera was successfully created.'
+  end
+
   def destroy
     @camera = Camera.find(params[:id])
     if @camera.destroy
