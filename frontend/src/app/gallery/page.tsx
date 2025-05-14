@@ -5,14 +5,11 @@ import GalleryApp from '../containers/galleryapp';
 
 
 export default function Page() {
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   return (
     <>
       <Header />
       <div className="min-h-screen bg-[#faf7f2] pt-[80px]">
-        <Suspense>
-          <GalleryApp categories={selectedCategories} />
-        </Suspense>
+        <GalleryApp categories={[]} />
       </div>
     </>
   );
