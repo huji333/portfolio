@@ -9,7 +9,7 @@ export default function Page() {
     <>
       <Header />
       <div className="min-h-screen bg-[#faf7f2] pt-[80px]">
-        <GalleryApp categories={[]} />
+        <GalleryApp />
       </div>
     </>
   );

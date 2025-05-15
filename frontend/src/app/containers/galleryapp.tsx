@@ -31,35 +31,48 @@ async function fetchImages(categoryids : number[]): Promise<ImageType[]> {
   return ImagesData;
 }
 
+export default function Galleryapp() {
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [images, setImages] = useState<ImageType[]>([]);
+  const [selectedCategoryids, setSelectedCategoryids] = useState<number[]>([]);
 
-export default async function Gallerypp() {
-  const categories = await fetchCategories();
-  const [images, setImages] = useState<ImageType[]>([])
-  const [selectedCategoryids, setSelectedCategoryids] = useState<number[]>([])
-
-  console.log("page")
-
-  async function updateImages(selectedCategoryids: number[]){
-    const images = await fetchImages(selectedCategoryids)
-    setImages(images)
+  async function loadCategories(){
+    try {
+      const categoriesData = await fetchCategories();
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
   }
 
-  useEffect( () => {
-    updateImages(selectedCategoryids)
-  },[selectedCategoryids]
-  )
+  async function updateImages(selectedCategoryids: number[]){
+    try {
+      const images = await fetchImages(selectedCategoryids);
+      setImages(images);
+    } catch (error) {
+      console.error('Failed to fetch images:', error);
+    }
+  }
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
+    updateImages(selectedCategoryids);
+  }, [selectedCategoryids]);
 
   return (
     <>
       <ImageFilter
         categories={categories}
-        updateCategories={ (id) => {
+        updateCategories={(id) => {
           setSelectedCategoryids(
             (prev) =>
               prev.includes(id)
                 ? prev.filter((categoryId) => categoryId !== id)
-                : [...prev,id]
-          )
+                : [...prev, id]
+          );
         }}
       />
       <ImageGrid images={images} />
