@@ -1,15 +1,13 @@
 "use client"
 import { ImageType } from '@/utils/types';
 import { CategoryType } from '@/utils/types';
-import { use, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ImageGrid from '../components/image/imagegrid';
-import CategoryCheckboxList from '../components/image/categorycheckboxlist';
+import ImageFilter from '../components/image/ImageFilter';
 
 type Props = {
   categories: number[];
 };
-
-
 
 async function fetchCategories(){
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`;
@@ -21,37 +19,50 @@ async function fetchCategories(){
   return categoriesData
 }
 
-async function fetchImages(categories : number[]): Promise<ImageType[]> {
-  const query = categories.length > 0 ? `?categories=${categories.join(',')}` : '';
+async function fetchImages(categoryids : number[]): Promise<ImageType[]> {
+  const query = categoryids.length > 0 ? `?categories=${categoryids.join(',')}` : '';
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/images${query}`;
   console.log(url);
   const res = await fetch(url)
   if (!res.ok) {
-    throw new Error("Failed to fetch data");
+    throw new Error("Failed to fetch images");
   }
   const ImagesData: ImageType[] = await res.json();
   return ImagesData;
 }
 
 
-export default function Gallerypp() {
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+export default async function Gallerypp() {
+  const categories = await fetchCategories();
   const [images, setImages] = useState<ImageType[]>([])
-  const [categories, setCategories] = useState<number[]>([])
+  const [selectedCategoryids, setSelectedCategoryids] = useState<number[]>([])
 
   console.log("page")
 
-  async function updateImages(categoryids: number[]){
-    const images = await fetchImages(categoryids)
+  async function updateImages(selectedCategoryids: number[]){
+    const images = await fetchImages(selectedCategoryids)
     setImages(images)
   }
 
   useEffect( () => {
-    updateImages(categories)
-  },[]
+    updateImages(selectedCategoryids)
+  },[selectedCategoryids]
   )
 
   return (
-    <ImageGrid images={images} />
+    <>
+      <ImageFilter
+        categories={categories}
+        updateCategories={ (id) => {
+          setSelectedCategoryids(
+            (prev) =>
+              prev.includes(id)
+                ? prev.filter((categoryId) => categoryId !== id)
+                : [...prev,id]
+          )
+        }}
+      />
+      <ImageGrid images={images} />
+    </>
   );
 }
