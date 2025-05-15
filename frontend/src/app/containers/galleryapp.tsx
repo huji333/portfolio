@@ -63,7 +63,7 @@ export default function Galleryapp() {
   }, [selectedCategoryids]);
 
   return (
-    <>
+    <div className="space-y-6">
       <ImageFilter
         categories={categories}
         updateCategories={(id) => {
@@ -76,6 +76,6 @@ export default function Galleryapp() {
         }}
       />
       <ImageGrid images={images} />
-    </>
+    </div>
   );
 }

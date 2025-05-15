@@ -8,7 +8,7 @@ type Props = {
 
 export default function ImageFilter({categories, updateCategories = f => f}: Props) {
   return (
-    <>
+    <div className="flex flex-wrap gap-3 px-4">
       {categories.map(category => (
         <CategoryCheckbox
           key={category.id}
@@ -16,6 +16,6 @@ export default function ImageFilter({categories, updateCategories = f => f}: Pro
           onCheck={()=>updateCategories(category.id)}
         />
       ))}
-    </>
+    </div>
   );
 }
