@@ -16,5 +16,6 @@ Rails.application.routes.draw do
   end
   namespace :api do
     resources :images, only: %i[index show]
+    resources :categories, only: %i[index]
   end
 end
