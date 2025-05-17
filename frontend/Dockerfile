@@ -18,6 +18,9 @@ RUN npm install -g yarn@$YARN_VERSION --force
 # Throw-away build stage to reduce size of final image
 FROM base AS build
 
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
