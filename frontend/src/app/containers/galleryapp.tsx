@@ -22,7 +22,6 @@ async function fetchCategories(){
 async function fetchImages(categoryids : number[]): Promise<ImageType[]> {
   const query = categoryids.length > 0 ? `?categories=${categoryids.join(',')}` : '';
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/images${query}`;
-  console.log(url);
   const res = await fetch(url)
   if (!res.ok) {
     throw new Error("Failed to fetch images");

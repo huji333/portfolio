@@ -6,7 +6,7 @@ type Props = {
   updateCategories: (categoryId: number) => void;
 }
 
-export default function ImageFilter({categories, updateCategories = f => f}: Props) {
+export default function ImageFilter({categories, updateCategories }: Props) {
   return (
     <div className="flex flex-wrap gap-3 px-4">
       {categories.map(category => (
