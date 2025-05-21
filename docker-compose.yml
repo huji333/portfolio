@@ -7,6 +7,11 @@ services:
       - ./backend:/app
     ports:
       - '3000:3000'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGHOST: db
     depends_on:
       - db
   frontend:
@@ -16,7 +21,7 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - '3001:3001'
+      - '3002:3002'
     depends_on:
       - backend
   db:
@@ -27,3 +32,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
