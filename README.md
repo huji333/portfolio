@@ -23,16 +23,9 @@
    docker-compose up -d
    ```
 
-4. データベースの作成とマイグレーション
+4. ユーザーの作成（http://localhost:3000/users/sign_up でサインアップ）
 
-   ```bash
-   docker-compose exec backend bundle exec rails db:create
-   docker-compose exec backend bundle exec rails db:migrate
-   ```
-
-5. ユーザーの作成（http://localhost:3000/users/sign_up でサインアップ）
-
-6. ユーザーを管理者に変更
+5. ユーザーを管理者に変更
 
    ```bash
    docker-compose exec backend rails console

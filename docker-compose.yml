@@ -32,6 +32,18 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db_data:/var/lib/postgresql/data
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      RAILS_ENV: development
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    command: bundle exec rails db:migrate
+    depends_on:
+      - db
 
 volumes:
   db_data:
