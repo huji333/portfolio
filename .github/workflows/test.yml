@@ -79,14 +79,14 @@ jobs:
           ruby-version: '3.3.5'
           bundler-cache: true
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libvips-dev
+
       - name: Install dependencies
         working-directory: ./backend
         run: bundle install
-
-      - name: Debug psql
-        run: |
-          export PGPASSWORD=$POSTGRES_PASSWORD
-          psql -h 127.0.0.1 -U $POSTGRES_USER -d $POSTGRES_DB -c '\conninfo'
 
       - name: Setup test database
         working-directory: ./backend
