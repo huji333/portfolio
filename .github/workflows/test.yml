@@ -48,8 +48,14 @@ jobs:
         run: yarn lint
 
   test:
-    needs: [rubocop, frontend-lint]
     runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+      PGHOST: localhost
+      PGUSER: ${{ secrets.POSTGRES_USER }}
+      PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: portfolio_test
+    needs: [rubocop, frontend-lint]
     services:
       postgres:
         image: postgres:15
@@ -79,24 +85,8 @@ jobs:
 
       - name: Setup test database
         working-directory: ./backend
-        run: |
-          bundle exec rails db:create
-          bundle exec rails db:schema:load
-        env:
-          RAILS_ENV: test
-          POSTGRES_HOST: localhost
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: portfolio_test
-          PGHOST: localhost
+        run: bundle exec rails db:prepare
 
       - name: Run backend tests
         working-directory: ./backend
         run: bundle exec rspec
-        env:
-          RAILS_ENV: test
-          POSTGRES_HOST: localhost
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: portfolio_test
-          PGHOST: localhost
