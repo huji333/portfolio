@@ -22,13 +22,13 @@ RSpec.describe 'Image Create', type: :system do
     select camera.name, from: 'image_camera_id'
     select lens.name, from: 'image_lens_id'
     check "image_category_ids_#{category.id}"
-    attach_file 'image_file', Rails.root.join('spec', 'fixtures', 'files', 'test_image.jpg')
+    attach_file 'image_file', Rails.root.join("spec/fixtures/files/test_image.jpg")
     click_button '保存'
 
     # Debug: Check for any error messages
     if page.has_css?('.alert-danger')
       puts "Validation errors:"
-      page.all('.alert-danger li').each do |error|
+      page.all('.alert-danger li').find_each do |error|
         puts "- #{error.text}"
       end
     end

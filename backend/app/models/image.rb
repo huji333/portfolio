@@ -13,6 +13,8 @@ class Image < ApplicationRecord
   validates :display_order, presence: true
   validates :is_published, inclusion: { in: [true, false] }
 
+  scope :published, -> { where(is_published: true) }
+
   validate :taken_at_is_in_the_past
 
   # リサイズ後にメタデータを更新(縦横のピクセル数など)
@@ -21,9 +23,9 @@ class Image < ApplicationRecord
   def category_ids=(ids)
     super
     # 保存後にカテゴリーの関連付けを更新
-    if persisted?
-      self.categories = Category.where(id: ids.reject(&:blank?))
-    end
+    return unless persisted?
+
+    self.categories = Category.where(id: ids.compact_blank)
   end
 
   def self.resize_io(io)
@@ -33,6 +35,14 @@ class Image < ApplicationRecord
       .resize_to_limit(1920, 1920)
       .convert('jpg')
       .call
+  end
+
+  def self.filter_by_categories(category_ids)
+    return all if category_ids.blank?
+
+    joins(:categories)
+      .where(categories: { id: category_ids })
+      .distinct
   end
 
   private

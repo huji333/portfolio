@@ -1,4 +1,3 @@
 class Admin::IndexController < Admin::Base
-  def index
-  end
+  def index; end
 end

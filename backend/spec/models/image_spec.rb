@@ -6,7 +6,7 @@ RSpec.describe Image, type: :model do
   describe 'validations' do
     context 'file' do
       it 'should be valid with file' do
-        image.file = Rack::Test::UploadedFile.new(Rails.root.join('spec', 'fixtures', 'files', 'test_image.jpg'), 'image/jpeg')
+        image.file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/test_image.jpg"), 'image/jpeg')
         expect(image).to be_valid
       end
 
@@ -38,12 +38,11 @@ RSpec.describe Image, type: :model do
         image.caption = ''
         expect(image).to be_invalid
       end
-
     end
 
     context 'taken_at' do
       it 'should be valid with past taken_at' do
-        image.taken_at = Time.now - 1.day
+        image.taken_at = 1.day.ago
         expect(image).to be_valid
       end
 
@@ -53,10 +52,9 @@ RSpec.describe Image, type: :model do
       end
 
       it 'should be invalid with future taken_at' do
-        image.taken_at = Time.now + 1.day
+        image.taken_at = 1.day.from_now
         expect(image).to be_invalid
       end
-
     end
 
     context 'display_order' do
@@ -69,7 +67,6 @@ RSpec.describe Image, type: :model do
         image.display_order = nil
         expect(image).to be_invalid
       end
-
     end
 
     context 'is_published' do
@@ -110,13 +107,11 @@ RSpec.describe Image, type: :model do
 
     context 'categories' do
       it 'should be valid with categories' do
-        image.save!  # Save the image first
+        image.save! # Save the image first
         category = create(:category)
         image.categories << category
         expect(image).to be_valid
       end
     end
-
   end
-
 end
