@@ -56,15 +56,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3.5'
+          bundler-cache: true
 
-      - name: Build Docker images
-        run: docker compose build
+      - name: Install dependencies
+        working-directory: ./backend
+        run: bundle install
 
       - name: Run backend tests
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          docker compose run --rm backend bundle exec rspec
+        working-directory: ./backend
+        run: bundle exec rspec
