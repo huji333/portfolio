@@ -6,8 +6,8 @@ on:
     branches: [main]
 
 env:
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: postgres
+  POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
   POSTGRES_DB: portfolio_test
   RAILS_ENV: test
 
@@ -24,6 +24,7 @@ jobs:
           bundler-cache: true
 
       - name: Run rubocop
+        working-directory: ./backend
         run: bundle exec rubocop
 
   frontend-lint:
@@ -37,9 +38,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: yarn install
 
       - name: Run ESLint
+        working-directory: ./frontend
         run: yarn lint
 
   test:
