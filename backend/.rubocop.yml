@@ -2,40 +2,46 @@ inherit_from: .rubocop_todo.yml
 
 require: rubocop-rails
 AllCops:
-    NewCops: enable
-    Exclude:
-        - 'vendor/**/*' # rubocop config/default.yml
-        - 'db/**/*'
-        - 'bin/**/*'
-        - 'node_modules/**/*'
-    SuggestExtensions: false
+  NewCops: enable
+  Exclude:
+    - 'vendor/**/*' # rubocop config/default.yml
+    - 'db/**/*'
+    - 'bin/**/*'
+    - 'node_modules/**/*'
+  SuggestExtensions: false
 Style/AsciiComments:
-    Enabled: false
-Documentation:
-    Enabled: false
+  Enabled: false
+Style/Documentation:
+  Enabled: false
 Style/FrozenStringLiteralComment:
-    Enabled: false
+  Enabled: false
 Style/ClassAndModuleChildren:
-    Enabled: false
+  Enabled: false
 Style/StringLiterals:
-    Enabled: false
+  Enabled: false
 Rails/I18nLocaleTexts:
-    Enabled: false
+  Enabled: false
 Naming/HeredocDelimiterNaming:
-    Enabled: false
+  Enabled: false
 Metrics/MethodLength:
-    Max: 25
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
 Rails/SkipsModelValidations:
-    Exclude:
-        - 'test/test_helper.rb'
+  Exclude:
+    - 'test/test_helper.rb'
 Rails/InverseOf:
-    Enabled: false
+  Enabled: false
 Metrics/AbcSize:
-    Max: 38
+  Max: 38
 Metrics/CyclomaticComplexity:
-    Max: 15
+  Max: 15
 Metrics/ClassLength:
-    Exclude:
-        - 'test/**/*'
+  Exclude:
+    - 'test/**/*'
 Metrics/PerceivedComplexity:
-    Max: 12
+  Max: 12
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'

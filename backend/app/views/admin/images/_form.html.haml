@@ -18,10 +18,12 @@
     .col-md-3.col-form-label.fw-bold taken_at
     .col-md-9= form.datetime_field :taken_at, class: 'form-control'
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold camera_id
+    .col-md-3
+      = form.label :camera_id, 'カメラ', class: 'col-form-label fw-bold'
     .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: false }, class: 'form-control'
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold lens_id
+    .col-md-3
+      = form.label :lens_id, 'レンズ', class: 'col-form-label fw-bold'
     .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control'
   .row.mb-3
     .col-md-3.col-form-label.fw-bold display_order
@@ -34,7 +36,10 @@
 
   .row.mb-3
     .col-md-3.col-form-label.fw-bold is_published
-    .col-md-9= form.check_box :is_published, class: 'form-control'
+    .col-md-9
+      .form-check
+        = form.check_box :is_published, class: 'form-check-input'
+        = form.label :is_published, '公開する', class: 'form-check-label'
   .row
     .col
       = form.submit '保存', class: 'btn btn-primary d-block w-100'

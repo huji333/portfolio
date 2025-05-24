@@ -1,0 +1,21 @@
+.container.mt-4
+  %h1.mb-4 管理者ページ
+
+  .row
+    .col-md-4.mb-4
+      = link_to admin_images_path, class: 'card text-decoration-none' do
+        .card-body
+          %h5.card-title 画像管理
+          %p.card-text.text-muted 画像のアップロードと管理
+
+    .col-md-4.mb-4
+      = link_to admin_cameras_path, class: 'card text-decoration-none' do
+        .card-body
+          %h5.card-title カメラ管理
+          %p.card-text.text-muted カメラ情報の管理
+
+    .col-md-4.mb-4
+      = link_to admin_lenses_path, class: 'card text-decoration-none' do
+        .card-body
+          %h5.card-title レンズ管理
+          %p.card-text.text-muted レンズ情報の管理

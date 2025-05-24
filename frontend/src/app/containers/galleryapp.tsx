@@ -5,10 +5,6 @@ import { useState, useEffect } from 'react';
 import ImageGrid from '../components/image/imagegrid';
 import ImageFilter from '../components/image/ImageFilter';
 
-type Props = {
-  categories: number[];
-};
-
 async function fetchCategories(){
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`;
   const res = await fetch(url);

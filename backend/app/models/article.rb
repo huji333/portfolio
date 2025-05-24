@@ -1,5 +1,5 @@
 class Article < ApplicationRecord
-  enum status: { draft: 0, published: 1, archived: 2 }, _prefix: true
+  enum :status, { draft: 0, published: 1, archived: 2 }, prefix: true
 
   has_many :publishments
 

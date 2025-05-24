@@ -1,5 +1,4 @@
-import React, { Suspense } from "react";
-import { useState } from 'react';
+import React from "react";
 import Header from "../components/layout/header";
 import GalleryApp from '../containers/galleryapp';
 
