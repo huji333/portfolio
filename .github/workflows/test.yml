@@ -87,7 +87,16 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: portfolio_test
+          PGHOST: localhost
 
       - name: Run backend tests
         working-directory: ./backend
         run: bundle exec rspec
+        env:
+          RAILS_ENV: test
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: portfolio_test
+          PGHOST: localhost
