@@ -18,7 +18,6 @@ class Admin::ImagesController < Admin::Base
 
   def create
     @image = Image.new(image_params.except(:file))
-    @image.category_ids = image_params[:category_ids] if image_params[:category_ids].present?
     # 長辺が1920px以内になるようにリサイズしたものを添付
     if (uploaded = image_params[:file]).present?
       processed_io = Image.resize_io(uploaded.tempfile)

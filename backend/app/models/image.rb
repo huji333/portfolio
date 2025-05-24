@@ -15,6 +15,17 @@ class Image < ApplicationRecord
 
   validate :taken_at_is_in_the_past
 
+  # リサイズ後にメタデータを更新(縦横のピクセル数など)
+  after_create_commit :analyze_image
+
+  def category_ids=(ids)
+    super
+    # 保存後にカテゴリーの関連付けを更新
+    if persisted?
+      self.categories = Category.where(id: ids.reject(&:blank?))
+    end
+  end
+
   def self.resize_io(io)
     require 'image_processing/vips'
     ImageProcessing::Vips
@@ -30,5 +41,11 @@ class Image < ApplicationRecord
     return if taken_at.nil?
 
     errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
+  end
+
+  def analyze_image
+    return unless file.attached?
+
+    file.analyze
   end
 end

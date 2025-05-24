@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   namespace :admin do
+    root to: 'index#index'
     resources :images
     resources :cameras
     resources :lenses
