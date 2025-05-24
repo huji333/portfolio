@@ -75,21 +75,23 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.2)
-    aws-eventstream (1.3.0)
-    aws-partitions (1.1001.0)
-    aws-sdk-core (3.212.0)
+    aws-eventstream (1.3.2)
+    aws-partitions (1.1107.0)
+    aws-sdk-core (3.224.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
+      base64
       jmespath (~> 1, >= 1.6.1)
-    aws-sdk-kms (1.95.0)
-      aws-sdk-core (~> 3, >= 3.210.0)
+      logger
+    aws-sdk-kms (1.101.0)
+      aws-sdk-core (~> 3, >= 3.216.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.170.0)
-      aws-sdk-core (~> 3, >= 3.210.0)
+    aws-sdk-s3 (1.186.1)
+      aws-sdk-core (~> 3, >= 3.216.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
-    aws-sigv4 (1.10.1)
+    aws-sigv4 (1.11.0)
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.2.0)
     bcrypt (3.1.20)
@@ -225,7 +227,7 @@ GEM
     psych (5.2.0)
       stringio
     public_suffix (6.0.1)
-    puma (6.4.3)
+    puma (6.6.0)
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.1.8)
@@ -375,7 +377,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  aws-sdk-s3 (~> 1.48)
+  aws-sdk-s3 (~> 1.150)
   bootsnap
   capybara
   database_cleaner-active_record
@@ -389,8 +391,8 @@ DEPENDENCIES
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
-  pg (~> 1.1)
-  puma (>= 5.0)
+  pg (~> 1.5)
+  puma (>= 6.4)
   rack-cors
   rails (~> 7.2, >= 7.2.1.1)
   rspec-rails
