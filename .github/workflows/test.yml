@@ -51,9 +51,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
-      PGHOST: localhost
-      PGUSER: ${{ secrets.POSTGRES_USER }}
-      PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      PGHOST: 127.0.0.1
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: portfolio_test
     needs: [rubocop, frontend-lint]
     services:
@@ -82,6 +82,11 @@ jobs:
       - name: Install dependencies
         working-directory: ./backend
         run: bundle install
+
+      - name: Debug psql
+        run: |
+          export PGPASSWORD=$POSTGRES_PASSWORD
+          psql -h 127.0.0.1 -U $POSTGRES_USER -d $POSTGRES_DB -c '\conninfo'
 
       - name: Setup test database
         working-directory: ./backend
