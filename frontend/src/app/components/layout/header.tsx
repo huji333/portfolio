@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import Logo from '../../assets/logo.svg';
 
 type HeaderProps = {
@@ -24,9 +25,9 @@ const Header: React.FC<HeaderProps> = ({ isIndexPage = false }) => {
     <header className={`${positionClass} top-0 w-full z-50 transition-all ${baseStyle}`}>
       <div className="w-full flex justify-between items-center px-6 py-8">
         {/* ロゴ */}
-        <a href="/" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <Logo className={`h-6 w-auto ${logoStyle}`} alt="Kakemu Fujii" />
-        </a>
+        </Link>
 
         {/* ナビゲーション */}
         <nav>
@@ -34,13 +35,13 @@ const Header: React.FC<HeaderProps> = ({ isIndexPage = false }) => {
           <ul className="hidden md:flex items-center space-x-8">
             {['ABOUT', 'GALLERY', 'PROJECTS', 'CONTACT'].map((item) => (
               <li key={item}>
-                <a
+                <Link
                   href={`/${item.toLowerCase()}`}
                   className="font-medium text-sm relative group"
                 >
                   {item}
                   <span className="absolute left-1/2 -bottom-1 h-[1px] w-0 bg-current transition-all duration-300 ease-in-out group-hover:w-full group-hover:left-0"></span>
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -57,9 +58,9 @@ const Header: React.FC<HeaderProps> = ({ isIndexPage = false }) => {
             <ul className="absolute left-0 top-full w-full bg-transparent text-black flex flex-col space-y-4 p-4 md:hidden">
               {['ABOUT', 'GALLERY', 'PROJECTS', 'CONTACT'].map((item) => (
                 <li key={item}>
-                  <a href={`/${item.toLowerCase()}`} className="font-medium text-base">
+                  <Link href={`/${item.toLowerCase()}`} className="font-medium text-base">
                     {item}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
