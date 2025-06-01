@@ -69,7 +69,7 @@ class Admin::ImagesController < Admin::Base
   def image_params
     params.require(:image).permit(
       :title, :caption, :taken_at, :camera_id, :lens_id,
-      :display_order, :is_published, :file,
+      :row_order, :is_published, :file,
       category_ids: []
     )
   end

@@ -88,7 +88,7 @@ erDiagram
     datetime taken_at
     bigint camera_id
     bigint lens_id
-    int display_order
+    int row_order
     bool is_published
     datetime created_at
     datetime updated_at

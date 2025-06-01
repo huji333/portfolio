@@ -26,8 +26,8 @@
       = form.label :lens_id, 'レンズ', class: 'col-form-label fw-bold'
     .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control'
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold display_order
-    .col-md-9= form.number_field :display_order, class: 'form-control'
+    .col-md-3.col-form-label.fw-bold row_order
+    .col-md-9= form.number_field :row_order, class: 'form-control'
   %h3 カテゴリ
   - categories.each do |category|
     .form-check

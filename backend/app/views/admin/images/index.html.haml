@@ -16,7 +16,7 @@
     %tbody
       - @images.each do |image|
         %tr
-          %td= image.display_order
+          %td= image.row_order
           %td
             - if image.file.attached?
               = image_tag(image.file, alt: "#{image.title} preview", style: "height: 100px; width: auto;") # 高さのみ指定

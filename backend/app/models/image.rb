@@ -10,7 +10,6 @@ class Image < ApplicationRecord
   validates :title, presence: true
   validates :caption, presence: true
   validates :taken_at, presence: true
-  validates :display_order, presence: true
   validates :is_published, inclusion: { in: [true, false] }
 
   scope :published, -> { where(is_published: true) }
