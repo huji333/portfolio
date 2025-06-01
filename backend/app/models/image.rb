@@ -1,4 +1,7 @@
 class Image < ApplicationRecord
+  include RankedModel
+  ranks :row_order
+
   has_many :image_categories, dependent: :destroy
   has_many :categories, through: :image_categories
   belongs_to :camera

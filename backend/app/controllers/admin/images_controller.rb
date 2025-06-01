@@ -1,7 +1,9 @@
 class Admin::ImagesController < Admin::Base
   before_action :set_cameras_and_lenses_and_categories, only: [:new, :edit, :create, :update]
+  before_action :set_image, only: [:show, :edit, :update, :destroy, :insert_at]
+
   def index
-    @images = Image.all
+    @images = Image.rank(:row_order).all
   end
 
   def show
@@ -58,12 +60,22 @@ class Admin::ImagesController < Admin::Base
     end
   end
 
+  def insert_at
+    @image.row_order_position = params[:position].to_i
+    @image.save!
+    head :ok
+  end
+
   private
 
   def set_cameras_and_lenses_and_categories
     @cameras = Camera.all
     @lenses = Lens.all
     @categories = Category.all
+  end
+
+  def set_image
+    @image = Image.find(params[:id])
   end
 
   def image_params
