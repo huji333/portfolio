@@ -2,9 +2,11 @@
 
 - if flash.notice
   .alert.alert-info= flash[:notice]
+- if flash.alert
+  .alert.alert-danger= flash[:alert]
 
 .table-responsive
-  %table.table.table-striped
+  %table.table.table-striped{"data-controller": "sortable sortable-style"}
     %thead
       %tr
         %th 表示順
@@ -13,18 +15,9 @@
         %th 閲覧
         %th 編集
         %th 削除
-    %tbody
+    %tbody{"data-sortable-target": "list",
+           "data-sortable-update-url-value": insert_at_admin_image_path(":id")}
       - @images.each do |image|
-        %tr
-          %td= image.row_order
-          %td
-            - if image.file.attached?
-              = image_tag(image.file, alt: "#{image.title} preview", style: "height: 100px; width: auto;") # 高さのみ指定
-            - else
-              %span プレビューなし
-          %td= image.title
-          %td= link_to '閲覧', admin_image_path(image), class: 'btn btn-primary btn-sm'
-          %td= link_to '編集', edit_admin_image_path(image), class: 'btn btn-secondary btn-sm'
-          %td= button_to '削除', admin_image_path(image), method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'
+        = render 'image_row', image: image
 
 = link_to '新規作成', new_admin_image_path, class: 'btn btn-primary mt-3'

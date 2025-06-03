@@ -19,7 +19,7 @@ class Admin::ImagesController < Admin::Base
   end
 
   def create
-    @image = Image.new(image_params.except(:file))
+    @image = Image.new(image_params.except(:file, :position))
     # 長辺が1920px以内になるようにリサイズしたものを添付
     if (uploaded = image_params[:file]).present?
       processed_io = Image.resize_io(uploaded.tempfile)
@@ -33,6 +33,13 @@ class Admin::ImagesController < Admin::Base
     end
 
     if @image.save
+      # positionパラメータがある場合は、指定位置に挿入
+      if image_params[:position].present?
+        position = image_params[:position].to_i
+        total_count = Image.count
+        insert_position = [position, total_count].min
+        @image.row_order_position = insert_position
+      end
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
     else
       flash.now[:alert] = 'Image faild to create.'
@@ -61,9 +68,13 @@ class Admin::ImagesController < Admin::Base
   end
 
   def insert_at
-    @image.row_order_position = params[:position].to_i
-    @image.save!
-    head :ok
+    position = insert_params.to_i # require(:position)は直接値を返すので、[:position]は不要
+    @image.row_order_position = position
+    if @image.save
+      head :ok
+    else
+      render json: { error: @image.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   private
@@ -81,8 +92,12 @@ class Admin::ImagesController < Admin::Base
   def image_params
     params.require(:image).permit(
       :title, :caption, :taken_at, :camera_id, :lens_id,
-      :row_order, :is_published, :file,
+      :row_order, :is_published, :file, :position,
       category_ids: []
     )
+  end
+
+  def insert_params
+    params.require(:position)
   end
 end

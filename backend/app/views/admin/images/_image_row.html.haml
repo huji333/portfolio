@@ -1,0 +1,13 @@
+%tr{"data-image-id": image.id}
+  %td.handle
+    %span.material-symbols-outlined drag_indicator
+    = (image.row_order_rank || 0) + 1
+  %td
+    - if image.file.attached?
+      = image_tag(image.file, alt: "#{image.title} preview", style: "height: 100px; width: auto;")
+    - else
+      %span プレビューなし
+  %td= image.title
+  %td= link_to '閲覧', admin_image_path(image), class: 'btn btn-primary btn-sm'
+  %td= link_to '編集', edit_admin_image_path(image), class: 'btn btn-secondary btn-sm'
+  %td= button_to '削除', admin_image_path(image), method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'

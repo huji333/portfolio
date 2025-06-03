@@ -1,0 +1,132 @@
+/* ドラッグ&ドロップの基本スタイル */
+.sortable-ghost {
+  opacity: 0.5;
+  background: #f8f9fa;
+}
+
+/* ドラッグハンドル */
+.handle {
+  cursor: move;
+  padding: 8px;
+  color: #6c757d;
+}
+
+.handle:hover {
+  color: #495057;
+}
+
+/* リストアイテム */
+[data-sortable-target="list"] > * {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 12px;
+  transition: background-color 0.2s ease;
+}
+
+[data-sortable-target="list"] > *:hover {
+  background-color: #f8f9fa;
+}
+
+/* ドラッグ&ドロップのスタイル */
+.sortable-dragging {
+  opacity: 0.5;
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sortable-drop-target {
+  background: #e9ecef;
+  border: 2px dashed #6c757d;
+}
+
+/* 位置表示インジケーター */
+.position-indicator {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #495057;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  z-index: 1000;
+}
+
+/* 更新中の状態 */
+.updating {
+  position: relative;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 成功状態 */
+.success {
+  background-color: rgba(40, 167, 69, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.success-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #28a745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  z-index: 1000;
+}
+
+/* エラー状態 */
+.error {
+  background-color: rgba(220, 53, 69, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.error-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #dc3545;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  z-index: 1000;
+}
+
+/* リストアイテムの基本スタイル */
+[data-sortable-target="item"] {
+  position: relative;
+  transition: all 0.3s ease;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  padding: 12px;
+}
+
+[data-sortable-target="item"]:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
