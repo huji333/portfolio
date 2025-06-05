@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_25_115357) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_01_082435) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -79,14 +79,14 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_25_115357) do
     t.datetime "taken_at", null: false
     t.bigint "camera_id", null: false
     t.bigint "lens_id", null: false
-    t.integer "display_order", null: false
+    t.integer "row_order"
     t.boolean "is_published", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["camera_id"], name: "index_images_on_camera_id"
-    t.index ["display_order"], name: "index_images_on_display_order"
     t.index ["is_published"], name: "index_images_on_is_published"
     t.index ["lens_id"], name: "index_images_on_lens_id"
+    t.index ["row_order"], name: "index_images_on_row_order"
     t.index ["taken_at"], name: "index_images_on_taken_at"
   end
 

@@ -17,7 +17,6 @@ RSpec.describe 'Image Create', type: :system do
     fill_in 'image_title', with: 'Test Image'
     fill_in 'image_caption', with: 'Test Caption'
     fill_in 'image_taken_at', with: 1.day.ago
-    fill_in 'image_display_order', with: '1'
     check 'image_is_published'
     select camera.name, from: 'image_camera_id'
     select lens.name, from: 'image_lens_id'

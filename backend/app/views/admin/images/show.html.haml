@@ -1,10 +1,9 @@
-%h1 image
+%h1 画像詳細
 - if @image.file.attached?
-  %p
-    %strong Image:
-    = image_tag @image.file, width: '300'
+  .mb-3
+    = image_tag @image.file, class: 'img-fluid img-thumbnail', style: 'max-width: 300px;'
 - else
-  %p No image attached.
+  %p.text-muted No image attached.
 .row.py-1
   .col-md-3.fw-bold Title
   .col-md-9= @image.title

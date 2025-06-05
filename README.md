@@ -2,14 +2,12 @@
 
 ## 開発環境の立ち上げ方
 
-1. `.env` ファイルを作成し、以下の内容を記載
+1. 環境変数の設定
 
-   ```env
-   POSTGRES_USER=backend
-   POSTGRES_PASSWORD=password
-   POSTGRES_DB=backend_development
-   PGHOST=db
-   ```
+   サンプルを参考に以下で環境変数を導入
+   - .env
+   - backend/ .env.development
+   - frontend/ .env.local
 
 2. Dockerイメージのビルド
 
@@ -88,7 +86,7 @@ erDiagram
     datetime taken_at
     bigint camera_id
     bigint lens_id
-    int display_order
+    int row_order
     bool is_published
     datetime created_at
     datetime updated_at

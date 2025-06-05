@@ -4,7 +4,7 @@ FactoryBot.define do
     title { Faker::Lorem.word }
     caption { Faker::Lorem.sentence }
     taken_at { Faker::Date.between(from: 1.year.ago, to: Time.zone.today) }
-    display_order { 1 }
+    row_order { 1 }
     is_published { true }
     camera { build(:camera) }
     lens { build(:lens) }

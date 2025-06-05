@@ -57,15 +57,10 @@ RSpec.describe Image, type: :model do
       end
     end
 
-    context 'display_order' do
-      it 'should be valid with display_order' do
-        image.display_order = 1
+    context 'row_order' do
+      it 'should be valid with row_order' do
+        image.row_order = 1
         expect(image).to be_valid
-      end
-
-      it 'should be invalid with nil display_order' do
-        image.display_order = nil
-        expect(image).to be_invalid
       end
     end
 

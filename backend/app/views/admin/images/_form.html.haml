@@ -25,9 +25,15 @@
     .col-md-3
       = form.label :lens_id, 'レンズ', class: 'col-form-label fw-bold'
     .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control'
-  .row.mb-3
-    .col-md-3.col-form-label.fw-bold display_order
-    .col-md-9= form.number_field :display_order, class: 'form-control'
+  - if image.new_record?
+    .row.mb-3
+      .col-md-3.col-form-label.fw-bold 表示位置
+      .col-md-9= form.number_field :row_order_position, class: 'form-control'
+  - else
+    .row.mb-3
+      .col-md-3.col-form-label.fw-bold 表示位置
+      .col-md-9= image.row_order
+
   %h3 カテゴリ
   - categories.each do |category|
     .form-check
