@@ -3,11 +3,8 @@
 - if flash.notice
   .alert.alert-info= flash[:notice]
 
--# エラー表示用
-#flash
-
 .table-responsive
-  %table.table.table-striped{"data-controller": "sortable sortable-style"}
+  %table.table.table-striped{"data-controller": "sortable"}
     %thead
       %tr
         %th 表示順

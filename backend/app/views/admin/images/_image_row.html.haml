@@ -1,12 +1,12 @@
 %tr{"data-image-id": image.id}
-  %td.handle.cursor-move.user-select-none
+  %td.handle.cursor-grab.user-select-none
     %span.material-symbols-outlined.text-muted.me-1 drag_indicator
     %span.order-number= (image.row_order_rank || 0) + 1
   %td
     - if image.file.attached?
       = image_tag(image.file, alt: "#{image.title} preview", style: "height: 100px; width: auto;")
     - else
-      %span プレビューなし
+      %span.text-muted プレビューなし
   %td= image.title
   %td= link_to '閲覧', admin_image_path(image), class: 'btn btn-primary btn-sm'
   %td= link_to '編集', edit_admin_image_path(image), class: 'btn btn-secondary btn-sm'

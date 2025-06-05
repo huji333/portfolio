@@ -44,14 +44,10 @@ export default class extends Controller {
   }
 
   #showError() {
-    const flashDiv = document.getElementById('flash')
-    if (!flashDiv) return
-
-    flashDiv.innerHTML = `
-      <div class="alert alert-danger" role="alert">
-        並び替えに失敗しました
-      </div>
-    `
+    const flashDiv = document.createElement('div')
+    flashDiv.className = 'alert alert-danger'
+    flashDiv.textContent = '並び替えに失敗しました'
+    document.querySelector('.container').insertBefore(flashDiv, document.querySelector('.table-responsive'))
   }
 
   async #updatePosition(itemId, position) {
