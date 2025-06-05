@@ -15,16 +15,12 @@ export default class extends Controller {
     })
   }
 
-  /**
-   * CSRFトークンをmetaタグから取得する
-   * @type {string}
-   */
   get csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content
   }
 
   /**
-   * 並び替えが完了したときに実行されるメインの処理
+   * ドラッグ＆ドロップ完了時に呼ばれる
    */
   async onSortEnd(evt) {
     const { item, newIndex } = evt
@@ -32,27 +28,32 @@ export default class extends Controller {
 
     try {
       await this.#updatePosition(itemId, newIndex)
+
       this.#updateOrderNumbers()
     } catch {
+      // エラー時は DOM を元に戻す
       this.sortable.sort(this.sortable.toArray(), true)
-      // Flash alertを表示
-      const flashContainer = document.createElement('div')
-      flashContainer.className = 'alert alert-danger'
-      flashContainer.textContent = '並び替えに失敗しました'
-      document.querySelector('h1').insertAdjacentElement('afterend', flashContainer)
+      this.#showError()
     }
   }
 
   #updateOrderNumbers() {
-    this.listTarget.querySelectorAll('tr').forEach((row, index) => {
-      const orderCell = row.querySelector('.handle')
-      if (orderCell) orderCell.textContent = `${index + 1}`
-    })
+    this.listTarget
+      .querySelectorAll('.handle .order-number')
+      .forEach((num, idx) => (num.textContent = idx + 1))
   }
 
-  /**
-   * サーバーに新しい順序をPOSTリクエストで送信する
-   */
+  #showError() {
+    const flashDiv = document.getElementById('flash')
+    if (!flashDiv) return
+
+    flashDiv.innerHTML = `
+      <div class="alert alert-danger" role="alert">
+        並び替えに失敗しました
+      </div>
+    `
+  }
+
   async #updatePosition(itemId, position) {
     const response = await fetch(`/admin/images/${itemId}/insert_at`, {
       method: 'POST',

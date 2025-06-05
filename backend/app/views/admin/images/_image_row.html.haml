@@ -1,7 +1,7 @@
 %tr{"data-image-id": image.id}
-  %td.handle
-    %span.material-symbols-outlined drag_indicator
-    = (image.row_order_rank || 0) + 1
+  %td.handle.cursor-move.user-select-none
+    %span.material-symbols-outlined.text-muted.me-1 drag_indicator
+    %span.order-number= (image.row_order_rank || 0) + 1
   %td
     - if image.file.attached?
       = image_tag(image.file, alt: "#{image.title} preview", style: "height: 100px; width: auto;")

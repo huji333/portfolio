@@ -1,9 +1,7 @@
 %h1 画像一覧
 
-- if flash.notice
-  .alert.alert-info= flash[:notice]
-- if flash.alert
-  .alert.alert-danger= flash[:alert]
+-# エラー表示用
+#flash
 
 .table-responsive
   %table.table.table-striped{"data-controller": "sortable sortable-style"}
