@@ -10,7 +10,11 @@ Rails.application.routes.draw do
   # root "posts#index"
   namespace :admin do
     root to: 'index#index'
-    resources :images
+    resources :images do
+      member do
+        post :insert_at
+      end
+    end
     resources :cameras
     resources :lenses
     resources :categories

@@ -5,7 +5,7 @@ export type ImageType = {
   taken_at: string;
   camera_id: number;
   lens_id: number;
-  display_order: number;
+  row_order: number;
   is_published: boolean;
   created_at: string;
   updated_at: string;
