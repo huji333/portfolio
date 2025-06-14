@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "../components/layout/header";
-import GalleryApp from '../containers/galleryapp';
+import Header from "../components/layout/Header";
+import GalleryApp from '../containers/GalleryApp';
 
 export default function Page() {
   return (

@@ -1,12 +1,12 @@
 import { CategoryType } from '@/utils/types';
 
-type Props = {
-  category:CategoryType
+type CategoryCheckboxProps = {
+  category: CategoryType;
   onCheck: (categoryId: number) => void;
 };
 
-export default function CategoryCheckbox({ category, onCheck= f => f }: Props) {
-  return(
+export default function CategoryCheckbox({ category, onCheck }: CategoryCheckboxProps) {
+  return (
     <label className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-sm hover:shadow transition-shadow cursor-pointer">
       <input
         type="checkbox"
@@ -16,5 +16,5 @@ export default function CategoryCheckbox({ category, onCheck= f => f }: Props) {
       />
       <span className="text-sm text-gray-700">{category.name}</span>
     </label>
-  )
+  );
 }
