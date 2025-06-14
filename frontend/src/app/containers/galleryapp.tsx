@@ -2,7 +2,7 @@
 import { ImageType } from '@/utils/types';
 import { CategoryType } from '@/utils/types';
 import { useState, useEffect } from 'react';
-import ImageGrid from '../components/image/imagegrid';
+import ImageGrid from '../components/image/ImageGrid';
 import ImageFilter from '../components/image/ImageFilter';
 import ImageModal from '../components/image/ImageModal';
 
