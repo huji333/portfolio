@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Header from "./components/layout/header";
+import Header from "./components/layout/Header";
 
 // 画像の配列（PC用とスマホ用）
 const images = [
