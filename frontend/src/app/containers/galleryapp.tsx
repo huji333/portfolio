@@ -37,6 +37,9 @@ export default function Galleryapp() {
   const [focusedImageIndex, setFocusedImageIndex] = useState<number | null>(null);
   const focusedImage = focusedImageIndex !== null ? images[focusedImageIndex] : null;
 
+  const hasPrevious = focusedImageIndex !== null && focusedImageIndex > 0;
+  const hasNext = focusedImageIndex !== null && focusedImageIndex < images.length - 1;
+
   async function loadCategories(){
     try {
       const categoriesData = await fetchCategories();
@@ -74,7 +77,7 @@ export default function Galleryapp() {
                 ? prev.filter((categoryId) => categoryId !== id)
                 : [...prev, id]
           );
-          // imagesがfetchされた際にindexの整合性をとる
+          // ensure that the modal is closed when the category is changed
           setFocusedImageIndex(null);
         }}
       />
@@ -90,6 +93,18 @@ export default function Galleryapp() {
         onClose={() =>{
           setFocusedImageIndex(null)
         }}
+        onNext={() => {
+          setFocusedImageIndex((prev) =>
+            prev !== null && prev < images.length - 1 ? prev + 1 : prev
+          );
+        }}
+        onPrevious={() => {
+          setFocusedImageIndex((prev) =>
+            prev !== null && prev > 0 ? prev - 1 : prev
+          );
+        }}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
       />
     </div>
   );
