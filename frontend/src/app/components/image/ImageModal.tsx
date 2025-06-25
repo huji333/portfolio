@@ -77,9 +77,17 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
           <h3 className="text-lg font-semibold">{image.title}</h3>
           {image.caption && <p className="text-sm text-gray-600">{image.caption}</p>}
           <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-            {image.camera_id && <span>Camera: {image.camera_id}</span>}
-            {image.lens_id && <span>Lens: {image.lens_id}</span>}
-            {image.taken_at && <span>{image.taken_at}</span>}
+            {image.camera_name && <span>Camera: {image.camera_name}</span>}
+            {image.lens_name && <span>Lens: {image.lens_name}</span>}
+            {image.taken_at && <span>
+              {new Date(image.taken_at).toLocaleString('ja-JP', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>}
           </div>
         </div>
       </div>
