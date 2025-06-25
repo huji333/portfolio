@@ -3,8 +3,8 @@ export type ImageType = {
   title: string;
   caption: string;
   taken_at: string;
-  camera_id: number;
-  lens_id: number;
+  camera_name: string;
+  lens_name: string;
   row_order: number;
   is_published: boolean;
   created_at: string;
