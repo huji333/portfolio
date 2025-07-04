@@ -136,6 +136,7 @@ GEM
       railties (>= 6.1)
     drb (2.2.1)
     erubi (1.13.0)
+    exifr (1.4.1)
     factory_bot (6.5.1)
       activesupport (>= 6.1.0)
     factory_bot_rails (6.4.4)
@@ -387,6 +388,7 @@ DEPENDENCIES
   devise
   dockerfile-rails (>= 1.6)
   dotenv-rails
+  exifr
   factory_bot_rails
   faker
   haml-rails

@@ -55,7 +55,30 @@ class Image < ApplicationRecord
     errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
   end
 
-  def analyze_image
+  def extract_exif_data
+    require 'exifr/jpeg'
+    return unless file.attached?
+
+    # debug
+    p "extracting exif data"
+    p exif.date_time_original
+    p exif.model
+    p exif.lens
+
+    exif = EXIFR::JPEG.new(file.path)
+    self.taken_at = exif.date_time_original if exif.date_time_original
+    if exif.model
+      self.camera = Camera.where("name ILIKE ?", "%#{exif.model}%").first
+    end
+    if exif.lens
+      self.lens = Lens.where("name ILIKE ?", "%#{exif.lens}%").first
+    end
+
+    file.analyze
+    self.save!
+  end
+
+  def analyze_width
     return unless file.attached?
 
     file.analyze

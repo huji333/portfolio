@@ -54,6 +54,8 @@ gem "devise"
 
 gem "image_processing", "~> 1.2"
 
+gem "exifr"
+
 gem "aws-sdk-s3", "~> 1.150"
 
 gem "rubocop", require: false
