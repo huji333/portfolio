@@ -2,8 +2,9 @@
 import { ImageType } from '@/utils/types';
 import { CategoryType } from '@/utils/types';
 import { useState, useEffect } from 'react';
-import ImageGrid from '../components/image/imagegrid';
+import ImageGrid from '../components/image/ImageGrid';
 import ImageFilter from '../components/image/ImageFilter';
+import ImageModal from '../components/image/ImageModal';
 
 async function fetchCategories(){
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`;
@@ -15,21 +16,29 @@ async function fetchCategories(){
   return categoriesData
 }
 
-async function fetchImages(categoryids : number[]): Promise<ImageType[]> {
-  const query = categoryids.length > 0 ? `?categories=${categoryids.join(',')}` : '';
+async function fetchImages(categoryIds : number[]): Promise<ImageType[]> {
+  const query = categoryIds.length > 0 ? `?categories=${categoryIds.join(',')}` : '';
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/images${query}`;
   const res = await fetch(url)
   if (!res.ok) {
     throw new Error("Failed to fetch images");
   }
-  const ImagesData: ImageType[] = await res.json();
-  return ImagesData;
+  const imagesData: ImageType[] = await res.json();
+  return imagesData;
 }
 
 export default function Galleryapp() {
+  // Filter
   const [categories, setCategories] = useState<CategoryType[]>([]);
+  // Grid
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [images, setImages] = useState<ImageType[]>([]);
-  const [selectedCategoryids, setSelectedCategoryids] = useState<number[]>([]);
+  // Modal
+  const [focusedImageIndex, setFocusedImageIndex] = useState<number | null>(null);
+  const focusedImage = focusedImageIndex !== null ? images[focusedImageIndex] : null;
+
+  const hasPrevious = focusedImageIndex !== null && focusedImageIndex > 0;
+  const hasNext = focusedImageIndex !== null && focusedImageIndex < images.length - 1;
 
   async function loadCategories(){
     try {
@@ -40,10 +49,10 @@ export default function Galleryapp() {
     }
   }
 
-  async function updateImages(selectedCategoryids: number[]){
+  async function updateImages(categoryIds: number[]){
     try {
-      const images = await fetchImages(selectedCategoryids);
-      setImages(images);
+      const fetchedImages = await fetchImages(categoryIds);
+      setImages(fetchedImages);
     } catch (error) {
       console.error('Failed to fetch images:', error);
     }
@@ -54,23 +63,49 @@ export default function Galleryapp() {
   }, []);
 
   useEffect(() => {
-    updateImages(selectedCategoryids);
-  }, [selectedCategoryids]);
+    updateImages(selectedCategoryIds);
+  }, [selectedCategoryIds]);
 
   return (
     <div className="space-y-6">
       <ImageFilter
         categories={categories}
         updateCategories={(id) => {
-          setSelectedCategoryids(
+          setSelectedCategoryIds(
             (prev) =>
               prev.includes(id)
                 ? prev.filter((categoryId) => categoryId !== id)
                 : [...prev, id]
           );
+          // ensure that the modal is closed when the category is changed
+          setFocusedImageIndex(null);
         }}
       />
-      <ImageGrid images={images} />
+      <ImageGrid
+        images={images}
+        onFocus={(index) => {
+          console.log('onFocus called with index:', index);
+          setFocusedImageIndex(index);
+        }}
+      />
+      <ImageModal
+        image={focusedImage}
+        onClose={() =>{
+          setFocusedImageIndex(null)
+        }}
+        onNext={() => {
+          setFocusedImageIndex((prev) =>
+            prev !== null && prev < images.length - 1 ? prev + 1 : prev
+          );
+        }}
+        onPrevious={() => {
+          setFocusedImageIndex((prev) =>
+            prev !== null && prev > 0 ? prev - 1 : prev
+          );
+        }}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+      />
     </div>
   );
 }

@@ -9,16 +9,25 @@ class Api::ImagesController < ApplicationController
         params[:categories]
       end
 
-    images = Image.published.filter_by_categories(category_ids)
-    render json: images.map { |image|
-      image.as_json.merge(file: url_for(image.file))
-    }
+    images = Image.published.filter_by_categories(category_ids).includes(:camera, :lens)
+    render json: images.map { |image| image_json(image) }
   end
 
   def show
-    image = Image.find(params[:id])
-    render json: image.as_json.merge(file: url_for(image.file))
+    image = Image.includes(:camera, :lens).find(params[:id])
+    render json: image_json(image)
   rescue ActiveRecord::RecordNotFound
     render json: { error: 'Image not found' }, status: :not_found
+  end
+
+  private
+
+  # カメラのidとレンズのidを名前に変更して渡す
+  def image_json(image)
+    image.as_json(except: [:camera_id, :lens_id]).merge(
+      file: url_for(image.file),
+      camera_name: "#{image.camera.manufacturer} #{image.camera.name}",
+      lens_name: image.lens.name
+    )
   end
 end
