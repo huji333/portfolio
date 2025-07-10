@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "exif-js": "^2.3.0",
     "sortablejs": "^1.15.6"
   }
 }

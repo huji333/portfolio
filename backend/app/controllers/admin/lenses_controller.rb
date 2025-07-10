@@ -1,4 +1,6 @@
 class Admin::LensesController < Admin::Base
+  before_action :set_lens, only: [:show, :edit, :update, :destroy]
+
   def index
     @lenses = Lens.all
   end
@@ -7,30 +9,53 @@ class Admin::LensesController < Admin::Base
     @lens = Lens.new
   end
 
-  def edit
-    @lens = Lens.find(params[:id])
-  end
+  def edit; end
 
   def create
     @lens = Lens.new(lens_params)
+
     if @lens.save
       redirect_to admin_lenses_path, notice: 'Lens was successfully created.'
     else
-      flash.now[:alert] = 'Lens failed to create.'
       render :new, status: :unprocessable_entity
     end
   end
 
-  def destroy
-    @lens = Lens.find(params[:id])
-    if @lens.destroy
-      redirect_to admin_lenses_path, notice: 'Lens was successfully destroyed.'
+  def update
+    if @lens.update(lens_params)
+      redirect_to admin_lenses_path, notice: 'Lens was successfully updated.'
     else
-      redirect_to admin_lenses_path, alert: 'Lens failed to destroy.'
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @lens.destroy
+    redirect_to admin_lenses_path, notice: 'Lens was successfully destroyed.'
+  end
+
+  def lookup
+    name = params[:name]&.strip
+
+    if name.present?
+      # レンズ名で検索（部分一致）
+      lens = Lens.where("LOWER(name) LIKE ?", "%#{name.downcase}%").first
+
+      if lens
+        render json: { id: lens.id, name: lens.name }
+      else
+        render json: { error: 'Lens not found' }, status: :not_found
+      end
+    else
+      render json: { error: 'Name parameter is required' }, status: :bad_request
     end
   end
 
   private
+
+  def set_lens
+    @lens = Lens.find(params[:id])
+  end
 
   def lens_params
     params.require(:lens).permit(:name)

@@ -15,8 +15,16 @@ Rails.application.routes.draw do
         post :insert_at
       end
     end
-    resources :cameras
-    resources :lenses
+    resources :cameras do
+      collection do
+        get :lookup
+      end
+    end
+    resources :lenses do
+      collection do
+        get :lookup
+      end
+    end
     resources :categories
   end
   namespace :api do

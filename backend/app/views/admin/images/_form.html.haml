@@ -1,4 +1,4 @@
-= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true) do |form|
+= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-reader" }) do |form|
   - if image.errors.any?
     .alert.alert-danger
       %ul
@@ -7,24 +7,28 @@
   - unless image.file.attached?
     .row.mb-3
       .col-md-3.col-form-label.fw-bold Image
-      .col-md-9= form.file_field :file, class: 'form-control'
+      .col-md-9= form.file_field :file, class: 'form-control', data: { exif_reader_target: "fileInput", action: "change->exif-reader#fileSelected" }
+  .row.mb-3.justify-content-center
+    .button-container
+      = button_tag 'EXIFデータを反映', type: :button, data: { exif_reader_target: "exifButton", action: 'click->exif-reader#readExifData' }, class: 'btn btn-secondary', id: 'exifButton'
+      %div{ data: { exif_reader_target: 'exifMessage' }, class: 'text-muted small mt-1' }
   .row.mb-3
     .col-md-3.col-form-label.fw-bold title
-    .col-md-9= form.text_field :title, class: 'form-control'
+    .col-md-9= form.text_field :title, class: 'form-control', data: { exif_reader_target: "titleInput" }
   .row.mb-3
     .col-md-3.col-form-label.fw-bold caption
-    .col-md-9= form.text_area :caption, class: 'form-control'
+    .col-md-9= form.text_area :caption, class: 'form-control', data: { exif_reader_target: "captionInput" }
   .row.mb-3
     .col-md-3.col-form-label.fw-bold taken_at
-    .col-md-9= form.datetime_field :taken_at, class: 'form-control'
+    .col-md-9= form.datetime_field :taken_at, class: 'form-control', data: { exif_reader_target: "takenAtInput" }
   .row.mb-3
     .col-md-3
       = form.label :camera_id, 'カメラ', class: 'col-form-label fw-bold'
-    .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: false }, class: 'form-control'
+    .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: false }, class: 'form-control', data: { exif_reader_target: "cameraSelect" }
   .row.mb-3
     .col-md-3
       = form.label :lens_id, 'レンズ', class: 'col-form-label fw-bold'
-    .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control'
+    .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control', data: { exif_reader_target: "lensSelect" }
   - if image.new_record?
     .row.mb-3
       .col-md-3.col-form-label.fw-bold 表示位置
