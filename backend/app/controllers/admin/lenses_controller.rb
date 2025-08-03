@@ -42,12 +42,10 @@ class Admin::LensesController < Admin::Base
       lens = Lens.where("LOWER(name) = ?", name.downcase).first
 
       # 2. 部分一致（大文字小文字無視）
-      if !lens
-        lens = Lens.where("LOWER(name) LIKE ?", "%#{name.downcase}%").first
-      end
+      lens ||= Lens.where("LOWER(name) LIKE ?", "%#{name.downcase}%").first
 
       # 3. 空白を正規化して部分一致
-      if !lens
+      unless lens
         cleaned_name = name.gsub(/\s+/, ' ').strip
         lens = Lens.where("LOWER(REPLACE(name, '  ', ' ')) LIKE ?", "%#{cleaned_name.downcase}%").first
       end
