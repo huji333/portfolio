@@ -37,13 +37,12 @@ class Admin::CamerasController < Admin::Base
   end
 
   def lookup
-    make = params[:make]&.strip
-    model = params[:model]&.strip
+    camera_name = params[:camera_name]&.strip
+    manufacturer = params[:manufacturer]&.strip
 
-    if make.present? && model.present?
-      # メーカー名とモデル名で検索（部分一致）
-      camera = Camera.where("LOWER(manufacturer) LIKE ? AND LOWER(name) LIKE ?",
-                            "%#{make.downcase}%", "%#{model.downcase}%").first
+    if camera_name.present? || manufacturer.present?
+      # カメラ名とメーカー名で検索
+      camera = Camera.lookup(camera_name, manufacturer)
 
       if camera
         render json: { id: camera.id, name: camera.name, manufacturer: camera.manufacturer }
@@ -51,7 +50,7 @@ class Admin::CamerasController < Admin::Base
         render json: { error: 'Camera not found' }, status: :not_found
       end
     else
-      render json: { error: 'Make and model parameters are required' }, status: :bad_request
+      render json: { error: 'Camera name or manufacturer parameter is required' }, status: :bad_request
     end
   end
 

@@ -1,5 +1,5 @@
 class Admin::LensesController < Admin::Base
-  before_action :set_lens, only: [:show, :edit, :update, :destroy]
+  before_action :set_lens, only: [:edit, :update, :destroy]
 
   def index
     @lenses = Lens.all

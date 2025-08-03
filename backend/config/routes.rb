@@ -25,10 +25,10 @@ Rails.application.routes.draw do
         get :lookup
       end
     end
-    resources :categories
   end
   namespace :api do
     resources :images, only: %i[index show]
     resources :categories, only: %i[index]
+    post :camera_name, to: 'camera_names#create'
   end
 end

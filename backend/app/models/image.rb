@@ -30,14 +30,7 @@ class Image < ApplicationRecord
     self.categories = Category.where(id: ids.compact_blank)
   end
 
-  def self.resize_io(io)
-    require 'image_processing/vips'
-    ImageProcessing::Vips
-      .source(io)
-      .resize_to_limit(1920, 1920)
-      .convert('jpg')
-      .call
-  end
+
 
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?

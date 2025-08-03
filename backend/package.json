@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@rails/activestorage": "^8.0.200",
+    "browser-image-compression": "^2.0.2",
     "exif-js": "^2.3.0",
     "sortablejs": "^1.15.6"
   }
