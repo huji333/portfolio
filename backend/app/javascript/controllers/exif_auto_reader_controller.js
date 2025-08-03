@@ -49,6 +49,7 @@ export default class extends Controller {
 
         const make = window.EXIF.getTag(file, "Make")
         const model = window.EXIF.getTag(file, "Model")
+
         if (make && model && this.hasCameraSelectTarget) {
           const success = await this.lookupCamera(make, model)
           if (success) updatedFields++
@@ -60,6 +61,29 @@ export default class extends Controller {
         }
         if (!lensName || lensName === "undefined") {
           lensName = window.EXIF.getTag(file, "LensSpecification")
+        }
+        if (!lensName || lensName === "undefined") {
+          lensName = window.EXIF.getTag(file, "LensMake")
+        }
+        if (!lensName || lensName === "undefined") {
+          lensName = window.EXIF.getTag(file, "LensModel")
+        }
+        if (!lensName || lensName === "undefined") {
+          lensName = window.EXIF.getTag(file, "LensSerialNumber")
+        }
+        if (!lensName || lensName === "undefined") {
+          lensName = window.EXIF.getTag(file, "LensFirmwareVersion")
+        }
+        if (!lensName || lensName === "undefined") {
+          lensName = window.EXIF.getTag(file, "LensSpec")
+        }
+
+        // undefinedキーからレンズ情報を取得（フォールバック）
+        if (!lensName || lensName === "undefined") {
+          const allTags = window.EXIF.getAllTags(file)
+          if (allTags.undefined && typeof allTags.undefined === 'string') {
+            lensName = allTags.undefined
+          }
         }
 
         if (lensName && lensName !== "undefined" && this.hasLensSelectTarget) {
