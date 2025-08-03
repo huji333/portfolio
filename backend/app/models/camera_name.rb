@@ -7,28 +7,21 @@ class CameraName
     model_key = model.upcase.strip
 
     # メーカー名で検索
-    if camera_names[make_key]&.key?(model_key)
-      return camera_names[make_key][model_key]
-    end
+    return camera_names[make_key][model_key] if camera_names[make_key]&.key?(model_key)
 
     # メーカー名が見つからない場合は、部分一致で検索
     camera_names.each do |manufacturer, models|
-      if manufacturer.include?(make_key) || make_key.include?(manufacturer)
-        if models.key?(model_key)
-          return models[model_key]
-        end
-      end
+      next unless manufacturer.include?(make_key) || make_key.include?(manufacturer)
+      return models[model_key] if models.key?(model_key)
     end
 
     # デフォルトは元のモデル名を返す
     model
   end
 
-  private
-
   def self.load_camera_names
-    @camera_names ||= begin
-      yaml_path = Rails.root.join('config', 'camera_names.yml')
+    @load_camera_names ||= begin
+      yaml_path = Rails.root.join("config/camera_names.yml")
       if File.exist?(yaml_path)
         YAML.load_file(yaml_path) || {}
       else

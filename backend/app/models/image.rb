@@ -30,8 +30,6 @@ class Image < ApplicationRecord
     self.categories = Category.where(id: ids.compact_blank)
   end
 
-
-
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?
 

@@ -1,5 +1,5 @@
 class Api::CameraNamesController < ApplicationController
-  skip_before_action :verify_authenticity_token  # SPA からの呼び出し用
+  skip_before_action :verify_authenticity_token # SPA からの呼び出し用
 
   def create
     make  = params[:make]&.strip

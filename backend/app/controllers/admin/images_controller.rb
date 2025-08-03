@@ -18,7 +18,7 @@ class Admin::ImagesController < Admin::Base
     @image = Image.find(params[:id])
   end
 
-    def create
+  def create
     @image = Image.new(image_params.except(:file, :position))
 
     # Direct Uploadされたファイルを処理
