@@ -25,6 +25,7 @@ Rails.application.routes.draw do
         get :lookup
       end
     end
+    resources :categories
   end
   namespace :api do
     resources :images, only: %i[index show]
