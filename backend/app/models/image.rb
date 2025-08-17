@@ -17,6 +17,17 @@ class Image < ApplicationRecord
 
   scope :published, -> { where(is_published: true) }
 
+  # 画像のURLを提供
+  def file_url
+    return nil unless file.attached?
+
+    if Rails.env.development?
+      file.url
+    else
+      file.service_url(expires_in: 1.hour)
+    end
+  end
+
   validate :taken_at_is_in_the_past
 
   # リサイズ後にメタデータを更新(縦横のピクセル数など)
