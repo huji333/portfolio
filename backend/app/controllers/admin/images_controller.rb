@@ -20,16 +20,10 @@ class Admin::ImagesController < Admin::Base
 
   def create
     @image = Image.new(image_params.except(:file, :position))
-    # 長辺が1920px以内になるようにリサイズしたものを添付
-    if (uploaded = image_params[:file]).present?
-      processed_io = Image.resize_io(uploaded.tempfile)
-      processed_io.rewind # 念のため先頭へ
 
-      @image.file.attach(
-        io: processed_io,
-        filename: "#{uploaded.original_filename}_1920.jpg",
-        content_type: 'image/jpeg'
-      )
+    # Direct Uploadされたファイルを処理
+    if (signed_id = image_params[:file]).present?
+      @image.file.attach(signed_id)
     end
 
     if @image.save

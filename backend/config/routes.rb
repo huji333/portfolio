@@ -15,12 +15,21 @@ Rails.application.routes.draw do
         post :insert_at
       end
     end
-    resources :cameras
-    resources :lenses
+    resources :cameras do
+      collection do
+        get :lookup
+      end
+    end
+    resources :lenses do
+      collection do
+        get :lookup
+      end
+    end
     resources :categories
   end
   namespace :api do
     resources :images, only: %i[index show]
     resources :categories, only: %i[index]
+    post :camera_name, to: 'camera_names#create'
   end
 end

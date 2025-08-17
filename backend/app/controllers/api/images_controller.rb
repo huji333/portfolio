@@ -27,7 +27,7 @@ class Api::ImagesController < ApplicationController
     image.as_json(except: [:camera_id, :lens_id]).merge(
       file: url_for(image.file),
       camera_name: "#{image.camera.manufacturer} #{image.camera.name}",
-      lens_name: image.lens.name
+      lens_name: image.lens&.name
     )
   end
 end

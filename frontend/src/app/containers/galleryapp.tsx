@@ -84,7 +84,6 @@ export default function Galleryapp() {
       <ImageGrid
         images={images}
         onFocus={(index) => {
-          console.log('onFocus called with index:', index);
           setFocusedImageIndex(index);
         }}
       />

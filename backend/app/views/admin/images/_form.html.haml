@@ -1,4 +1,4 @@
-= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true) do |form|
+= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-auto-reader image-upload", image_upload_upload_url_value: rails_direct_uploads_url }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
   - if image.errors.any?
     .alert.alert-danger
       %ul
@@ -6,46 +6,55 @@
           %li= message
   - unless image.file.attached?
     .row.mb-3
-      .col-md-3.col-form-label.fw-bold Image
-      .col-md-9= form.file_field :file, class: 'form-control'
+      .col-md-3
+        = form.label :file, 'Image File', class: 'col-form-label fw-bold'
+      .col-md-9
+        = form.file_field :file, class: 'form-control', data: { exif_auto_reader_target: "fileInput", image_upload_target: "input", action: "change->exif-auto-reader#fileSelected change->image-upload#fileSelected" }
+        %div{ data: { image_upload_target: 'status' } }
+        %div{ data: { exif_auto_reader_target: 'status' } }
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold title
-    .col-md-9= form.text_field :title, class: 'form-control'
+    .col-md-3
+      = form.label :title, 'Title', class: 'col-form-label fw-bold'
+    .col-md-9= form.text_field :title, class: 'form-control', data: { exif_auto_reader_target: "titleInput" }
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold caption
+    .col-md-3
+      = form.label :caption, 'Caption', class: 'col-form-label fw-bold'
     .col-md-9= form.text_area :caption, class: 'form-control'
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold taken_at
-    .col-md-9= form.datetime_field :taken_at, class: 'form-control'
+    .col-md-3
+      = form.label :taken_at, 'Taken At', class: 'col-form-label fw-bold'
+    .col-md-9= form.datetime_field :taken_at, class: 'form-control', data: { exif_auto_reader_target: "takenAtInput" }
   .row.mb-3
     .col-md-3
-      = form.label :camera_id, 'カメラ', class: 'col-form-label fw-bold'
-    .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: false }, class: 'form-control'
+      = form.label :camera_id, 'Camera', class: 'col-form-label fw-bold'
+    .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: "Please select" }, class: 'form-control', data: { exif_auto_reader_target: "cameraSelect" }
   .row.mb-3
     .col-md-3
-      = form.label :lens_id, 'レンズ', class: 'col-form-label fw-bold'
-    .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: false }, class: 'form-control'
+      = form.label :lens_id, 'Lens', class: 'col-form-label fw-bold'
+    .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: "Please select" }, class: 'form-control', data: { exif_auto_reader_target: "lensSelect" }
   - if image.new_record?
     .row.mb-3
-      .col-md-3.col-form-label.fw-bold 表示位置
+      .col-md-3
+        = form.label :row_order_position, 'Display Order', class: 'col-form-label fw-bold'
       .col-md-9= form.number_field :row_order_position, class: 'form-control'
   - else
     .row.mb-3
-      .col-md-3.col-form-label.fw-bold 表示位置
+      .col-md-3.col-form-label.fw-bold Display Order
       .col-md-9= image.row_order
 
-  %h3 カテゴリ
+  %h3 Categories
   - categories.each do |category|
     .form-check
-      = form.check_box :category_ids, { multiple: true, checked: image.categories.include?(category) }, category.id, nil
-      = form.label :category_ids, category.name, class: "form-check-label"
+      = form.check_box :category_ids, { multiple: true, checked: image.categories.include?(category), id: "category_#{category.id}" }, category.id, nil
+      = form.label "category_#{category.id}", category.name, class: "form-check-label"
 
   .row.mb-3
-    .col-md-3.col-form-label.fw-bold is_published
+    .col-md-3
+      = form.label :is_published, 'Publish Settings', class: 'col-form-label fw-bold'
     .col-md-9
       .form-check
         = form.check_box :is_published, class: 'form-check-input'
-        = form.label :is_published, '公開する', class: 'form-check-label'
+        = form.label :is_published, 'Publish', class: 'form-check-label'
   .row
     .col
-      = form.submit '保存', class: 'btn btn-primary d-block w-100'
+      = form.submit 'Save', class: 'btn btn-primary d-block w-100'
