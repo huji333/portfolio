@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
         port: '3000',
         pathname: '/rails/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'huji333-portfolio.s3.ap-northeast-1.amazonaws.com',
+        pathname: '/**',
+      },
     ],
   },
 };

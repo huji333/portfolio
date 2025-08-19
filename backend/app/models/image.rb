@@ -20,18 +20,9 @@ class Image < ApplicationRecord
   # 画像のURLを提供
   def file_url
     return nil unless file.attached?
-
-    # ActiveStorage::Current.url_optionsが設定されていれば、適切なURLが生成される
-    # S3の場合は署名付きURL、Diskの場合はローカルURL
-    if Rails.env.production?
-      # 本番環境では署名付きURLを使用（セキュリティのため）
-      file.service_url(expires_in: 1.hour)
-    else
-      # 開発環境では通常のURLを使用
-      file.url
-    end
+    file.blob.url(expires_in: 1.hour, disposition: "inline", filename: file.filename)
   rescue => e
-    Rails.logger.error "Failed to generate URL for image #{id}: #{e.message}"
+    Rails.logger.error "file_url error (image #{id}): #{e.full_message}"
     nil
   end
 
