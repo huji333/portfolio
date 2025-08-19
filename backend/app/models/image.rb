@@ -21,11 +21,18 @@ class Image < ApplicationRecord
   def file_url
     return nil unless file.attached?
 
-    if Rails.env.development?
-      file.url
-    else
+    # ActiveStorage::Current.url_optionsが設定されていれば、適切なURLが生成される
+    # S3の場合は署名付きURL、Diskの場合はローカルURL
+    if Rails.env.production?
+      # 本番環境では署名付きURLを使用（セキュリティのため）
       file.service_url(expires_in: 1.hour)
+    else
+      # 開発環境では通常のURLを使用
+      file.url
     end
+  rescue => e
+    Rails.logger.error "Failed to generate URL for image #{id}: #{e.message}"
+    nil
   end
 
   validate :taken_at_is_in_the_past
