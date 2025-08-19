@@ -20,8 +20,9 @@ class Image < ApplicationRecord
   # 画像のURLを提供
   def file_url
     return nil unless file.attached?
+
     file.blob.url(expires_in: 1.hour, disposition: "inline", filename: file.filename)
-  rescue => e
+  rescue StandardError => e
     Rails.logger.error "file_url error (image #{id}): #{e.full_message}"
     nil
   end

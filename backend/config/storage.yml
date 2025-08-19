@@ -8,14 +8,14 @@ local:
 
 s3_dev:
   service: S3
-  access_key_id: <%= ENV["AWS_ACCESS_KEY_ID"] %>
-  secret_access_key: <%= ENV["AWS_SECRET_ACCESS_KEY"] %>
-  region: <%= ENV.fetch("AWS_REGION", "us-east-1") %>
-  bucket: <%= ENV.fetch("AWS_BUCKET") %>
+  access_key_id: <%= ENV["AWS_ACCESS_KEY_ID"] || "dummy" %>
+  secret_access_key: <%= ENV["AWS_SECRET_ACCESS_KEY"] || "dummy" %>
+  region: <%= ENV["AWS_REGION"] || "us-east-1" %>
+  bucket: <%= ENV["AWS_BUCKET"] || "dummy-bucket" %>
 
 s3_prod:
   service: S3
-  access_key_id: <%= ENV["AWS_ACCESS_KEY_ID"] %>
-  secret_access_key: <%= ENV["AWS_SECRET_ACCESS_KEY"] %>
-  region: <%= ENV.fetch("AWS_REGION", "ap-northeast-1") %>
-  bucket: <%= ENV.fetch("AWS_BUCKET") %>
+  access_key_id: <%= ENV["AWS_ACCESS_KEY_ID"] || "dummy" %>
+  secret_access_key: <%= ENV["AWS_SECRET_ACCESS_KEY"] || "dummy" %>
+  region: <%= ENV["AWS_REGION"] || "ap-northeast-1" %>
+  bucket: <%= ENV["AWS_BUCKET"] || "dummy-bucket" %>
