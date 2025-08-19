@@ -27,7 +27,7 @@ async function fetchImages(categoryIds : number[]): Promise<ImageType[]> {
   return imagesData;
 }
 
-export default function Galleryapp() {
+export default function GalleryApp() {
   // Filter
   const [categories, setCategories] = useState<CategoryType[]>([]);
   // Grid
