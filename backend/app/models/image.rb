@@ -17,6 +17,16 @@ class Image < ApplicationRecord
 
   scope :published, -> { where(is_published: true) }
 
+  # 画像のURLを提供
+  def file_url
+    return nil unless file.attached?
+
+    file.blob.url(expires_in: 1.hour, disposition: "inline", filename: file.filename)
+  rescue StandardError => e
+    Rails.logger.error "file_url error (image #{id}): #{e.full_message}"
+    nil
+  end
+
   validate :taken_at_is_in_the_past
 
   # リサイズ後にメタデータを更新(縦横のピクセル数など)
