@@ -10,6 +10,8 @@ export type ImageType = {
   created_at: string;
   updated_at: string;
   file: string; // 画像のURL
+  width: number | null;
+  height: number | null;
 };
 
 export type CategoryType = {
