@@ -29,6 +29,11 @@ const nextConfig: NextConfig = {
         hostname: 'huji333-portfolio.s3.ap-northeast-1.amazonaws.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'portfolio-image-dev.s3.amazonaws.com',
+        pathname: '/**',
+      },
     ],
   },
 };
