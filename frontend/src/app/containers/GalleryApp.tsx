@@ -2,6 +2,7 @@
 import { ImageType } from '@/utils/types';
 import { CategoryType } from '@/utils/types';
 import { useState, useEffect } from 'react';
+import { fetchImages } from '@/hooks/imageApi';
 import ImageGrid from '../components/image/ImageGrid';
 import ImageFilter from '../components/image/ImageFilter';
 import ImageModal from '../components/image/ImageModal';
@@ -14,17 +15,6 @@ async function fetchCategories(){
   }
   const categoriesData: CategoryType[] = await res.json()
   return categoriesData
-}
-
-async function fetchImages(categoryIds : number[]): Promise<ImageType[]> {
-  const query = categoryIds.length > 0 ? `?categories=${categoryIds.join(',')}` : '';
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/images${query}`;
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error("Failed to fetch images");
-  }
-  const imagesData: ImageType[] = await res.json();
-  return imagesData;
 }
 
 export default function GalleryApp() {
@@ -58,7 +48,7 @@ export default function GalleryApp() {
   async function updateImages(categoryIds: number[]){
     setIsLoadingImages(true);
     try {
-      const fetchedImages = await fetchImages(categoryIds);
+      const fetchedImages = await fetchImages({ categoryIds });
       setImages(fetchedImages);
     } catch (error) {
       console.error('Failed to fetch images:', error);
