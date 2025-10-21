@@ -3,7 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
+  --color-base: #F5EFE6;
+  --color-base-light: #FBF8F2;
+  --color-base-dark: #E8DFCA;
+  --color-accent: #6D94C5;
+  --color-accent-light: #CBDCEB;
+  --background: var(--color-base);
   --foreground: #171717;
 }
 
@@ -19,4 +24,3 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
-
