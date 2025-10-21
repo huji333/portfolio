@@ -6,60 +6,86 @@ import Logo from '../../assets/logo.svg';
 
 type HeaderProps = {
   isIndexPage?: boolean;
+  heroTone?: 'light' | 'dark';
 };
 
-const Header: React.FC<HeaderProps> = ({ isIndexPage = false }) => {
+const Header: React.FC<HeaderProps> = ({ isIndexPage = false, heroTone = 'light' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
   const positionClass = isIndexPage ? 'fixed' : 'sticky';
+  const isFrosted = heroTone === 'dark';
   const baseStyle = isIndexPage
-    ? 'bg-transparent text-black md:text-white'
-    : 'bg-[#faf7f2] text-black';
+    ? isFrosted
+      ? 'bg-base-light/95 backdrop-blur-sm shadow-sm'
+      : 'bg-transparent'
+    : isFrosted
+      ? 'bg-base-light/95 backdrop-blur-sm shadow-sm'
+      : 'bg-[#faf7f2]';
+  const textColorClass = isIndexPage
+    ? isFrosted
+      ? 'text-black'
+      : 'text-black md:text-white'
+    : 'text-black';
+  const headerStyle = `${positionClass} top-0 z-50 w-full transition-colors duration-300 ${baseStyle} ${textColorClass}`;
   const logoStyle = isIndexPage
-    ? 'fill-black md:fill-white'
+    ? isFrosted
+      ? 'fill-black'
+      : 'fill-black md:fill-white'
     : 'fill-black';
 
+  const mobileMenuStyle = isFrosted
+    ? 'bg-base-light text-black shadow-md'
+    : isIndexPage
+      ? 'bg-white/90 text-black backdrop-blur'
+      : 'bg-[#faf7f2] text-black';
+
+  const aboutHref = isIndexPage ? '#about' : '/#about';
+  const navItems = [
+    { label: 'ABOUT', href: aboutHref },
+    { label: 'GALLERY', href: '/gallery' },
+    { label: 'PROJECTS', href: '/projects' },
+    { label: 'CONTACT', href: '/contact' },
+  ];
+
   return (
-    <header className={`${positionClass} top-0 w-full z-50 transition-all ${baseStyle}`}>
-      <div className="w-full flex justify-between items-center px-6 py-8">
-        {/* ロゴ */}
+    <header className={headerStyle}>
+      <div className="flex w-full items-center justify-between px-6 py-8">
         <Link href="/" className="flex items-center">
           <Logo className={`h-6 w-auto ${logoStyle}`} alt="Kakemu Fujii" />
         </Link>
 
-        {/* ナビゲーション */}
         <nav>
-          {/* デスクトップメニュー */}
-          <ul className="hidden md:flex items-center space-x-8">
-            {['ABOUT', 'GALLERY', 'PROJECTS', 'CONTACT'].map((item) => (
-              <li key={item}>
+          <ul className="hidden items-center space-x-8 md:flex">
+            {navItems.map(({ label, href }) => (
+              <li key={label}>
                 <Link
-                  href={`/${item.toLowerCase()}`}
-                  className="font-medium text-sm relative group"
+                  href={href}
+                  className="relative text-sm font-medium group"
                 >
-                  {item}
-                  <span className="absolute left-1/2 -bottom-1 h-[1px] w-0 bg-current transition-all duration-300 ease-in-out group-hover:w-full group-hover:left-0"></span>
+                  {label}
+                  <span className="absolute left-1/2 -bottom-1 h-[1px] w-0 bg-current transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
                 </Link>
               </li>
             ))}
           </ul>
 
-          {/* モバイルメニュー */}
           <button
-            className="md:hidden text-xl"
+            className="text-xl md:hidden"
             onClick={toggleMenu}
             aria-label="Toggle Menu"
           >
-            {"\u2630"}
+            {'\u2630'}
           </button>
           {isOpen && (
-            <ul className="absolute left-0 top-full w-full bg-transparent text-black flex flex-col space-y-4 p-4 md:hidden">
-              {['ABOUT', 'GALLERY', 'PROJECTS', 'CONTACT'].map((item) => (
-                <li key={item}>
-                  <Link href={`/${item.toLowerCase()}`} className="font-medium text-base">
-                    {item}
+            <ul
+              className={`absolute left-0 top-full flex w-full flex-col space-y-4 p-4 md:hidden ${mobileMenuStyle}`}
+            >
+              {navItems.map(({ label, href }) => (
+                <li key={label}>
+                  <Link href={href} className="text-base font-medium" onClick={() => setIsOpen(false)}>
+                    {label}
                   </Link>
                 </li>
               ))}

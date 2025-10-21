@@ -5,7 +5,7 @@ import GalleryApp from '../containers/GalleryApp';
 export default function Page() {
   return (
     <>
-      <Header />
+      <Header heroTone="dark" />
       <div className="min-h-screen bg-[#faf7f2]">
         <GalleryApp />
       </div>
