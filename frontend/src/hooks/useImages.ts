@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { ImageType } from '@/utils/types';
@@ -25,7 +25,15 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
     let isActive = true;
     setIsLoading(true);
 
-    fetchImages({ categoryIds })
+    const normalizedCategoryIds =
+      categoryKey.length > 0
+        ? categoryKey
+            .split(',')
+            .map((value) => Number.parseInt(value, 10))
+            .filter((value) => Number.isFinite(value))
+        : [];
+
+    fetchImages({ categoryIds: normalizedCategoryIds })
       .then((fetchedImages) => {
         if (!isActive) {
           return;

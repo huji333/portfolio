@@ -1,10 +1,19 @@
-import React from "react";
-import Header from "../components/layout/Header";
+'use client';
+
+import { useState } from 'react';
+import Header, { HEADER_STYLE_PRESETS } from '@/ui/Header';
 
 export default function Page() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <>
-      <Header heroTone="dark" />
+      <Header
+        isMenuOpen={isMenuOpen}
+        onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
+        onCloseMenu={() => setIsMenuOpen(false)}
+        styles={HEADER_STYLE_PRESETS.solid}
+      />
       <main className="min-h-screen bg-[#faf7f2] flex flex-col items-center justify-center px-6 text-center">
         <span className="text-xs tracking-[0.3em] text-gray-500 uppercase">Projects</span>
         <h1 className="mt-4 text-3xl md:text-4xl font-semibold text-gray-900">Work in Progress</h1>

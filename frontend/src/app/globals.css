@@ -24,3 +24,7 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.snap-ignore {
+  scroll-snap-align: none;
+}
