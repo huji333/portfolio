@@ -20,3 +20,11 @@ export type CategoryType = {
   created_at: string;
   updated_at: string;
 };
+
+export type ProjectType = {
+  id: number;
+  title: string;
+  link: string;
+  file: string | null;
+};
+

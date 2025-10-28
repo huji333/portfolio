@@ -1,19 +1,41 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `backend/`: Ruby on Rails app (admin UI, API). Tests in `backend/spec/`; migrations in `backend/db/migrate/`; views in `backend/app/views/`; JS controllers in `backend/app/javascript/`.
-- `frontend/`: Next.js (TypeScript + Tailwind). App routes under `frontend/src/app/`; components under `frontend/src/app/components/`; static assets in `frontend/public/`.
-- Root ops files: `docker-compose.yml`, service `Dockerfile*`, Fly.io configs.
+
+- `backend/`: Ruby on Rails app (admin UI, API).
+    - `backend/app/controllers/`: Rails controllers.
+    - `backend/app/models/`: Rails models.
+    - `backend/app/views/`: Rails views.
+    - `backend/app/javascript/`: JavaScript controllers for Rails.
+    - `backend/db/migrate/`: Database migrations.
+    - `backend/spec/`: RSpec tests.
+- `frontend/`: Next.js (TypeScript + Tailwind).
+    - `frontend/src/app/`: Next.js app routes.
+    - `frontend/src/ui/`: React components.
+    - `frontend/src/hooks/`: Custom React hooks.
+    - `frontend/src/utils/`: Utility functions.
+    - `frontend/public/`: Static assets.
+- Root ops files:
+    - `docker-compose.yml`: Docker Compose configuration.
+    - `backend/Dockerfile`, `frontend/Dockerfile`: Dockerfiles for backend and frontend services.
+    - `fly.yml` (root), `backend/fly.toml`, `frontend/fly.toml`: Fly.io deployment configurations.
 
 ## Build, Test, and Development Commands
-- Rails (local): `cd backend && bin/setup` (install gems, prepare DB), then `bin/rails s` (serve on `:3000`).
-- Rails (tests): `cd backend && bundle exec rspec`.
-- Rails (lint): `cd backend && bundle exec rubocop`.
-- Next.js (dev): `cd frontend && npm run dev` (serves on `:3002`).
-- Next.js (build/start): `cd frontend && npm run build && npm run start`.
-- Docker (full stack): `docker compose up --build` (starts `backend`, `frontend`, `db`).
+
+- Using docker compose for local development.
+    - Start services: `docker compose up -d`
+    - Stop services: `docker compose down`
+    - Build services: `docker compose build`
+- Backend (inside `backend` container):
+    - Run tests: `bundle exec rspec`
+    - Run RuboCop: `bundle exec rubocop`
+- Frontend (inside `frontend` container):
+    - Start development server: `npm run dev`
+    - Build for production: `npm run build`
+    - Run ESLint: `npm run lint`
 
 ## Coding Style & Naming Conventions
+
 - Ruby: 2-space indent, follow RuboCop (`backend/.rubocop.yml`). Models singular (`Image`), controllers plural (`ImagesController`). Migrations use snake_case: `20241019_create_images.rb`.
 - TypeScript/React: 2-space indent. Components PascalCase (`ImageGrid.tsx`), hooks camelCase (`useImageFilter.ts`). Pages live under `src/app/.../page.tsx`.
 - CSS: Tailwind utility-first in `frontend/src/app/globals.css` and component classes.
@@ -29,8 +51,7 @@
 
 ## Security & Configuration Tips
 - Do not commit secrets. Rails credentials live in `backend/config/credentials.yml.enc` (edit via `bin/rails credentials:edit`).
-- Local env: `backend/.env.development` (used by Docker) and `frontend/.env` (see `frontend/.env.example`). Update CORS in `backend/config/initializers/cors.rb` when changing origins.
+- Local env: `backend/.env.development` (used by Docker), `frontend/.env.local` (local environment variables), and `frontend/.env.production` (production environment variables). Update CORS in `backend/config/initializers/cors.rb` when changing origins.
 
 ## Agent-Specific Notes
 - Respect directory scopes above. When modifying many files, keep changes narrowly focused and run `rubocop` and `rspec` for backend, `npm run lint` for frontend before submitting.
-
