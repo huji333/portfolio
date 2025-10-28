@@ -13,20 +13,15 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
   return (
     <section className="bg-base-light px-6 py-20 md:py-24 snap-ignore" aria-labelledby="projects-heading">
       <div className="mx-auto w-full max-w-5xl">
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="projects-heading" className="text-2xl font-bold text-black md:text-3xl">
-              最近の活動
-            </h2>
-            <p className="mt-3 max-w-xl text-base font-medium text-black md:text-lg">
-              最近取り組んだ開発や研究へのリンク集です
-            </p>
-          </div>
+        <div className="flex flex-row items-center justify-between">
+          <h2 id="projects-heading" className="text-2xl font-semibold text-foreground md:text-3xl">
+            最近の活動
+          </h2>
           <Link
             href="/projects"
-            className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-accent"
+            className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-blue-600"
           >
-            すべて見る
+            Show More
             <span aria-hidden>→</span>
           </Link>
         </div>

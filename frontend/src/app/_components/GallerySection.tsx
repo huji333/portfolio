@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import ImageGrid from '@/app/gallery/_components/ImageGrid';
-import { useImages } from '@/hooks/useImages';
+import { useImages } from './useImages';
 
 export default function GallerySection() {
   const { images, isLoading } = useImages();
@@ -13,20 +13,15 @@ export default function GallerySection() {
   return (
     <section className="bg-base-light px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">
       <div className="mx-auto w-full max-w-5xl">
-        <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h2 id="gallery-heading" className="text-2xl font-bold text-black md:text-3xl">
-              作品集
-            </h2>
-            <p className="mt-3 max-w-xl text-base font-medium text-black md:text-lg">
-              最近撮影した写真を集めたギャラリーです
-            </p>
-          </div>
+        <div className="flex flex-row items-center justify-between">
+          <h2 id="gallery-heading" className="text-2xl font-semibold text-foreground md:text-3xl">
+            作品集
+          </h2>
           <Link
             href="/gallery"
-            className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-accent"
+            className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-blue-600"
           >
-            もっと見る
+            Show More
             <span aria-hidden>→</span>
           </Link>
         </div>

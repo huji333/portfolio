@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ImageType } from '@/utils/types';
-import { fetchImages } from './imageApi';
+import { fetchImages } from '@/hooks/imageApi';
 
 type UseImagesOptions = {
   categoryIds?: number[];
