@@ -1,0 +1,23 @@
+= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true) do |form|
+  - if project.errors.any?
+    .alert.alert-danger
+      %ul
+        - project.errors.full_messages.each do |message|
+          %li= message
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold title
+    .col-md-9= form.text_field :title, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold link
+    .col-md-9= form.url_field :link, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold file
+    .col-md-9
+      = form.file_field :file, class: 'form-control'
+      - if project.file.attached?
+        %small.text-muted.d-block.mt-2
+          現在のファイル:
+          = link_to project.file.filename, rails_blob_path(project.file, disposition: 'attachment'), target: '_blank', rel: 'noreferrer'
+  .row
+    .col
+      = form.submit '保存', class: 'btn btn-primary d-block w-100'
