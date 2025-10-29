@@ -26,10 +26,12 @@ Rails.application.routes.draw do
       end
     end
     resources :categories
+    resources :projects
   end
   namespace :api do
     resources :images, only: %i[index show]
     resources :categories, only: %i[index]
+    resources :projects, only: %i[index]
     post :camera_name, to: 'camera_names#create'
   end
 end

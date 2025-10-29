@@ -1,0 +1,28 @@
+%h1 プロジェクト一覧
+
+- if flash.notice
+  .alert.alert-info= flash[:notice]
+- if flash.alert
+  .alert.alert-danger= flash[:alert]
+
+.table-responsive
+  %table.table.table-striped
+    %thead
+      %tr
+        %th プロジェクト名
+        %th リンク
+        %th 編集
+        %th 削除
+    %tbody
+      - @projects.each do |project|
+        %tr
+          %td= project.title
+          %td
+            - if project.link.present?
+              = link_to project.link, project.link, target: '_blank', rel: 'noreferrer'
+            - else
+              ー
+          %td= link_to '編集', edit_admin_project_path(project), class: 'btn btn-secondary btn-sm'
+          %td= button_to '削除', admin_project_path(project), method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'
+
+= link_to '新規作成', new_admin_project_path, class: 'btn btn-primary mt-3'
