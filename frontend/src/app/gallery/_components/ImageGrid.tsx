@@ -3,6 +3,7 @@
 import type { KeyboardEvent } from 'react';
 import Image from 'next/image';
 import { ImageType } from '@/utils/types';
+import Loading from '@/ui/Loading';
 
 type ImageGridProps = {
   images: ImageType[];
@@ -18,11 +19,7 @@ export default function ImageGrid({
   isInteractive = true,
 }: ImageGridProps) {
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-600" />
-      </div>
-    );
+    return <Loading label="Loading images..." className="py-20" />;
   }
 
   const isClickable = Boolean(onFocus) && isInteractive;

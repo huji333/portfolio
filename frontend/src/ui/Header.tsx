@@ -28,10 +28,10 @@ export const HEADER_STYLE_PRESETS: Record<'light' | 'solid', HeaderStyles> = {
     mobileMenu: 'border-white/20 bg-white/10 text-white backdrop-blur',
   },
   solid: {
-    header: 'border-b border-foreground/10 bg-base-light/95 text-foreground backdrop-blur',
+    header: 'border-b border-foreground/10 bg-background/95 text-foreground backdrop-blur',
     linkHover: 'hover:text-accent',
     menuButton: 'border border-foreground/15 text-foreground',
-    mobileMenu: 'border-foreground/10 bg-base-light text-foreground',
+    mobileMenu: 'border-foreground/10 bg-background text-foreground',
   },
 };
 
