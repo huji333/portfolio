@@ -31,7 +31,7 @@ export default function IntroSection() {
   return (
     <section
       id="about"
-      className="bg-base-light px-6 py-20 md:py-24 snap-ignore scroll-mt-24"
+      className="bg-background px-6 py-20 md:py-24 snap-ignore scroll-mt-24"
       aria-labelledby="about-heading"
     >
       <div className="mx-auto w-full max-w-5xl">

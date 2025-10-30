@@ -3,9 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --color-base: #F5EFE6;
-  --color-base-light: #FBF8F2;
-  --color-base-dark: #E8DFCA;
+  --color-base: #FBF8F2;
+  --color-base-dark: #F5EFE6;
   --color-accent: #6D94C5;
   --color-accent-light: #CBDCEB;
   --background: var(--color-base);

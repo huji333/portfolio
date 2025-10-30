@@ -15,7 +15,7 @@ export default function Page() {
         onCloseMenu={() => setIsMenuOpen(false)}
         styles={HEADER_STYLE_PRESETS.solid}
       />
-      <div className="min-h-screen bg-base-light pt-20 md:pt-24">
+      <div className="min-h-screen bg-background pt-20 md:pt-24">
         <GalleryApp />
       </div>
     </>

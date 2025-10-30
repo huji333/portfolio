@@ -8,8 +8,8 @@ type ProjectCardProps = {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-accent-light/60 bg-base-light p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg">
-      <div className="relative w-full overflow-hidden rounded-xl bg-accent-light">
+    <article className="flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg">
+      <div className="relative w-full overflow-hidden rounded-xl">
         <div className="aspect-[4/3]" />
         {project.file ? (
           <Image
@@ -17,7 +17,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             alt={project.title}
             fill
             sizes="(min-width: 768px) 33vw, 100vw"
-            className="object-cover"
+            className="object-contain object-center"
             priority={false}
           />
         ) : (
