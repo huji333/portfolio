@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'mini_magick'
 
 RSpec.describe 'Image Create with EXIF', type: :system do
   include Devise::Test::IntegrationHelpers
@@ -14,7 +15,7 @@ RSpec.describe 'Image Create with EXIF', type: :system do
     sign_in admin
   end
 
-  it 'Should automatically populate fields from a7C II EXIF data and create image' do
+  it 'Should automatically populate fields from a7C II EXIF data and create image', js: true do
     visit '/admin/images/new'
 
     # ファイルを選択してEXIF自動読み込みをトリガー
@@ -51,6 +52,8 @@ RSpec.describe 'Image Create with EXIF', type: :system do
     check 'image_is_published'
     check "category_#{category.id}"
 
+    expect(page).to have_css('[data-image-upload-target="status"]', text: '✓ アップロード完了', wait: 10)
+
     click_button 'Save'
 
     # 成功することを確認
@@ -67,8 +70,9 @@ RSpec.describe 'Image Create with EXIF', type: :system do
     expect(image.is_published).to be true
     expect(image.categories).to include(category)
 
-    # 画像ファイルが適切に処理されているか確認
-    expect(image.file.metadata['width']).to be_present
-    expect(image.file.metadata['width']).to be > 0
+    image.file.blob.open do |tempfile|
+      processed = MiniMagick::Image.new(tempfile.path)
+      expect(processed.width).to eq(1920)
+    end
   end
 end

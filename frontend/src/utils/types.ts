@@ -26,5 +26,6 @@ export type ProjectType = {
   title: string;
   link: string;
   file: string | null;
+  width?: number | null;
+  height?: number | null;
 };
-

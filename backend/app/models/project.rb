@@ -4,6 +4,8 @@ class Project < ApplicationRecord
   validates :title, presence: true
   validates :link, presence: true
 
+  after_commit :analyze_attached_file, on: %i[create update]
+
   def file_url
     return nil unless file.attached?
 
@@ -11,5 +13,14 @@ class Project < ApplicationRecord
   rescue StandardError => e
     Rails.logger.error "file_url error (project #{id}): #{e.full_message}"
     nil
+  end
+
+  private
+
+  def analyze_attached_file
+    return unless file.attached?
+    return if file.analyzed?
+
+    file.analyze
   end
 end

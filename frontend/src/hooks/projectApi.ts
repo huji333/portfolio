@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from '@/utils/api';
 import { ProjectType } from '@/utils/types';
 
 type FetchProjectsInit = RequestInit & {
@@ -12,26 +13,17 @@ type FetchProjectsOptions = {
 
 type FetchProjectsResult = ProjectType[];
 
-function resolveBaseUrl(): string {
-  if (process.env.NODE_ENV === 'production') {
-    const baseUrl = process.env.API_BASE_URL;
-    if (!baseUrl) {
-      throw new Error('API_BASE_URL is not defined in production.');
-    }
-    return baseUrl;
-  }
-
-  // Local Docker environment
-  return 'http://portfolio-backend-1:3000/api';
-}
-
 function buildProjectsUrl(): string {
-  return `${resolveBaseUrl()}/projects`;
+  return `${getApiBaseUrl()}/projects`;
 }
 
 export async function fetchProjects({ fetchInit }: FetchProjectsOptions = {}): Promise<FetchProjectsResult> {
   const url = buildProjectsUrl();
   const init: FetchProjectsInit = fetchInit ? { ...fetchInit } : {};
+
+  if (!init.cache) {
+    init.cache = 'no-store';
+  }
 
   if (typeof window !== 'undefined' && 'next' in init) {
     delete init.next;
