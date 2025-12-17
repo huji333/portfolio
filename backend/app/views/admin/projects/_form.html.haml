@@ -1,4 +1,4 @@
-= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true) do |form|
+= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true, data: { controller: "image-upload", image_upload_upload_url_value: rails_direct_uploads_url, image_upload_max_width_value: 720 }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
   - if project.errors.any?
     .alert.alert-danger
       %ul
@@ -13,7 +13,10 @@
   .row.mb-3
     .col-md-3.col-form-label.fw-bold file
     .col-md-9
-      = form.file_field :file, class: 'form-control'
+      = form.file_field :file,
+        class: 'form-control',
+        data: { image_upload_target: "input", action: "change->image-upload#fileSelected" }
+      %div{ data: { image_upload_target: 'status' } }
       - if project.file.attached?
         %small.text-muted.d-block.mt-2
           現在のファイル:

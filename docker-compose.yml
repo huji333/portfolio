@@ -25,10 +25,13 @@ services:
       - ./frontend:/app
     ports:
       - '3002:3002'
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:3000/api"
+      API_BASE_URL: "http://backend:3000/api"
     depends_on:
       - backend
   db:
-    image: postgres:latest
+    image: postgres:16-bookworm
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

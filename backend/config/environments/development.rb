@@ -76,4 +76,5 @@ Rails.application.configure do
 
   # Allow requests coming from the backend container hostname when running via Docker Compose.
   config.hosts << "portfolio-backend-1"
+  config.hosts << "backend"
 end
