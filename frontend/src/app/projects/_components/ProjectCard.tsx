@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { ProjectType } from '@/utils/types';
 
 type ProjectCardProps = {
@@ -7,8 +6,28 @@ type ProjectCardProps = {
 };
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+  const Wrapper = (project.link ? 'a' : 'article') as const;
+  const wrapperProps = project.link
+    ? {
+        href: project.link,
+        target: '_blank',
+        rel: 'noreferrer noopener',
+        'aria-label': `Open ${project.title} in a new tab`,
+        role: 'article' as const,
+      }
+    : {};
+
+  const wrapperClasses = [
+    'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg',
+    project.link
+      ? 'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg">
+    <Wrapper className={wrapperClasses} {...wrapperProps}>
       <div className="relative w-full overflow-hidden rounded-xl">
         <div className="aspect-[4/3]" />
         {project.file ? (
@@ -27,19 +46,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         )}
       </div>
       <div className="mt-5 flex flex-1 flex-col gap-3 text-foreground">
-        <h3 className="text-lg font-semibold text-foreground">{project.title}</h3>
-        {project.link && (
-          <Link
-            href={project.link}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-foreground"
-          >
-            Visit Project
-            <span aria-hidden>→</span>
-          </Link>
-        )}
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+          {project.title}
+          {project.link && (
+            <span aria-hidden className="text-base text-accent">
+              ↗
+            </span>
+          )}
+        </h3>
       </div>
-    </article>
+    </Wrapper>
   );
 }

@@ -1,3 +1,4 @@
+# rubocop:disable Metrics/BlockLength
 Rails.application.routes.draw do
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -35,3 +36,4 @@ Rails.application.routes.draw do
     post :camera_name, to: 'camera_names#create'
   end
 end
+# rubocop:enable Metrics/BlockLength

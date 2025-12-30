@@ -40,7 +40,7 @@ export async function fetchProjects({ fetchInit }: FetchProjectsOptions = {}): P
 
   try {
     return (await response.json()) as FetchProjectsResult;
-  } catch (error) {
+  } catch {
     throw new Error('Failed to parse projects response.');
   }
 }
