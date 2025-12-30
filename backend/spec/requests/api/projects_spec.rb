@@ -16,10 +16,10 @@ RSpec.describe 'Projects API', type: :request do
       projects = response.parsed_body
       expect(projects.length).to eq(2)
 
-      titles = projects.map { |project| project['title'] }
+      titles = projects.pluck('title')
       expect(titles).to match_array([project_one.title, project_two.title])
 
-      links = projects.map { |project| project['link'] }
+      links = projects.pluck('link')
       expect(links).to include(project_one.link, project_two.link)
     end
   end

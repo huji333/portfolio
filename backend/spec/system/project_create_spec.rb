@@ -25,6 +25,5 @@ RSpec.describe 'Project management', type: :system do
 
     project = Project.order(:created_at).last
     expect(project.title).to eq('System Spec Project')
-
   end
 end

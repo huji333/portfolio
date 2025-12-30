@@ -68,6 +68,5 @@ RSpec.describe 'Image Create with EXIF', type: :system do
     expect(image.caption).to eq('Auto-populated from a7C II EXIF')
     expect(image.is_published).to be true
     expect(image.categories).to include(category)
-
   end
 end
