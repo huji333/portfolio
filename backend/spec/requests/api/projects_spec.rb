@@ -1,16 +1,26 @@
 require 'rails_helper'
 
 RSpec.describe 'Projects API', type: :request do
-  before do
-    create(:project, title: 'Test Project 1', id: 1)
-    create(:project, title: 'Test Project 2', id: 2)
+  let!(:project_one) do
+    create(:project, title: 'Test Project 1', id: 1, link: 'https://example.com/project-1')
+  end
+  let!(:project_two) do
+    create(:project, title: 'Test Project 2', id: 2, link: 'https://example.com/project-2')
   end
 
   describe 'index' do
     it 'should return a list of projects' do
       get '/api/projects'
       expect(response).to have_http_status(:success)
-      expect(response.parsed_body.length).to eq(2)
+
+      projects = response.parsed_body
+      expect(projects.length).to eq(2)
+
+      titles = projects.map { |project| project['title'] }
+      expect(titles).to match_array([project_one.title, project_two.title])
+
+      links = projects.map { |project| project['link'] }
+      expect(links).to include(project_one.link, project_two.link)
     end
   end
 end

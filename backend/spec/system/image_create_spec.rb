@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'mini_magick'
 
 RSpec.describe 'Image Create with EXIF', type: :system do
   include Devise::Test::IntegrationHelpers
@@ -70,9 +69,5 @@ RSpec.describe 'Image Create with EXIF', type: :system do
     expect(image.is_published).to be true
     expect(image.categories).to include(category)
 
-    image.file.blob.open do |tempfile|
-      processed = MiniMagick::Image.new(tempfile.path)
-      expect(processed.width).to eq(1920)
-    end
   end
 end

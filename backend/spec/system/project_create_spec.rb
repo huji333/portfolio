@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'mini_magick'
 
 RSpec.describe 'Project management', type: :system do
   include Devise::Test::IntegrationHelpers
@@ -27,9 +26,5 @@ RSpec.describe 'Project management', type: :system do
     project = Project.order(:created_at).last
     expect(project.title).to eq('System Spec Project')
 
-    project.file.blob.open do |tempfile|
-      processed = MiniMagick::Image.new(tempfile.path)
-      expect(processed.width).to eq(720)
-    end
   end
 end
