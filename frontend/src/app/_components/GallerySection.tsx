@@ -11,7 +11,7 @@ export default function GallerySection() {
   const showEmptyState = !isLoading && previewImages.length === 0;
 
   return (
-    <section className="bg-base-light px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">
+    <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">
       <div className="mx-auto w-full max-w-5xl">
         <div className="flex flex-row items-center justify-between">
           <h2 id="gallery-heading" className="text-2xl font-semibold text-foreground md:text-3xl">

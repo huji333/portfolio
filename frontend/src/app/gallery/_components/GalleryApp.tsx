@@ -6,14 +6,10 @@ import type { CategoryType, ImageType } from '@/utils/types';
 import ImageFilter from './ImageFilter';
 import ImageGrid from './ImageGrid';
 import ImageModal from './ImageModal';
+import { getApiBaseUrl } from '@/utils/api';
 
 async function fetchCategories(): Promise<CategoryType[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  if (!baseUrl) {
-    throw new Error('NEXT_PUBLIC_API_BASE_URL is not set.');
-  }
-
+  const baseUrl = getApiBaseUrl();
   const response = await fetch(`${baseUrl}/categories`);
 
   if (!response.ok) {

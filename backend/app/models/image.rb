@@ -7,7 +7,7 @@ class Image < ApplicationRecord
   belongs_to :camera
   belongs_to :lens
 
-  has_one_attached :file
+  has_one_attached :file, dependent: :purge_later
 
   validates :file, presence: true
   validates :title, presence: true
@@ -16,6 +16,8 @@ class Image < ApplicationRecord
   validates :is_published, inclusion: { in: [true, false] }
 
   scope :published, -> { where(is_published: true) }
+
+  after_commit :analyze_attached_file, on: %i[create update]
 
   # 画像のURLを提供
   def file_url
@@ -28,9 +30,6 @@ class Image < ApplicationRecord
   end
 
   validate :taken_at_is_in_the_past
-
-  # リサイズ後にメタデータを更新(縦横のピクセル数など)
-  after_create_commit :analyze_image
 
   def category_ids=(ids)
     super
@@ -56,8 +55,9 @@ class Image < ApplicationRecord
     errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
   end
 
-  def analyze_image
+  def analyze_attached_file
     return unless file.attached?
+    return if file.analyzed?
 
     file.analyze
   end

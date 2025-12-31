@@ -4,15 +4,20 @@ import HeroSection from './_components/HeroSection';
 import IntroSection from './_components/IntroSection';
 import ProjectsSection from './_components/ProjectsSection';
 import GallerySection from './_components/GallerySection';
+import { Suspense } from 'react';
+import Loading from '@/ui/Loading';
 
-export default function HomePage() {
+export default async function HomePage() {
+
   return (
     <>
       <SiteHeader />
       <main className="snap-y snap-proximity md:snap-mandatory">
         <HeroSection />
         <IntroSection />
-        <ProjectsSection projects={[]} />
+        <Suspense fallback={<Loading />}>
+          <ProjectsSection />
+        </Suspense>
         <GallerySection />
       </main>
     </>
