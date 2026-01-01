@@ -13,6 +13,7 @@ class Api::ProjectsController < ApplicationController
 
     project.as_json(only: %i[id title link]).merge(
       file: project.file_url,
+      thumbnail: project.thumbnail_url,
       width: width,
       height: height
     )

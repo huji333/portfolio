@@ -1,4 +1,4 @@
-= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true, data: { controller: "image-upload", image_upload_upload_url_value: rails_direct_uploads_url, image_upload_max_width_value: 720 }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
+= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true, data: { controller: "image-upload", image_upload_upload_url_value: rails_direct_uploads_url }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
   - if project.errors.any?
     .alert.alert-danger
       %ul

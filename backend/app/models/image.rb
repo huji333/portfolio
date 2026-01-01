@@ -1,6 +1,9 @@
 class Image < ApplicationRecord
   include RankedModel
+  include CdnAttachedFile
+
   ranks :row_order
+  THUMBNAIL_LIMIT = [960, 960].freeze
 
   has_many :image_categories, dependent: :destroy
   has_many :categories, through: :image_categories
@@ -16,18 +19,6 @@ class Image < ApplicationRecord
   validates :is_published, inclusion: { in: [true, false] }
 
   scope :published, -> { where(is_published: true) }
-
-  after_commit :analyze_attached_file, on: %i[create update]
-
-  # 画像のURLを提供
-  def file_url
-    return nil unless file.attached?
-
-    file.blob.url(expires_in: 1.hour, disposition: "inline", filename: file.filename)
-  rescue StandardError => e
-    Rails.logger.error "file_url error (image #{id}): #{e.full_message}"
-    nil
-  end
 
   validate :taken_at_is_in_the_past
 
@@ -53,12 +44,5 @@ class Image < ApplicationRecord
     return if taken_at.nil?
 
     errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
-  end
-
-  def analyze_attached_file
-    return unless file.attached?
-    return if file.analyzed?
-
-    file.analyze
   end
 end

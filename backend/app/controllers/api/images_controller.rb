@@ -30,6 +30,7 @@ class Api::ImagesController < ApplicationController
 
     image.as_json(except: [:camera_id, :lens_id]).merge(
       file: image.file_url,
+      thumbnail: image.thumbnail_url,
       width: width,
       height: height,
       camera_name: "#{image.camera.manufacturer} #{image.camera.name}",

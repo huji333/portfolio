@@ -6,6 +6,7 @@ type ProjectCardProps = {
 };
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+  const imageSrc = project.thumbnail ?? project.file;
   const Wrapper = (project.link ? 'a' : 'article') as const;
   const wrapperProps = project.link
     ? {
@@ -30,9 +31,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     <Wrapper className={wrapperClasses} {...wrapperProps}>
       <div className="relative w-full overflow-hidden rounded-xl">
         <div className="aspect-[4/3]" />
-        {project.file ? (
+        {imageSrc ? (
           <Image
-            src={project.file}
+            src={imageSrc}
             alt={project.title}
             fill
             sizes="(min-width: 768px) 33vw, 100vw"

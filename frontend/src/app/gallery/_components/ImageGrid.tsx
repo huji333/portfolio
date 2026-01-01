@@ -31,7 +31,7 @@ export default function ImageGrid({
         const hasDimensions =
           typeof image.width === 'number' && typeof image.height === 'number' && image.width > 0 && image.height > 0;
 
-        if (!hasDimensions) {
+        if (!hasDimensions || !image.thumbnail) {
           return null;
         }
 
@@ -55,7 +55,7 @@ export default function ImageGrid({
         return (
           <div key={image.id} className={containerClassName} {...interactionProps}>
             <Image
-              src={image.file}
+              src={image.thumbnail}
               alt={image.title}
               width={image.width as number}
               height={image.height as number}

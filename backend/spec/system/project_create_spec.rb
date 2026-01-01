@@ -9,7 +9,7 @@ RSpec.describe 'Project management', type: :system do
     sign_in admin
   end
 
-  it 'creates a project and resizes the attachment to the configured width', js: true do
+  it 'creates a project with a direct-uploaded attachment', js: true do
     visit '/admin/projects/new'
 
     fill_in 'project_title', with: 'System Spec Project'
