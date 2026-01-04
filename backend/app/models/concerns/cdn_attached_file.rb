@@ -24,6 +24,8 @@ module CdnAttachedFile
     variant = thumbnail_variant
     return unless variant
 
+    variant.processed
+
     build_cdn_url(variant.key)
   rescue StandardError, LoadError => e
     Rails.logger.warn "thumbnail_url fallback (#{log_reference}): #{e.class} #{e.message}"
@@ -51,7 +53,9 @@ module CdnAttachedFile
     variant = thumbnail_variant
     return if variant.blank?
 
-    variant.processed? || variant.process
+    variant.processed
+  rescue LoadError => e
+    Rails.logger.warn "thumbnail_variant skipped (#{log_reference}): #{e.message}"
   rescue StandardError => e
     Rails.logger.error "thumbnail_variant error (#{log_reference}): #{e.full_message}"
   end
