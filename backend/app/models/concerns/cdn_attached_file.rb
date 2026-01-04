@@ -48,7 +48,10 @@ module CdnAttachedFile
   def warm_thumbnail_variant
     return unless file.attached?
 
-    thumbnail_variant&.process_later
+    variant = thumbnail_variant
+    return if variant.blank?
+
+    variant.processed? || variant.process
   rescue StandardError => e
     Rails.logger.error "thumbnail_variant error (#{log_reference}): #{e.full_message}"
   end

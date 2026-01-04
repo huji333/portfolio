@@ -19,6 +19,7 @@ class Image < ApplicationRecord
   validates :is_published, inclusion: { in: [true, false] }
 
   scope :published, -> { where(is_published: true) }
+  scope :ordered_for_gallery, -> { order(row_order: :asc, id: :asc) }
 
   validate :taken_at_is_in_the_past
 
@@ -36,6 +37,14 @@ class Image < ApplicationRecord
     joins(:categories)
       .where(categories: { id: category_ids })
       .distinct
+  end
+
+  def self.for_gallery(category_ids: nil)
+    published
+      .filter_by_categories(category_ids)
+      .with_attached_file
+      .includes(:camera, :lens)
+      .ordered_for_gallery
   end
 
   private
