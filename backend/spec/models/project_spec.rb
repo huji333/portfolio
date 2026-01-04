@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Project, type: :model do
   let(:project) { build(:project) }
+  let(:cdn_base_url) { Rails.configuration.cdn_base_url }
 
   describe 'validations' do
     context 'title' do
@@ -41,7 +42,7 @@ RSpec.describe Project, type: :model do
         file = double('ActiveStorage::Attached::One', attached?: true, key: 'projects/file-key')
         allow(project).to receive(:file).and_return(file)
 
-        expect(project.file_url).to eq('https://cdn.example.test/projects/file-key')
+        expect(project.file_url).to eq("#{cdn_base_url}/projects/file-key")
       end
     end
   end
