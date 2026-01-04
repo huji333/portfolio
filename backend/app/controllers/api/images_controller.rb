@@ -13,13 +13,6 @@ class Api::ImagesController < ApplicationController
     render json: images.map { |image| image_json(image) }
   end
 
-  def show
-    image = Image.includes(:camera, :lens).find(params[:id])
-    render json: image_json(image)
-  rescue ActiveRecord::RecordNotFound
-    render json: { error: 'Image not found' }, status: :not_found
-  end
-
   private
 
   # カメラのidとレンズのidを名前に変更して渡す

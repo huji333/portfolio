@@ -26,22 +26,4 @@ RSpec.describe 'Images API', type: :request do
       end
     end
   end
-
-  describe 'show' do
-    context 'fetch image by id' do
-      it 'should return a image' do
-        get "/api/images/1"
-        expect(response).to have_http_status(:success)
-        expect(response.parsed_body['id']).to eq(1)
-        expect(response.parsed_body['title']).to eq('Test Image 1')
-      end
-    end
-    context 'return error if image not found' do
-      it 'should return error' do
-        get "/api/images/999"
-        expect(response).to have_http_status(:not_found)
-        expect(response.parsed_body['error']).to eq('Image not found')
-      end
-    end
-  end
 end

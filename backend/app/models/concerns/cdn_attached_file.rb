@@ -1,6 +1,8 @@
 module CdnAttachedFile
   extend ActiveSupport::Concern
 
+  MissingCdnBaseUrlError = Class.new(StandardError)
+
   included do
     after_commit :analyze_attached_file, on: %i[create update]
     after_commit :warm_thumbnail_variant, on: %i[create update]
@@ -25,7 +27,7 @@ module CdnAttachedFile
     build_cdn_url(variant.key)
   rescue StandardError, LoadError => e
     Rails.logger.warn "thumbnail_url fallback (#{log_reference}): #{e.class} #{e.message}"
-    file.attached? ? build_cdn_url(file.key) : nil
+    file_url
   end
 
   private
@@ -56,7 +58,11 @@ module CdnAttachedFile
   end
 
   def build_cdn_url(key)
-    base_url = ENV.fetch("CLOUDFRONT_BASE_URL")
-    "#{base_url.delete_suffix('/')}/#{key}"
+    "#{cdn_base_url}/#{key}"
+  end
+
+  def cdn_base_url
+    Rails.configuration.cdn_base_url.presence ||
+      raise(MissingCdnBaseUrlError, "CLOUDFRONT_BASE_URL must be set to generate CDN-backed file URLs")
   end
 end
