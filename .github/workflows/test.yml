@@ -31,6 +31,8 @@ jobs:
 
   frontend-lint:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_CLOUDFRONT_BASE_URL: ${{ secrets.NEXT_PUBLIC_CLOUDFRONT_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +57,7 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: portfolio_test
+      CLOUDFRONT_BASE_URL: ${{ secrets.CLOUDFRONT_BASE_URL }}
     needs: [rubocop, frontend-lint]
     services:
       postgres:
