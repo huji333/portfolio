@@ -10,6 +10,7 @@ export type ImageType = {
   created_at: string;
   updated_at: string;
   file: string; // 画像のURL
+  thumbnail?: string | null;
   width: number | null;
   height: number | null;
 };
@@ -26,6 +27,7 @@ export type ProjectType = {
   title: string;
   link: string;
   file: string | null;
+  thumbnail?: string | null;
   width?: number | null;
   height?: number | null;
 };

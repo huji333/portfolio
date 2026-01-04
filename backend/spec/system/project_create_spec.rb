@@ -9,14 +9,12 @@ RSpec.describe 'Project management', type: :system do
     sign_in admin
   end
 
-  it 'creates a project and resizes the attachment to the configured width', js: true do
+  it 'creates a project with a direct-uploaded attachment', js: true do
     visit '/admin/projects/new'
 
     fill_in 'project_title', with: 'System Spec Project'
     fill_in 'project_link', with: 'https://example.com/system-spec'
     attach_file 'project_file', Rails.root.join('spec/fixtures/files/test_image.jpg')
-
-    expect(page).to have_css('[data-image-upload-target="status"]', text: '✓ アップロード完了', wait: 10)
 
     click_button '保存'
 

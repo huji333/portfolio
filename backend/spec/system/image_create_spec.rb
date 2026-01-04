@@ -51,8 +51,6 @@ RSpec.describe 'Image Create with EXIF', type: :system do
     check 'image_is_published'
     check "category_#{category.id}"
 
-    expect(page).to have_css('[data-image-upload-target="status"]', text: '✓ アップロード完了', wait: 10)
-
     click_button 'Save'
 
     # 成功することを確認

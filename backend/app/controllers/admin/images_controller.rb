@@ -19,12 +19,7 @@ class Admin::ImagesController < Admin::Base
   end
 
   def create
-    @image = Image.new(image_params.except(:file, :position))
-
-    # Direct Uploadされたファイルを処理
-    if (signed_id = image_params[:file]).present?
-      @image.file.attach(signed_id)
-    end
+    @image = Image.new(image_params.except(:position))
 
     if @image.save
       # positionパラメータがある場合は、指定位置に挿入
@@ -43,7 +38,15 @@ class Admin::ImagesController < Admin::Base
 
   def update
     @image = Image.find(params[:id])
-    if @image.update(image_params)
+    params_hash = image_params.except(:row_order_position)
+
+    if @image.update(params_hash)
+      # row_order_positionが指定されている場合は順序を更新
+      if image_params[:row_order_position].present?
+        position = image_params[:row_order_position].to_i
+        @image.row_order_position = position
+        @image.save
+      end
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
     else
       flash[:alert] = 'Image failed to update.'
@@ -86,7 +89,7 @@ class Admin::ImagesController < Admin::Base
   def image_params
     params.require(:image).permit(
       :title, :caption, :taken_at, :camera_id, :lens_id,
-      :row_order, :is_published, :file,
+      :row_order_position, :is_published, :file,
       category_ids: []
     )
   end

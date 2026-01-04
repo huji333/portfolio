@@ -10,27 +10,22 @@ export default class extends Controller {
     "status"
   ]
 
+  static LENS_TAGS = [
+    "LensModel", "Lens", "LensSpecification", "LensMake",
+    "LensSerialNumber", "LensFirmwareVersion", "LensSpec"
+  ]
+
   connect() {
     this.clearStatus()
   }
 
   fileSelected() {
     this.clearStatus()
-
-    if (!this.hasFileInputTarget || this.fileInputTarget.files.length === 0) {
-      return
-    }
+    if (!this.hasFileInputTarget || this.fileInputTarget.files.length === 0) return
 
     const file = this.fileInputTarget.files[0]
     this.setStatus("EXIFデータを自動読み取り中...", "info")
-
-    if (this.application.getControllerForElementAndIdentifier(this.element, 'image-upload')) {
-      setTimeout(() => {
-        this.readExifData(file)
-      }, 200)
-    } else {
-      this.readExifData(file)
-    }
+    this.readExifData(file)
   }
 
   async readExifData(file) {
@@ -49,51 +44,17 @@ export default class extends Controller {
 
         const make = window.EXIF.getTag(file, "Make")
         const model = window.EXIF.getTag(file, "Model")
-
         if (make && model && this.hasCameraSelectTarget) {
-          const success = await this.lookupCamera(make, model)
-          if (success) updatedFields++
+          if (await this.lookupCamera(make, model)) updatedFields++
         }
 
-        let lensName = window.EXIF.getTag(file, "LensModel")
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "Lens")
-        }
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "LensSpecification")
-        }
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "LensMake")
-        }
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "LensModel")
-        }
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "LensSerialNumber")
-        }
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "LensFirmwareVersion")
-        }
-        if (!lensName || lensName === "undefined") {
-          lensName = window.EXIF.getTag(file, "LensSpec")
-        }
-
-        // undefinedキーからレンズ情報を取得（フォールバック）
-        if (!lensName || lensName === "undefined") {
-          const allTags = window.EXIF.getAllTags(file)
-          if (allTags.undefined && typeof allTags.undefined === 'string') {
-            lensName = allTags.undefined
-          }
-        }
-
+        const lensName = this.extractLensName(file)
         if (lensName && lensName !== "undefined" && this.hasLensSelectTarget) {
-          const success = await this.lookupLens(lensName)
-          if (success) updatedFields++
+          if (await this.lookupLens(lensName)) updatedFields++
         }
 
         if (this.hasTitleInputTarget && !this.titleInputTarget.value) {
-          const fileName = file.name.replace(/\.[^/.]+$/, "")
-          this.titleInputTarget.value = fileName
+          this.titleInputTarget.value = file.name.replace(/\.[^/.]+$/, "")
           updatedFields++
         }
 
@@ -109,17 +70,30 @@ export default class extends Controller {
     }
   }
 
+  extractLensName(file) {
+    for (const tag of this.constructor.LENS_TAGS) {
+      const value = window.EXIF.getTag(file, tag)
+      if (value && value !== "undefined") return value
+    }
+
+    const allTags = window.EXIF.getAllTags(file)
+    if (allTags?.undefined && typeof allTags.undefined === 'string') {
+      return allTags.undefined
+    }
+    return null
+  }
+
   parseExifDateTime(file) {
     const dateTime = window.EXIF.getTag(file, "DateTimeOriginal")
     if (!dateTime) return null
 
-    const offsetTime = window.EXIF.getTag(file, "OffsetTimeOriginal")
     const match = dateTime.match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})/)
     if (!match) return null
 
     const [, year, month, day, hour, minute, second] = match
     let localDateTime = `${year}-${month}-${day}T${hour}:${minute}`
 
+    const offsetTime = window.EXIF.getTag(file, "OffsetTimeOriginal")
     if (offsetTime) {
       const offsetMatch = offsetTime.match(/([+-])(\d{2}):(\d{2})/)
       if (offsetMatch) {
@@ -137,62 +111,56 @@ export default class extends Controller {
   }
 
   clearStatus() {
-    if (this.hasStatusTarget) {
-      this.statusTarget.textContent = ""
-      this.statusTarget.className = ""
-    }
+    if (!this.hasStatusTarget) return
+    this.statusTarget.textContent = ""
+    this.statusTarget.className = ""
   }
 
   setStatus(msg, level = "info") {
-    if (this.hasStatusTarget) {
-      this.statusTarget.textContent = msg
-      this.statusTarget.className = `text-${level} small mt-1`
-    }
+    if (!this.hasStatusTarget) return
+    this.statusTarget.textContent = msg
+    this.statusTarget.className = `text-${level} small mt-1`
   }
 
   async lookupCamera(make, model) {
     try {
       const apiResponse = await fetch('/api/camera_name', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          make: make,
-          model: model
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ make, model })
       })
 
-      if (apiResponse.ok) {
-        const apiData = await apiResponse.json()
-        const lookupUrl = `/admin/cameras/lookup?camera_name=${encodeURIComponent(apiData.camera_name)}&manufacturer=${encodeURIComponent(apiData.manufacturer)}`
-        const lookupResponse = await fetch(lookupUrl)
-
-        if (lookupResponse.ok) {
-          const camera = await lookupResponse.json()
-          if (this.hasCameraSelectTarget) {
-            this.cameraSelectTarget.value = camera.id
-          }
-          return true
-        } else if (lookupResponse.status === 404) {
-          const fallbackUrl = `/admin/cameras/lookup?camera_name=${encodeURIComponent(model)}&manufacturer=${encodeURIComponent(make)}`
-          const fallbackResponse = await fetch(fallbackUrl)
-
-          if (fallbackResponse.ok) {
-            const fallbackCamera = await fallbackResponse.json()
-            if (this.hasCameraSelectTarget) {
-              this.cameraSelectTarget.value = fallbackCamera.id
-            }
-            return true
-          } else {
-            this.showNotice(`カメラ "${apiData.camera_name}" または "${make} ${model}" が見つかりませんでした。手動で選択してください。`)
-            return false
-          }
+      if (!apiResponse.ok) {
+        if (apiResponse.status === 404) {
+          this.showNotice(`カメラ "${make} ${model}" が見つかりませんでした。手動で選択してください。`)
         }
-      } else if (apiResponse.status === 404) {
-        this.showNotice(`カメラ "${make} ${model}" が見つかりませんでした。手動で選択してください。`)
         return false
       }
+
+      const apiData = await apiResponse.json()
+      const lookupUrl = `/admin/cameras/lookup?camera_name=${encodeURIComponent(apiData.camera_name)}&manufacturer=${encodeURIComponent(apiData.manufacturer)}`
+      const lookupResponse = await fetch(lookupUrl)
+
+      if (lookupResponse.ok) {
+        const camera = await lookupResponse.json()
+        if (this.hasCameraSelectTarget) {
+          this.cameraSelectTarget.value = camera.id
+        }
+        return true
+      }
+
+      const fallbackUrl = `/admin/cameras/lookup?camera_name=${encodeURIComponent(model)}&manufacturer=${encodeURIComponent(make)}`
+      const fallbackResponse = await fetch(fallbackUrl)
+
+      if (fallbackResponse.ok) {
+        const fallbackCamera = await fallbackResponse.json()
+        if (this.hasCameraSelectTarget) {
+          this.cameraSelectTarget.value = fallbackCamera.id
+        }
+        return true
+      }
+
+      this.showNotice(`カメラ "${apiData.camera_name}" または "${make} ${model}" が見つかりませんでした。手動で選択してください。`)
       return false
     } catch (error) {
       console.error("カメラ情報の取得エラー:", error)
@@ -203,17 +171,13 @@ export default class extends Controller {
 
   async lookupLens(name) {
     try {
-      const lookupUrl = `/admin/lenses/lookup?name=${encodeURIComponent(name)}`
-      const response = await fetch(lookupUrl)
-
+      const response = await fetch(`/admin/lenses/lookup?name=${encodeURIComponent(name)}`)
       if (response.ok) {
         const lens = await response.json()
         if (this.hasLensSelectTarget) {
           this.lensSelectTarget.value = lens.id
         }
         return true
-      } else if (response.status === 404) {
-        return false
       }
       return false
     } catch (error) {
@@ -224,23 +188,15 @@ export default class extends Controller {
   }
 
   showNotice(message) {
+    const form = this.element.closest('form')
+    if (!form) return
+
     const alertDiv = document.createElement('div')
     alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2'
-    alertDiv.innerHTML = `
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `
+    alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`
 
-    const form = this.element.closest('form')
-    if (form) {
-      form.insertBefore(alertDiv, form.firstChild)
-
-      setTimeout(() => {
-        if (alertDiv.parentNode) {
-          alertDiv.remove()
-        }
-      }, 5000)
-    }
+    form.insertBefore(alertDiv, form.firstChild)
+    setTimeout(() => alertDiv.parentNode?.remove(), 5000)
   }
 
   showAlert(message) {

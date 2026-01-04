@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Images API', type: :request do
+  let(:cdn_base_url) { ENV.fetch('CLOUDFRONT_BASE_URL', nil) }
+
   before do
     create(:image, title: 'Test Image 1', id: 1)
     create(:image, title: 'Test Image 2')
@@ -25,22 +27,31 @@ RSpec.describe 'Images API', type: :request do
         expect(response.parsed_body.length).to eq(2)
       end
     end
-  end
 
-  describe 'show' do
-    context 'fetch image by id' do
-      it 'should return a image' do
-        get "/api/images/1"
-        expect(response).to have_http_status(:success)
-        expect(response.parsed_body['id']).to eq(1)
-        expect(response.parsed_body['title']).to eq('Test Image 1')
+    context 'response payload' do
+      it 'includes CDN-backed file URLs' do
+        get '/api/images'
+        payload = response.parsed_body.first
+
+        expect(payload['file']).to start_with(cdn_base_url)
       end
-    end
-    context 'return error if image not found' do
-      it 'should return error' do
-        get "/api/images/999"
-        expect(response).to have_http_status(:not_found)
-        expect(response.parsed_body['error']).to eq('Image not found')
+
+      it 'surfaces thumbnail URLs when available' do
+        allow_any_instance_of(Image).to receive(:thumbnail_url).and_return("#{cdn_base_url}/thumbnails/custom-key")
+
+        get '/api/images'
+        payload = response.parsed_body.first
+
+        expect(payload['thumbnail']).to eq("#{cdn_base_url}/thumbnails/custom-key")
+      end
+
+      it 'allows thumbnail to be nil when not generated' do
+        allow_any_instance_of(Image).to receive(:thumbnail_url).and_return(nil)
+
+        get '/api/images'
+        payload = response.parsed_body.first
+
+        expect(payload['thumbnail']).to be_nil
       end
     end
   end

@@ -1,4 +1,4 @@
-= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-auto-reader image-upload", image_upload_upload_url_value: rails_direct_uploads_url }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
+= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-auto-reader" }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
   - if image.errors.any?
     .alert.alert-danger
       %ul
@@ -9,8 +9,7 @@
       .col-md-3
         = form.label :file, 'Image File', class: 'col-form-label fw-bold'
       .col-md-9
-        = form.file_field :file, class: 'form-control', data: { exif_auto_reader_target: "fileInput", image_upload_target: "input", action: "change->exif-auto-reader#fileSelected change->image-upload#fileSelected" }
-        %div{ data: { image_upload_target: 'status' } }
+        = form.file_field :file, class: 'form-control', data: { exif_auto_reader_target: "fileInput", action: "change->exif-auto-reader#fileSelected" }
         %div{ data: { exif_auto_reader_target: 'status' } }
   .row.mb-3
     .col-md-3
@@ -32,15 +31,16 @@
     .col-md-3
       = form.label :lens_id, 'Lens', class: 'col-form-label fw-bold'
     .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: "Please select" }, class: 'form-control', data: { exif_auto_reader_target: "lensSelect" }
-  - if image.new_record?
-    .row.mb-3
-      .col-md-3
-        = form.label :row_order_position, 'Display Order', class: 'col-form-label fw-bold'
-      .col-md-9= form.number_field :row_order_position, class: 'form-control'
-  - else
-    .row.mb-3
-      .col-md-3.col-form-label.fw-bold Display Order
-      .col-md-9= image.row_order
+  .row.mb-3
+    .col-md-3
+      = form.label :row_order_position, 'Display Order', class: 'col-form-label fw-bold'
+    .col-md-9
+      = form.number_field :row_order_position, class: 'form-control', value: (image.persisted? ? (image.row_order_rank || 0) : nil)
+      %small.text-muted.d-block.mt-1
+        - if image.persisted?
+          = "現在の順序: #{(image.row_order_rank || 0) + 1}番目（0始まりで入力）"
+        - else
+          = "0始まりで入力してください（例: 0 = 最初、1 = 2番目）"
 
   %h3 Categories
   - categories.each do |category|
