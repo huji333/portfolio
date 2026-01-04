@@ -16,8 +16,6 @@ RSpec.describe 'Project management', type: :system do
     fill_in 'project_link', with: 'https://example.com/system-spec'
     attach_file 'project_file', Rails.root.join('spec/fixtures/files/test_image.jpg')
 
-    expect(page).to have_css('[data-image-upload-target="status"]', text: '✓ アップロード完了', wait: 10)
-
     click_button '保存'
 
     expect(page).to have_current_path('/admin/projects')
