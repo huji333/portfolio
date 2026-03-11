@@ -21,26 +21,21 @@ export async function fetchProjects({ fetchInit }: FetchProjectsOptions = {}): P
   const url = buildProjectsUrl();
   const init: FetchProjectsInit = fetchInit ? { ...fetchInit } : {};
 
-  if (!init.cache) {
-    init.cache = 'no-store';
-  }
-
   if (typeof window !== 'undefined' && 'next' in init) {
     delete init.next;
   }
 
-  const response = await fetch(url, init);
-
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => '');
-    throw new Error(
-      `Failed to fetch projects (${response.status} ${response.statusText})${errorBody ? `: ${errorBody}` : ''}`,
-    );
-  }
-
   try {
+    const response = await fetch(url, init);
+
+    if (!response.ok) {
+      console.error('Failed to fetch projects:', response.statusText);
+      return [];
+    }
+
     return (await response.json()) as FetchProjectsResult;
-  } catch {
-    throw new Error('Failed to parse projects response.');
+  } catch (error) {
+    console.error('Failed to fetch projects:', error);
+    return [];
   }
 }

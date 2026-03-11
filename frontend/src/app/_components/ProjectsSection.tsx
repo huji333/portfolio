@@ -1,10 +1,9 @@
 import Link from 'next/link';
 import ProjectCard from '../projects/_components/ProjectCard';
 import { fetchProjects } from '@/hooks/projectApi';
-import { use } from 'react';
 
-export default function ProjectsSection() {
-  const projects = use(fetchProjects());
+export default async function ProjectsSection() {
+  const projects = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="projects-heading">
       <div className="mx-auto w-full max-w-5xl">

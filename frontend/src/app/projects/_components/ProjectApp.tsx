@@ -1,9 +1,8 @@
 import { fetchProjects } from '@/hooks/projectApi';
 import ProjectCard from './ProjectCard';
-import { use } from 'react';
 
-export default function ProjectApp() {
-  const projects = use(fetchProjects());
+export default async function ProjectApp() {
+  const projects = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-20">

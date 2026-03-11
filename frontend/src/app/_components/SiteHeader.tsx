@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Header, { HEADER_STYLE_PRESETS } from '@/ui/Header';
+import Header from '@/ui/Header';
+import { HEADER_STYLE_PRESETS } from '@/ui/headerStyles';
 
 type SiteHeaderMode = 'auto' | 'solid' | 'light';
 type HeaderVariant = 'light' | 'solid';
@@ -17,16 +18,11 @@ export default function SiteHeader({ mode = 'auto' }: SiteHeaderProps) {
   const pathname = usePathname();
   const isHome = pathname === '/';
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [variant, setVariant] = useState<HeaderVariant>(() => {
     if (mode === 'light') return 'light';
     if (mode === 'solid') return 'solid';
     return isHome ? 'light' : 'solid';
   });
-
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (mode === 'light') {
@@ -57,23 +53,27 @@ export default function SiteHeader({ mode = 'auto' }: SiteHeaderProps) {
 
     updateVariant();
 
-    window.addEventListener('scroll', updateVariant, { passive: true });
+    let rafId: number | null = null;
+    const throttledUpdate = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        updateVariant();
+        rafId = null;
+      });
+    };
+
+    window.addEventListener('scroll', throttledUpdate, { passive: true });
     window.addEventListener('resize', updateVariant);
 
     return () => {
-      window.removeEventListener('scroll', updateVariant);
+      window.removeEventListener('scroll', throttledUpdate);
       window.removeEventListener('resize', updateVariant);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, [isHome, mode]);
 
-  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-  const closeMenu = () => setIsMenuOpen(false);
-
   return (
     <Header
-      isMenuOpen={isMenuOpen}
-      onToggleMenu={toggleMenu}
-      onCloseMenu={closeMenu}
       styles={HEADER_STYLE_PRESETS[variant]}
     />
   );
