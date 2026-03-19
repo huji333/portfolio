@@ -11,7 +11,10 @@ type FetchProjectsOptions = {
   fetchInit?: FetchProjectsInit;
 };
 
-type FetchProjectsResult = ProjectType[];
+type FetchProjectsResult = {
+  projects: ProjectType[];
+  error: boolean;
+};
 
 function buildProjectsUrl(): string {
   return `${getApiBaseUrl()}/projects`;
@@ -30,12 +33,13 @@ export async function fetchProjects({ fetchInit }: FetchProjectsOptions = {}): P
 
     if (!response.ok) {
       console.error('Failed to fetch projects:', response.statusText);
-      return [];
+      return { projects: [], error: true };
     }
 
-    return (await response.json()) as FetchProjectsResult;
+    const projects = (await response.json()) as ProjectType[];
+    return { projects, error: false };
   } catch (error) {
     console.error('Failed to fetch projects:', error);
-    return [];
+    return { projects: [], error: true };
   }
 }

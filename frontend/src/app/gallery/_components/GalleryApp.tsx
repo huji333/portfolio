@@ -16,6 +16,7 @@ export default function GalleryApp({ initialCategories: categories = [], initial
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [images, setImages] = useState<ImageType[]>(initialImages);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
   const initialLoadRef = useRef(true);
 
   const [focusedImageIndex, setFocusedImageIndex] = useState<number | null>(null);
@@ -38,16 +39,13 @@ export default function GalleryApp({ initialCategories: categories = [], initial
 
     let isActive = true;
     setIsLoadingImages(true);
+    setFetchError(false);
 
     fetchImages({ categoryIds: selectedCategoryIds })
-      .then((fetchedImages) => {
+      .then((result) => {
         if (isActive) {
-          setImages(fetchedImages);
-        }
-      })
-      .catch((error) => {
-        if (isActive) {
-          console.error('Failed to fetch images:', error);
+          setImages(result.images);
+          setFetchError(result.error);
         }
       })
       .finally(() => {
@@ -103,6 +101,9 @@ export default function GalleryApp({ initialCategories: categories = [], initial
         updateCategories={handleCategoryToggle}
         isDisabled={isInteractionDisabled}
       />
+      {fetchError && (
+        <p className="text-center text-sm text-red-600">読み込みに失敗しました。</p>
+      )}
       <ImageGrid
         images={images}
         isLoading={isLoadingImages}

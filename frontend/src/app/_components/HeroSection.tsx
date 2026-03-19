@@ -28,6 +28,7 @@ export default function HeroSection() {
       className="relative isolate flex min-h-screen items-end overflow-hidden text-white snap-start"
       aria-labelledby="hero-heading"
     >
+      <h1 id="hero-heading" className="sr-only">Kakemu Fujii</h1>
       <div className="absolute inset-0 md:hidden">
         <Image
           src={MOBILE_IMAGE.src}

@@ -1,9 +1,14 @@
+import type { Metadata } from 'next';
 import Header from '@/ui/Header';
 import { HEADER_STYLE_PRESETS } from '@/ui/headerStyles';
 import GalleryApp from './_components/GalleryApp';
 import type { CategoryType, ImageType } from '@/utils/types';
 import { getApiBaseUrl } from '@/utils/api';
 import { fetchImages } from '@/hooks/imageApi';
+
+export const metadata: Metadata = {
+  title: 'Gallery',
+};
 
 async function fetchCategories(): Promise<CategoryType[]> {
   const baseUrl = getApiBaseUrl();
@@ -26,11 +31,12 @@ async function fetchCategories(): Promise<CategoryType[]> {
 }
 
 async function fetchInitialImages(): Promise<ImageType[]> {
-  return fetchImages({
+  const result = await fetchImages({
     fetchInit: {
       next: { revalidate: 120 },
     },
   });
+  return result.images;
 }
 
 export default async function Page() {

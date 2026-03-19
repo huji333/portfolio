@@ -39,16 +39,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
-    const focusFirstElement = () => {
-      const focusable = dialogElement.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS);
-      if (focusable.length > 0) {
-        focusable[0].focus();
-      } else {
-        dialogElement.focus();
-      }
-    };
-
-    focusFirstElement();
+    dialogElement.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -141,7 +132,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
     // Overlay
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 outline-none"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

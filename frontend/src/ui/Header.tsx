@@ -29,7 +29,7 @@ export default function Header({ styles = HEADER_STYLE_PRESETS.solid }: HeaderPr
     <header className={`${BASE_HEADER_CLASS} ${styles.header}`}>
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-4 md:px-6 lg:px-8">
         <Link href="/" className="flex items-center" aria-label="Go to home">
-          <Logo className="h-6 w-auto fill-current" alt="Kakemu Fujii" />
+          <Logo className="h-6 w-auto fill-current" aria-label="Kakemu Fujii" role="img" />
         </Link>
 
         <nav className="relative">

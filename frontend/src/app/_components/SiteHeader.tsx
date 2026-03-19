@@ -62,13 +62,23 @@ export default function SiteHeader({ mode = 'auto' }: SiteHeaderProps) {
       });
     };
 
+    let resizeRafId: number | null = null;
+    const throttledResize = () => {
+      if (resizeRafId !== null) return;
+      resizeRafId = requestAnimationFrame(() => {
+        updateVariant();
+        resizeRafId = null;
+      });
+    };
+
     window.addEventListener('scroll', throttledUpdate, { passive: true });
-    window.addEventListener('resize', updateVariant);
+    window.addEventListener('resize', throttledResize);
 
     return () => {
       window.removeEventListener('scroll', throttledUpdate);
-      window.removeEventListener('resize', updateVariant);
+      window.removeEventListener('resize', throttledResize);
       if (rafId !== null) cancelAnimationFrame(rafId);
+      if (resizeRafId !== null) cancelAnimationFrame(resizeRafId);
     };
   }, [isHome, mode]);
 

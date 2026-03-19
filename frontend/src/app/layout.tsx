@@ -14,8 +14,18 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Kakemu Fujii",
+  title: {
+    default: "Kakemu Fujii",
+    template: "%s | Kakemu Fujii",
+  },
   description: "Kakemu Fujii's portfolio",
+  openGraph: {
+    title: "Kakemu Fujii",
+    description: "Kakemu Fujii's portfolio",
+    siteName: "Kakemu Fujii",
+    locale: "ja_JP",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

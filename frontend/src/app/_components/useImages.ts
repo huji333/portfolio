@@ -34,18 +34,11 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
         : [];
 
     fetchImages({ categoryIds: normalizedCategoryIds })
-      .then((fetchedImages) => {
+      .then((result) => {
         if (!isActive) {
           return;
         }
-        setImages(fetchedImages);
-      })
-      .catch((error) => {
-        if (!isActive) {
-          return;
-        }
-        console.error('useImages failed to fetch images', error);
-        setImages([]);
+        setImages(result.images);
       })
       .finally(() => {
         if (isActive) {
