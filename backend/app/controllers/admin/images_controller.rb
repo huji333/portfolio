@@ -1,6 +1,6 @@
 class Admin::ImagesController < Admin::Base
-  before_action :set_cameras_and_lenses_and_categories, only: [:new, :edit, :create, :update]
-  before_action :set_image, only: [:show, :edit, :update, :destroy, :insert_at]
+  before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
+  before_action :set_image, only: %i[show edit update destroy insert_at]
 
   def index
     @images = Image.rank(:row_order).all

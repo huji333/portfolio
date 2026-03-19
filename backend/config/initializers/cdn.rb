@@ -21,7 +21,9 @@ Rails.application.configure do
     raise "CLOUDFRONT_BASE_URL must be a valid absolute URL: #{e.message}"
   end
 
-  raise "CLOUDFRONT_BASE_URL must be an HTTP(S) URL with a hostname (was #{raw_base_url.inspect})" unless uri.is_a?(URI::HTTP) && uri.host.present?
+  unless uri.is_a?(URI::HTTP) && uri.host.present?
+    raise "CLOUDFRONT_BASE_URL must be an HTTP(S) URL with a hostname (was #{raw_base_url.inspect})"
+  end
 
   config.cdn_base_url = normalized_base_url.freeze
 end

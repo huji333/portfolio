@@ -1,5 +1,5 @@
 class Camera < ApplicationRecord
-  has_many :images
+  has_many :images, dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :manufacturer, presence: true
