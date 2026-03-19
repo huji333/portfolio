@@ -20,7 +20,7 @@ export default function CategoryCheckbox({ category, onCheck, isChecked, isDisab
         checked={isChecked}
         onChange={() => onCheck(category.id)}
         disabled={isDisabled}
-        className="w-4 h-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+        className="w-4 h-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 focus-visible:ring-2 focus-visible:ring-gray-500"
       />
       <span className="text-sm text-gray-700">{category.name}</span>
     </label>

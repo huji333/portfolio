@@ -7,28 +7,15 @@ type ProjectCardProps = {
 
 export default function ProjectCard({ project }: ProjectCardProps) {
   const imageSrc = project.thumbnail ?? project.file;
-  const Wrapper = (project.link ? 'a' : 'article') as const;
-  const wrapperProps = project.link
-    ? {
-        href: project.link,
-        target: '_blank',
-        rel: 'noreferrer noopener',
-        'aria-label': `Open ${project.title} in a new tab`,
-        role: 'article' as const,
-      }
-    : {};
 
-  const wrapperClasses = [
-    'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg',
-    project.link
-      ? 'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-      : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const wrapperClasses =
+    'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg' +
+    (project.link
+      ? ' focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+      : '');
 
-  return (
-    <Wrapper className={wrapperClasses} {...wrapperProps}>
+  const content = (
+    <>
       <div className="relative w-full overflow-hidden rounded-xl">
         <div className="aspect-[4/3]" />
         {imageSrc ? (
@@ -56,6 +43,22 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           )}
         </h3>
       </div>
-    </Wrapper>
+    </>
   );
+
+  if (project.link) {
+    return (
+      <a
+        href={project.link}
+        target="_blank"
+        rel="noreferrer noopener"
+        aria-label={`Open ${project.title} in a new tab`}
+        className={wrapperClasses}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={wrapperClasses}>{content}</div>;
 }

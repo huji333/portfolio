@@ -6,7 +6,10 @@ type FetchImagesOptions = {
   fetchInit?: RequestInit;
 };
 
-type FetchImagesResult = ImageType[];
+type FetchImagesResult = {
+  images: ImageType[];
+  error: boolean;
+};
 
 function buildImagesUrl(categoryIds: number[] = []): string {
   const baseUrl = getApiBaseUrl();
@@ -27,12 +30,13 @@ export async function fetchImages({ categoryIds = [], fetchInit }: FetchImagesOp
     const response = await fetch(url, init);
     if (!response.ok) {
       console.error('Failed to fetch images', response.statusText);
-      return [];
+      return { images: [], error: true };
     }
 
-    return (await response.json()) as FetchImagesResult;
+    const images = (await response.json()) as ImageType[];
+    return { images, error: false };
   } catch (error) {
     console.error('Failed to fetch images', error);
-    return [];
+    return { images: [], error: true };
   }
 }
