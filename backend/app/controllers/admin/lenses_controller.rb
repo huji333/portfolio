@@ -17,7 +17,7 @@ class Admin::LensesController < Admin::Base
     if @lens.save
       redirect_to admin_lenses_path, notice: 'Lens was successfully created.'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -25,7 +25,7 @@ class Admin::LensesController < Admin::Base
     if @lens.update(lens_params)
       redirect_to admin_lenses_path, notice: 'Lens was successfully updated.'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

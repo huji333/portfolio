@@ -17,7 +17,7 @@ class Admin::CategoriesController < Admin::Base
       redirect_to admin_categories_path, notice: 'Category was successfully created.'
     else
       flash.now[:alert] = 'Category failed to create.'
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -27,7 +27,7 @@ class Admin::CategoriesController < Admin::Base
       redirect_to admin_categories_path, notice: 'Category was successfully updated.'
     else
       flash.now[:alert] = 'Category failed to update.'
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

@@ -27,9 +27,12 @@ export default function GalleryApp({ initialCategories: categories = [], initial
   const isInteractionDisabled = isLoadingImages;
 
   const isInteractionDisabledRef = useRef(isInteractionDisabled);
-  isInteractionDisabledRef.current = isInteractionDisabled;
   const imagesLengthRef = useRef(images.length);
-  imagesLengthRef.current = images.length;
+
+  useEffect(() => {
+    isInteractionDisabledRef.current = isInteractionDisabled;
+    imagesLengthRef.current = images.length;
+  });
 
   useEffect(() => {
     if (initialLoadRef.current) {
@@ -38,21 +41,25 @@ export default function GalleryApp({ initialCategories: categories = [], initial
     }
 
     let isActive = true;
-    setIsLoadingImages(true);
-    setFetchError(false);
 
-    fetchImages({ categoryIds: selectedCategoryIds })
-      .then((result) => {
+    const load = async () => {
+      setIsLoadingImages(true);
+      setFetchError(false);
+
+      try {
+        const result = await fetchImages({ categoryIds: selectedCategoryIds });
         if (isActive) {
           setImages(result.images);
           setFetchError(result.error);
         }
-      })
-      .finally(() => {
+      } finally {
         if (isActive) {
           setIsLoadingImages(false);
         }
-      });
+      }
+    };
+
+    load();
 
     return () => {
       isActive = false;

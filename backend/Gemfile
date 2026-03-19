@@ -3,7 +3,7 @@ source "https://rubygems.org"
 ruby "3.3.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 7.2', '>= 7.2.1.1'
+gem 'rails', '~> 7.2', '>= 7.2.2.2'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
@@ -56,25 +56,22 @@ gem "image_processing", "~> 1.2"
 
 gem "aws-sdk-s3", "~> 1.150"
 
-gem "rubocop", require: false
-gem "rubocop-rails", require: false
-gem "rubocop-performance", require: false
-gem "rubocop-rspec", require: false
-
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
   gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'faker'
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-performance", require: false
+  gem "rubocop-rspec", require: false
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
   gem 'dotenv-rails'
-  gem "dockerfile-rails", ">= 1.6"
-
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
 

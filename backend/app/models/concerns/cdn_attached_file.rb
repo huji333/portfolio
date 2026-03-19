@@ -1,7 +1,8 @@
 module CdnAttachedFile
   extend ActiveSupport::Concern
 
-  MissingCdnBaseUrlError = Class.new(StandardError)
+  class MissingCdnBaseUrlError < StandardError
+  end
 
   included do
     after_commit :analyze_attached_file, on: %i[create update]
