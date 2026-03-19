@@ -1,5 +1,5 @@
 class Admin::CamerasController < Admin::Base
-  before_action :set_camera, only: [:show, :edit, :update, :destroy]
+  before_action :set_camera, only: %i[show edit update destroy]
 
   def index
     @cameras = Camera.all

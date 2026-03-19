@@ -23,7 +23,7 @@ class Api::ImagesController < ApplicationController
     width = metadata['width']&.to_i
     height = metadata['height']&.to_i
 
-    image.as_json(except: [:camera_id, :lens_id]).merge(
+    image.as_json(except: %i[camera_id lens_id]).merge(
       file: image.file_url,
       thumbnail: image.thumbnail_url,
       width: width,

@@ -6,27 +6,22 @@
 
    サンプルを参考に以下で環境変数を導入
    - .env
-   - backend/ .env.development
-   - frontend/ .env.local
+   - backend/.env.development
+   - frontend/.env.local
 
-2. Dockerイメージのビルド
+2. Dockerイメージのビルド・起動
 
    ```bash
-   docker-compose build
+   docker compose build
+   docker compose up -d
    ```
 
-3. コンテナの起動
+3. ユーザーの作成（http://localhost:3000/users/sign_up でサインアップ）
+
+4. ユーザーを管理者に変更
 
    ```bash
-   docker-compose up -d
-   ```
-
-4. ユーザーの作成（http://localhost:3000/users/sign_up でサインアップ）
-
-5. ユーザーを管理者に変更
-
-   ```bash
-   docker-compose exec backend rails console
+   docker compose exec backend rails console
    ```
 
    ```ruby
@@ -37,7 +32,6 @@
 
 - フロントエンド: http://localhost:3002
 - 管理画面（画像管理）: http://localhost:3000/admin/images
-- ユーザー登録画面: http://localhost:3000/users/sign_up
 
 ## データベース設計
 

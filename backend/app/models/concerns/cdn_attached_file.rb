@@ -76,7 +76,10 @@ module CdnAttachedFile
     url = Rails.configuration.cdn_base_url.presence
     return url if url
 
-    raise(MissingCdnBaseUrlError, "CLOUDFRONT_BASE_URL must be set to generate CDN-backed file URLs") if Rails.env.production?
+    if Rails.env.production?
+      raise(MissingCdnBaseUrlError,
+            "CLOUDFRONT_BASE_URL must be set to generate CDN-backed file URLs")
+    end
 
     nil
   end

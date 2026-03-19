@@ -40,7 +40,7 @@ gem "ranked-model"
 # gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "tzinfo-data", platforms: %i[windows jruby]
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -58,20 +58,20 @@ gem "aws-sdk-s3", "~> 1.150"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri windows ]
-  gem 'rspec-rails'
+  gem "debug", platforms: %i[mri windows]
   gem 'factory_bot_rails'
   gem 'faker'
+  gem 'rspec-rails'
   gem "rubocop", require: false
-  gem "rubocop-rails", require: false
   gem "rubocop-performance", require: false
+  gem "rubocop-rails", require: false
   gem "rubocop-rspec", require: false
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
-  gem "web-console"
   gem 'dotenv-rails'
+  gem "web-console"
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
 
@@ -81,7 +81,7 @@ end
 
 group :test do
   gem "capybara"
+  gem 'database_cleaner-active_record'
   gem "selenium-webdriver"
   gem 'shoulda-matchers'
-  gem 'database_cleaner-active_record'
 end
