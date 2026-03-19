@@ -6,8 +6,7 @@ FROM node:${NODE_VERSION}-slim AS base
 WORKDIR /app
 
 ENV NODE_ENV="production"
-ARG YARN_VERSION=1.22.19
-RUN npm install -g yarn@"$YARN_VERSION" --force
+RUN corepack enable
 
 
 # Throw-away build stage to reduce size of final image
@@ -27,13 +26,13 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3 && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --production=false
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
 
 COPY . .
 
 RUN npx next build --experimental-build-mode compile && \
-    yarn install --production=true && \
+    yarn workspaces focus --production && \
     yarn cache clean
 
 
@@ -45,4 +44,4 @@ COPY --from=build /app /app
 ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 EXPOSE 3000
-CMD [ "yarn", "run", "start" ]
+CMD [ "yarn", "start" ]
