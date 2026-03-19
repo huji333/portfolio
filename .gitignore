@@ -1,2 +1,4 @@
 .env
+.env.prod
+Caddyfile
 .DS_Store

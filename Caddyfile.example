@@ -1,0 +1,24 @@
+# Caddyfile.example
+# cp Caddyfile.example Caddyfile してドメイン名を置き換える。
+# Let's Encrypt が自動で TLS 証明書を取得・更新する。
+# ポート 80/443 がインターネットから到達可能である必要がある。
+
+# フロントエンド
+yourdomain.com {
+  header {
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    -Server
+  }
+  reverse_proxy frontend:3000
+}
+
+# バックエンド API
+api.yourdomain.com {
+  header {
+    X-Content-Type-Options "nosniff"
+    -Server
+  }
+  reverse_proxy backend:3000
+}
