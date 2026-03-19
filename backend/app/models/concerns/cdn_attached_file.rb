@@ -24,7 +24,7 @@ module CdnAttachedFile
     variant = thumbnail_variant
     return unless variant
 
-    variant.processed
+    ensure_thumbnail_variant_processed(variant)
 
     build_cdn_url(variant.key)
   rescue StandardError, LoadError => e
@@ -53,7 +53,7 @@ module CdnAttachedFile
     variant = thumbnail_variant
     return if variant.blank?
 
-    variant.processed
+    ensure_thumbnail_variant_processed(variant)
   rescue LoadError => e
     Rails.logger.warn "thumbnail_variant skipped (#{log_reference}): #{e.message}"
   rescue StandardError => e
@@ -65,11 +65,44 @@ module CdnAttachedFile
   end
 
   def build_cdn_url(key)
-    "#{cdn_base_url}/#{key}"
+    base = cdn_base_url
+    return nil if base.nil?
+
+    "#{base}/#{key}"
   end
 
   def cdn_base_url
-    Rails.configuration.cdn_base_url.presence ||
-      raise(MissingCdnBaseUrlError, "CLOUDFRONT_BASE_URL must be set to generate CDN-backed file URLs")
+    url = Rails.configuration.cdn_base_url.presence
+    return url if url
+
+    raise(MissingCdnBaseUrlError, "CLOUDFRONT_BASE_URL must be set to generate CDN-backed file URLs") if Rails.env.production?
+
+    nil
+  end
+
+  def ensure_thumbnail_variant_processed(variant)
+    return variant if thumbnail_variant_generated?(variant)
+
+    with_thumbnail_lock do
+      variant.processed unless thumbnail_variant_generated?(variant)
+    end
+
+    variant
+  rescue ActiveRecord::RecordNotUnique
+    variant
+  end
+
+  def thumbnail_variant_generated?(variant)
+    variant.respond_to?(:image) && variant.image&.attached?
+  rescue NoMethodError
+    false
+  end
+
+  def with_thumbnail_lock(&block)
+    if persisted?
+      with_lock(&block)
+    else
+      yield
+    end
   end
 end

@@ -4,7 +4,16 @@ require "uri"
 
 Rails.application.configure do
   raw_base_url = ENV["CLOUDFRONT_BASE_URL"]&.strip
-  raise "CLOUDFRONT_BASE_URL must be set to boot the application" if raw_base_url.blank?
+
+  if raw_base_url.blank?
+    if Rails.env.production?
+      raise "CLOUDFRONT_BASE_URL must be set to boot the application"
+    else
+      Rails.logger.warn "[cdn] CLOUDFRONT_BASE_URL is not set; CDN URLs will be unavailable" if defined?(Rails.logger)
+      config.cdn_base_url = nil
+      next
+    end
+  end
 
   normalized_base_url = raw_base_url.delete_suffix("/")
 

@@ -25,6 +25,9 @@ jobs:
 
       - name: Deploy Frontend
         working-directory: frontend
-        run: flyctl deploy --remote-only --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+        run: >
+          flyctl deploy --remote-only
+          --build-arg NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+          --build-arg NEXT_PUBLIC_CLOUDFRONT_BASE_URL=${{ secrets.NEXT_PUBLIC_CLOUDFRONT_BASE_URL }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_FRONT }}

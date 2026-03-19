@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# lock files (yarn is the canonical package manager)
+package-lock.json
+
 # debug
 npm-debug.log*
 yarn-debug.log*
