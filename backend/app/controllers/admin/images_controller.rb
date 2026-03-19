@@ -6,38 +6,27 @@ class Admin::ImagesController < Admin::Base
     @images = Image.rank(:row_order).all
   end
 
-  def show
-    @image = Image.find(params[:id])
-  end
+  def show; end
 
   def new
     @image = Image.new
   end
 
-  def edit
-    @image = Image.find(params[:id])
-  end
+  def edit; end
 
   def create
-    @image = Image.new(image_params.except(:position))
+    @image = Image.new(image_params.except(:row_order_position))
+    @image.row_order_position = image_params[:row_order_position].to_i if image_params[:row_order_position].present?
 
     if @image.save
-      # positionパラメータがある場合は、指定位置に挿入
-      if image_params[:position].present?
-        position = image_params[:position].to_i
-        total_count = Image.count
-        insert_position = [position, total_count].min
-        @image.row_order_position = insert_position
-      end
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
     else
-      flash.now[:alert] = 'Image faild to create.'
+      flash.now[:alert] = 'Image failed to create.'
       render :new, status: :unprocessable_content
     end
   end
 
   def update
-    @image = Image.find(params[:id])
     params_hash = image_params.except(:row_order_position)
 
     if @image.update(params_hash)
@@ -56,7 +45,6 @@ class Admin::ImagesController < Admin::Base
   end
 
   def destroy
-    @image = Image.find(params[:id])
     if @image.destroy
       redirect_to admin_images_path, notice: 'Image was successfully destroyed.'
     else

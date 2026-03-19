@@ -30,8 +30,11 @@ class Admin::LensesController < Admin::Base
   end
 
   def destroy
-    @lens.destroy
-    redirect_to admin_lenses_path, notice: 'Lens was successfully destroyed.'
+    if @lens.destroy
+      redirect_to admin_lenses_path, notice: 'Lens was successfully destroyed.'
+    else
+      redirect_to admin_lenses_path, alert: 'Lens could not be destroyed.'
+    end
   end
 
   def lookup

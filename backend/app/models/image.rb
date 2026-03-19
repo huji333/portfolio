@@ -43,7 +43,7 @@ class Image < ApplicationRecord
     published
       .filter_by_categories(category_ids)
       .with_attached_file
-      .includes(:camera, :lens)
+      .includes(:camera, :lens, :categories)
       .ordered_for_gallery
   end
 

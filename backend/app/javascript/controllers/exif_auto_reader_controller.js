@@ -11,8 +11,7 @@ export default class extends Controller {
   ]
 
   static LENS_TAGS = [
-    "LensModel", "Lens", "LensSpecification", "LensMake",
-    "LensSerialNumber", "LensFirmwareVersion", "LensSpec"
+    "LensModel", "Lens", "LensSpec"
   ]
 
   connect() {
@@ -49,7 +48,7 @@ export default class extends Controller {
         }
 
         const lensName = this.extractLensName(file)
-        if (lensName && lensName !== "undefined" && this.hasLensSelectTarget) {
+        if (lensName && this.hasLensSelectTarget) {
           if (await this.lookupLens(lensName)) updatedFields++
         }
 
@@ -73,11 +72,12 @@ export default class extends Controller {
   extractLensName(file) {
     for (const tag of this.constructor.LENS_TAGS) {
       const value = window.EXIF.getTag(file, tag)
-      if (value && value !== "undefined") return value
+      if (value && typeof value === 'string' && value !== "undefined") return value
     }
 
+    // exif-jsが未知のタグを"undefined"キーで格納することがある
     const allTags = window.EXIF.getAllTags(file)
-    if (allTags?.undefined && typeof allTags.undefined === 'string') {
+    if (allTags?.undefined && typeof allTags.undefined === 'string' && allTags.undefined !== "undefined") {
       return allTags.undefined
     }
     return null
