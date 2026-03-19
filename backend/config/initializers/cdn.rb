@@ -6,13 +6,11 @@ Rails.application.configure do
   raw_base_url = ENV["CLOUDFRONT_BASE_URL"]&.strip
 
   if raw_base_url.blank?
-    if Rails.env.production?
-      raise "CLOUDFRONT_BASE_URL must be set to boot the application"
-    else
-      Rails.logger.warn "[cdn] CLOUDFRONT_BASE_URL is not set; CDN URLs will be unavailable" if defined?(Rails.logger)
-      config.cdn_base_url = nil
-      next
-    end
+    raise "CLOUDFRONT_BASE_URL must be set to boot the application" if Rails.env.production?
+
+    Rails.logger.warn "[cdn] CLOUDFRONT_BASE_URL is not set; CDN URLs will be unavailable" if defined?(Rails.logger)
+    config.cdn_base_url = nil
+    next
   end
 
   normalized_base_url = raw_base_url.delete_suffix("/")

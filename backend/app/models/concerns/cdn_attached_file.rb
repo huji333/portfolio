@@ -98,9 +98,9 @@ module CdnAttachedFile
     false
   end
 
-  def with_thumbnail_lock(&block)
+  def with_thumbnail_lock(&)
     if persisted?
-      with_lock(&block)
+      with_lock(&)
     else
       yield
     end
