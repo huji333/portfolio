@@ -19,7 +19,7 @@ class Admin::CamerasController < Admin::Base
     if @camera.save
       redirect_to admin_cameras_path, notice: 'Camera was successfully created.'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -27,7 +27,7 @@ class Admin::CamerasController < Admin::Base
     if @camera.update(camera_params)
       redirect_to admin_cameras_path, notice: 'Camera was successfully updated.'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

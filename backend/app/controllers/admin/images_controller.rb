@@ -32,7 +32,7 @@ class Admin::ImagesController < Admin::Base
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
     else
       flash.now[:alert] = 'Image faild to create.'
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -51,7 +51,7 @@ class Admin::ImagesController < Admin::Base
     else
       flash[:alert] = 'Image failed to update.'
       Rails.logger.debug { "Image failed to update.#{@image.errors.full_messages}" }
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -70,7 +70,7 @@ class Admin::ImagesController < Admin::Base
     if @image.save
       head :ok
     else
-      render json: { error: @image.errors.full_messages }, status: :unprocessable_entity
+      render json: { error: @image.errors.full_messages }, status: :unprocessable_content
     end
   end
 

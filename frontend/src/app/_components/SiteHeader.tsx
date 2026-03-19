@@ -25,18 +25,8 @@ export default function SiteHeader({ mode = 'auto' }: SiteHeaderProps) {
   });
 
   useEffect(() => {
-    if (mode === 'light') {
-      setVariant('light');
-      return;
-    }
-
-    if (mode === 'solid') {
-      setVariant('solid');
-      return;
-    }
-
-    if (!isHome) {
-      setVariant('solid');
+    if (mode !== 'auto' || !isHome) {
+      setVariant(mode === 'light' ? 'light' : 'solid'); // eslint-disable-line react-hooks/set-state-in-effect -- sync variant with props
       return;
     }
 

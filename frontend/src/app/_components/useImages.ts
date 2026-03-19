@@ -23,7 +23,6 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
 
   useEffect(() => {
     let isActive = true;
-    setIsLoading(true);
 
     const normalizedCategoryIds =
       categoryKey.length > 0
@@ -33,18 +32,21 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
             .filter((value) => Number.isFinite(value))
         : [];
 
-    fetchImages({ categoryIds: normalizedCategoryIds })
-      .then((result) => {
-        if (!isActive) {
-          return;
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const result = await fetchImages({ categoryIds: normalizedCategoryIds });
+        if (isActive) {
+          setImages(result.images);
         }
-        setImages(result.images);
-      })
-      .finally(() => {
+      } finally {
         if (isActive) {
           setIsLoading(false);
         }
-      });
+      }
+    };
+
+    load();
 
     return () => {
       isActive = false;

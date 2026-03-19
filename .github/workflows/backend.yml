@@ -1,10 +1,14 @@
-name: Test
+name: Backend CI
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'backend/**'
 
 env:
   RAILS_ENV: test
@@ -20,45 +24,21 @@ jobs:
         with:
           ruby-version: '3.3.5'
           bundler-cache: true
-
-      - name: Install dependencies
-        working-directory: ./backend
-        run: bundle install
+          working-directory: backend
 
       - name: Run rubocop
         working-directory: ./backend
         run: bundle exec rubocop
 
-  frontend-lint:
+  rspec:
     runs-on: ubuntu-latest
+    needs: rubocop
     env:
-      NEXT_PUBLIC_CLOUDFRONT_BASE_URL: ${{ secrets.NEXT_PUBLIC_CLOUDFRONT_BASE_URL }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: yarn install
-
-      - name: Run ESLint
-        working-directory: ./frontend
-        run: yarn lint
-
-  test:
-    runs-on: ubuntu-latest
-    env:
-      RAILS_ENV: test
       PGHOST: 127.0.0.1
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: portfolio_test
       CLOUDFRONT_BASE_URL: ${{ secrets.CLOUDFRONT_BASE_URL }}
-    needs: [rubocop, frontend-lint]
     services:
       postgres:
         image: postgres:15
@@ -81,20 +61,17 @@ jobs:
         with:
           ruby-version: '3.3.5'
           bundler-cache: true
+          working-directory: backend
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libvips-dev
 
-      - name: Install dependencies
-        working-directory: ./backend
-        run: bundle install
-
       - name: Setup test database
         working-directory: ./backend
         run: bundle exec rails db:prepare
 
-      - name: Run backend tests
+      - name: Run tests
         working-directory: ./backend
         run: bundle exec rspec

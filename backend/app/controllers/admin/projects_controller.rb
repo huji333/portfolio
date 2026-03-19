@@ -17,7 +17,7 @@ class Admin::ProjectsController < Admin::Base
       redirect_to admin_projects_path, notice: 'Project was successfully created.'
     else
       flash.now[:alert] = 'Project failed to create.'
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -26,7 +26,7 @@ class Admin::ProjectsController < Admin::Base
       redirect_to admin_projects_path, notice: 'Project was successfully updated.'
     else
       flash.now[:alert] = 'Project failed to update.'
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

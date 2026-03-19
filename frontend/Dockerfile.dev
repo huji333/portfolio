@@ -3,13 +3,15 @@ FROM node:${NODE_VERSION}-slim
 
 WORKDIR /app
 
+RUN corepack enable
+
 # hadolint ignore=DL3008
 RUN apt-get update -qq && \
   apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3 && \
   rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --production=false && \
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable && \
   yarn cache clean
 
 COPY .env.local ./

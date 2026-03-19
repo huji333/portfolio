@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Logo from '@/app/assets/logo.svg';
+import Logo from '@/app/assets/Logo';
 import MobileMenu from './MobileMenu';
 import type { HeaderStyles } from './headerStyles';
 import { HEADER_STYLE_PRESETS } from './headerStyles';
