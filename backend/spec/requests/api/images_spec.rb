@@ -82,11 +82,11 @@ RSpec.describe 'Images API', type: :request do
       it 'fetches the next page using next_cursor' do
         get '/api/images', params: { limit: 2 }
         first_page = response.parsed_body
-        first_page_titles = first_page['images'].map { |i| i['title'] }
+        first_page_titles = first_page['images'].pluck('title')
 
         get '/api/images', params: { limit: 2, cursor: first_page['next_cursor'] }
         second_page = response.parsed_body
-        second_page_titles = second_page['images'].map { |i| i['title'] }
+        second_page_titles = second_page['images'].pluck('title')
 
         expect(second_page['images'].length).to eq(2)
         expect(second_page['has_more']).to be false
@@ -98,7 +98,7 @@ RSpec.describe 'Images API', type: :request do
 
       it 'returns images ordered by row_order and id' do
         get '/api/images'
-        titles = response.parsed_body['images'].map { |i| i['title'] }
+        titles = response.parsed_body['images'].pluck('title')
 
         expect(titles).to eq(['Test Image 1', 'Test Image 2', 'Test Image with category 1',
                               'Test Image with category 2'])
