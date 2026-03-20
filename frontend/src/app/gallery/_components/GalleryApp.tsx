@@ -10,13 +10,23 @@ import ImageModal from './ImageModal';
 type GalleryAppProps = {
   initialCategories?: CategoryType[];
   initialImages?: ImageType[];
+  initialNextCursor?: string | null;
+  initialHasMore?: boolean;
 };
 
-export default function GalleryApp({ initialCategories: categories = [], initialImages = [] }: GalleryAppProps) {
+export default function GalleryApp({
+  initialCategories: categories = [],
+  initialImages = [],
+  initialNextCursor = null,
+  initialHasMore = false,
+}: GalleryAppProps) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [images, setImages] = useState<ImageType[]>(initialImages);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const initialLoadRef = useRef(true);
 
   const [focusedImageIndex, setFocusedImageIndex] = useState<number | null>(null);
@@ -34,6 +44,7 @@ export default function GalleryApp({ initialCategories: categories = [], initial
     imagesLengthRef.current = images.length;
   });
 
+  // カテゴリ変更時: 1ページ目をロード
   useEffect(() => {
     if (initialLoadRef.current) {
       initialLoadRef.current = false;
@@ -50,6 +61,8 @@ export default function GalleryApp({ initialCategories: categories = [], initial
         const result = await fetchImages({ categoryIds: selectedCategoryIds });
         if (isActive) {
           setImages(result.images);
+          setNextCursor(result.nextCursor);
+          setHasMore(result.hasMore);
           setFetchError(result.error);
         }
       } finally {
@@ -65,6 +78,26 @@ export default function GalleryApp({ initialCategories: categories = [], initial
       isActive = false;
     };
   }, [selectedCategoryIds]);
+
+  // 次ページロード
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || !nextCursor) return;
+
+    setIsLoadingMore(true);
+    try {
+      const result = await fetchImages({
+        categoryIds: selectedCategoryIds,
+        cursor: nextCursor,
+      });
+      if (!result.error) {
+        setImages((prev) => [...prev, ...result.images]);
+        setNextCursor(result.nextCursor);
+        setHasMore(result.hasMore);
+      }
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMore, nextCursor, selectedCategoryIds]);
 
   const handleCategoryToggle = useCallback((id: number) => {
     if (isInteractionDisabledRef.current) {
@@ -114,6 +147,9 @@ export default function GalleryApp({ initialCategories: categories = [], initial
       <ImageGrid
         images={images}
         isLoading={isLoadingImages}
+        isLoadingMore={isLoadingMore}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
         onFocus={handleFocus}
       />
       <ImageModal

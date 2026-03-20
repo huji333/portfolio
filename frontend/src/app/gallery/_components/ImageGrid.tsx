@@ -46,6 +46,9 @@ type ImageGridProps = {
   images: ImageType[];
   onFocus?: (imageIndex: number) => void;
   isLoading?: boolean;
+  isLoadingMore?: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
   isInteractive?: boolean;
 };
 
@@ -53,9 +56,13 @@ export default function ImageGrid({
   images,
   onFocus,
   isLoading = false,
+  isLoadingMore = false,
+  hasMore = false,
+  onLoadMore,
   isInteractive = true,
 }: ImageGridProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
 
   useEffect(() => {
@@ -78,6 +85,27 @@ export default function ImageGrid({
     return () => observer.disconnect();
   }, [isLoading]);
 
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || !onLoadMore) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { rootMargin: '200px' },
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [hasMore, onLoadMore]);
+
   if (isLoading) {
     return <Loading label="Loading images..." className="py-20" />;
   }
@@ -87,55 +115,62 @@ export default function ImageGrid({
   const gridStyles = { gridAutoRows: `${ROW_HEIGHT_PX}px` } as const;
 
   return (
-    <div
-      ref={containerRef}
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
-      style={gridStyles}
-    >
-      {images.map((image, index) => {
-        const handleFocus = () => onFocus?.(index);
-        const hasDimensions =
-          typeof image.width === 'number' && typeof image.height === 'number' && image.width > 0 && image.height > 0;
+    <>
+      <div
+        ref={containerRef}
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
+        style={gridStyles}
+      >
+        {images.map((image, index) => {
+          const handleFocus = () => onFocus?.(index);
+          const hasDimensions =
+            typeof image.width === 'number' && typeof image.height === 'number' && image.width > 0 && image.height > 0;
 
-        if (!hasDimensions || !image.thumbnail) {
-          return null;
-        }
+          if (!hasDimensions || !image.thumbnail) {
+            return null;
+          }
 
-        const rowSpan = getRowSpan(image.width as number, image.height as number, columnWidth);
-        const containerClassName = isClickable ? 'cursor-pointer' : '';
-        const itemStyle = { gridRowEnd: `span ${rowSpan}` } as const;
+          const rowSpan = getRowSpan(image.width as number, image.height as number, columnWidth);
+          const containerClassName = isClickable ? 'cursor-pointer' : '';
+          const itemStyle = { gridRowEnd: `span ${rowSpan}` } as const;
 
-        const interactionProps = isClickable
-          ? {
-              role: 'button' as const,
-              tabIndex: 0,
-              'aria-label': image.title,
-              onClick: handleFocus,
-              onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault();
-                  handleFocus();
-                }
-              },
-            }
-          : {};
+          const interactionProps = isClickable
+            ? {
+                role: 'button' as const,
+                tabIndex: 0,
+                'aria-label': image.title,
+                onClick: handleFocus,
+                onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleFocus();
+                  }
+                },
+              }
+            : {};
 
-        return (
-          <div key={image.id} className={containerClassName} style={itemStyle} {...interactionProps}>
-            <div className="overflow-hidden bg-white shadow-sm">
-              <Image
-                src={image.thumbnail}
-                alt={image.title}
-                width={image.width as number}
-                height={image.height as number}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                className="h-auto w-full"
-                loading="lazy"
-              />
+          return (
+            <div key={image.id} className={containerClassName} style={itemStyle} {...interactionProps}>
+              <div className="overflow-hidden bg-white shadow-sm">
+                <Image
+                  src={image.thumbnail}
+                  alt={image.title}
+                  width={image.width as number}
+                  height={image.height as number}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  className="h-auto w-full"
+                  loading="lazy"
+                />
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+      {hasMore && (
+        <div ref={sentinelRef} className="flex justify-center py-8">
+          {isLoadingMore && <Loading label="Loading more..." />}
+        </div>
+      )}
+    </>
   );
 }

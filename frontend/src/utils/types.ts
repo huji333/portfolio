@@ -15,6 +15,12 @@ export type ImageType = {
   height: number | null;
 };
 
+export type PaginatedImages = {
+  images: ImageType[];
+  next_cursor: string | null;
+  has_more: boolean;
+};
+
 export type CategoryType = {
   id: number;
   name: string;

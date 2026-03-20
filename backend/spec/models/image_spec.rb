@@ -109,4 +109,52 @@ RSpec.describe Image, type: :model do
       end
     end
   end
+
+  describe '.for_gallery' do
+    let!(:img1) { create(:image, title: 'A', row_order: 0, is_published: true) }
+    let!(:img2) { create(:image, title: 'B', row_order: 1, is_published: true) }
+    let!(:img3) { create(:image, title: 'C', row_order: 2, is_published: true) }
+    let!(:img4) { create(:image, title: 'D', row_order: 3, is_published: true) }
+    let!(:unpublished) { create(:image, title: 'Hidden', row_order: 4, is_published: false) }
+
+    it 'returns only published images ordered by row_order, id' do
+      result = Image.for_gallery(limit: 10)
+      expect(result.map(&:title)).to eq(%w[A B C D])
+    end
+
+    it 'excludes unpublished images' do
+      result = Image.for_gallery(limit: 10)
+      expect(result.map(&:title)).not_to include('Hidden')
+    end
+
+    it 'fetches limit + 1 records to detect has_more' do
+      result = Image.for_gallery(limit: 2)
+      expect(result.size).to eq(3)
+    end
+
+    it 'returns records after cursor position' do
+      cursor = "#{img2.row_order},#{img2.id}"
+      result = Image.for_gallery(cursor: cursor, limit: 10)
+      expect(result.map(&:title)).to eq(%w[C D])
+    end
+
+    it 'filters by category_ids' do
+      cat = create(:category, name: 'Landscape')
+      img1.categories << cat
+      img3.categories << cat
+
+      result = Image.for_gallery(category_ids: [cat.id], limit: 10)
+      expect(result.map(&:title)).to eq(%w[A C])
+    end
+
+    it 'combines cursor and category filter' do
+      cat = create(:category, name: 'Landscape')
+      img1.categories << cat
+      img3.categories << cat
+
+      cursor = "#{img1.row_order},#{img1.id}"
+      result = Image.for_gallery(category_ids: [cat.id], cursor: cursor, limit: 10)
+      expect(result.map(&:title)).to eq(%w[C])
+    end
+  end
 end
