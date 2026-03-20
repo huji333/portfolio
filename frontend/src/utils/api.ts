@@ -9,7 +9,8 @@ export type ApiRequestInit = RequestInit & {
 
 function stripServerOnlyOptions(init: ApiRequestInit): RequestInit {
   if (typeof window !== 'undefined') {
-    const { next: _, ...rest } = init;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { next, ...rest } = init;
     return rest;
   }
   return init;
