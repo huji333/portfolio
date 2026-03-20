@@ -32,8 +32,11 @@ class Admin::CamerasController < Admin::Base
   end
 
   def destroy
-    @camera.destroy
-    redirect_to admin_cameras_path, notice: 'Camera was successfully destroyed.'
+    if @camera.destroy
+      redirect_to admin_cameras_path, notice: 'Camera was successfully destroyed.'
+    else
+      redirect_to admin_cameras_path, alert: 'Camera could not be destroyed.'
+    end
   end
 
   def lookup

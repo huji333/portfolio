@@ -15,10 +15,10 @@
   .col-md-9= @image.taken_at
 .row.py-1
   .col-md-3.fw-bold Camera
-  .col-md-9= @image.camera_id
+  .col-md-9= @image.camera&.name
 .row.py-1
   .col-md-3.fw-bold Lens
-  .col-md-9= @image.lens_id
+  .col-md-9= @image.lens&.name
 .row.py-1
   .col-md-3.fw-bold Is published
   .col-md-9= @image.is_published
