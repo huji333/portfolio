@@ -9,15 +9,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const imageSrc = project.thumbnail ?? project.file;
 
   const wrapperClasses =
-    'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent hover:shadow-lg' +
+    'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-xs transition hover:-translate-y-1 hover:border-accent hover:shadow-lg' +
     (project.link
-      ? ' focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+      ? ' focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
       : '');
 
   const content = (
     <>
       <div className="relative w-full overflow-hidden rounded-xl">
-        <div className="aspect-[4/3]" />
+        <div className="aspect-4/3" />
         {imageSrc ? (
           <Image
             src={imageSrc}
