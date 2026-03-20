@@ -1,6 +1,8 @@
 name: E2E Tests
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -15,7 +17,6 @@ jobs:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_DB: portfolio_test
-      CLOUDFRONT_BASE_URL: ${{ secrets.CLOUDFRONT_BASE_URL }}
       NEXT_PUBLIC_API_BASE_URL: http://localhost:3000/api
       API_BASE_URL: http://localhost:3000/api
 

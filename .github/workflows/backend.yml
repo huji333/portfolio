@@ -41,7 +41,7 @@ jobs:
       CLOUDFRONT_BASE_URL: ${{ secrets.CLOUDFRONT_BASE_URL }}
     services:
       postgres:
-        image: postgres:15
+        image: postgres:16
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}

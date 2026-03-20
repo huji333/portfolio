@@ -4,7 +4,7 @@ test.describe('Admin Access', () => {
   test('unauthenticated user is redirected to sign in page', async ({ browser }) => {
     // Use a fresh context with NO storageState to simulate unauthenticated user
     const context = await browser.newContext({
-      baseURL: 'http://localhost:3100',
+      baseURL: test.info().project.use.baseURL!,
       storageState: { cookies: [], origins: [] },
     });
     const page = await context.newPage();
@@ -18,7 +18,7 @@ test.describe('Admin Access', () => {
   test('guest user cannot access /admin', async ({ browser }) => {
     // Login as guest in a fresh context
     const context = await browser.newContext({
-      baseURL: 'http://localhost:3100',
+      baseURL: test.info().project.use.baseURL!,
       storageState: { cookies: [], origins: [] },
     });
     const page = await context.newPage();
