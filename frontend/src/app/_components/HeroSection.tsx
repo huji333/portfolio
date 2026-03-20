@@ -42,7 +42,7 @@ export default function HeroSection() {
       {DESKTOP_SLIDES.map((slide, index) => (
         <div
           key={slide.src}
-          className={`absolute inset-0 hidden md:block transition-opacity duration-[1600ms] ease-out ${
+          className={`absolute inset-0 hidden md:block transition-opacity duration-1600 ease-out ${
             index === activeIndex ? 'opacity-100' : 'opacity-0'
           }`}
           aria-hidden={index !== activeIndex}

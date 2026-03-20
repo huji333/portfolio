@@ -133,7 +133,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
     // Overlay
     <div
       ref={dialogRef}
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 outline-none"
+      className="fixed inset-0 z-80 flex items-center justify-center bg-black/70 outline-hidden"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -188,7 +188,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
 
       {/* Modal content */}
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded shadow-lg flex flex-col overflow-hidden"
+        className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-sm shadow-lg flex flex-col overflow-hidden"
         onClick={(event) => {
           event.stopPropagation();
         }}
@@ -207,7 +207,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
         </div>
 
         {/* Meta info */}
-        <div className="px-4 pb-4 space-y-1 flex-shrink-0 break-words">
+        <div className="px-4 pb-4 space-y-1 shrink-0 wrap-break-word">
           <h3 id={titleId} className="text-lg font-semibold">
             {image.title}
           </h3>

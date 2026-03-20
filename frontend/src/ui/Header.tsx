@@ -38,7 +38,7 @@ export default function Header({ styles = HEADER_STYLE_PRESETS.solid }: HeaderPr
               <li key={label}>
                 <Link href={href} className={`group relative transition-colors ${styles.linkHover}`}>
                   {label}
-                  <span className="pointer-events-none absolute left-0 -bottom-1 block h-[1px] w-0 bg-current transition-all duration-300 ease-in-out group-hover:w-full" />
+                  <span className="pointer-events-none absolute left-0 -bottom-1 block h-px w-0 bg-current transition-all duration-300 ease-in-out group-hover:w-full" />
                 </Link>
               </li>
             ))}

@@ -122,7 +122,7 @@ export default function ImageGrid({
 
         return (
           <div key={image.id} className={containerClassName} style={itemStyle} {...interactionProps}>
-            <div className="overflow-hidden bg-white shadow">
+            <div className="overflow-hidden bg-white shadow-sm">
               <Image
                 src={image.thumbnail}
                 alt={image.title}
