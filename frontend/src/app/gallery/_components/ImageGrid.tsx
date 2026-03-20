@@ -1,9 +1,43 @@
 'use client';
 
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { ImageType } from '@/utils/types';
 import Loading from '@/ui/Loading';
+
+function GridImage({ src, fallbackSrc, alt, width, height }: {
+  src: string;
+  fallbackSrc: string;
+  alt: string;
+  width: number;
+  height: number;
+}) {
+  const [currentSrc, setCurrentSrc] = useState(src);
+
+  const handleError = useCallback(
+    (e: SyntheticEvent<HTMLImageElement>) => {
+      if (currentSrc !== fallbackSrc) {
+        setCurrentSrc(fallbackSrc);
+      } else {
+        (e.target as HTMLImageElement).style.display = 'none';
+      }
+    },
+    [currentSrc, fallbackSrc],
+  );
+
+  return (
+    <Image
+      src={currentSrc}
+      alt={alt}
+      width={width}
+      height={height}
+      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+      className="h-auto w-full"
+      loading="lazy"
+      onError={handleError}
+    />
+  );
+}
 
 const GRID_GAP_PX = 16; // matches Tailwind gap-4
 const ROW_HEIGHT_PX = 8; // base row height for masonry grid
@@ -152,14 +186,12 @@ export default function ImageGrid({
           return (
             <div key={image.id} className={containerClassName} style={itemStyle} {...interactionProps}>
               <div className="overflow-hidden bg-white shadow-sm">
-                <Image
+                <GridImage
                   src={image.thumbnail}
+                  fallbackSrc={image.file}
                   alt={image.title}
                   width={image.width as number}
                   height={image.height as number}
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="h-auto w-full"
-                  loading="lazy"
                 />
               </div>
             </div>

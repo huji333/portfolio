@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useSyncExternalStore } from 'react';
+import { type SyntheticEvent, useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ImageType } from '@/utils/types';
@@ -116,6 +116,16 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
     };
   }, [image, isClient]);
 
+  const [imgErrorKey, setImgErrorKey] = useState<number | null>(null);
+  const handleImgError = useCallback(
+    (e: SyntheticEvent<HTMLImageElement>) => {
+      setImgErrorKey(image?.id ?? null);
+      (e.target as HTMLImageElement).style.display = 'none';
+    },
+    [image?.id],
+  );
+  const imgError = imgErrorKey === image?.id && imgErrorKey !== null;
+
   if (!image || !isClient) return null;
 
   const captionId = image.caption ? descriptionId : undefined;
@@ -203,7 +213,11 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
             sizes="(min-width: 1024px) 60vw, 90vw"
             className="h-auto max-h-[70vh] w-auto object-contain"
             priority={false}
+            onError={handleImgError}
           />
+          {imgError && (
+            <p className="text-sm text-gray-400">Failed to load image</p>
+          )}
         </div>
 
         {/* Meta info */}

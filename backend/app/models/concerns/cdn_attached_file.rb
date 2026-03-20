@@ -1,8 +1,7 @@
 module CdnAttachedFile
   extend ActiveSupport::Concern
 
-  class MissingCdnBaseUrlError < StandardError
-  end
+  class MissingCdnBaseUrlError < StandardError; end
 
   included do
     after_commit :analyze_attached_file, on: %i[create update]
@@ -35,17 +34,17 @@ module CdnAttachedFile
 
   private
 
-  def thumbnail_limit
-    self.class::THUMBNAIL_LIMIT
-  end
+  def thumbnail_limit = self.class::THUMBNAIL_LIMIT
 
   def analyze_attached_file
     return unless file.attached?
     return if file.analyzed?
 
     file.analyze
+  rescue ActiveStorage::FileNotFoundError => e
+    log_file_not_found(:analyze_attached_file, e)
   rescue StandardError => e
-    Rails.logger.warn "analyze_attached_file skipped (#{log_reference}): #{e.class} #{e.message}"
+    Rails.logger.error "analyze_attached_file failed (#{log_reference}): #{e.class} #{e.message}"
   end
 
   def warm_thumbnail_variant
@@ -55,21 +54,23 @@ module CdnAttachedFile
     return if variant.blank?
 
     ensure_thumbnail_variant_processed(variant)
+  rescue ActiveStorage::FileNotFoundError => e
+    log_file_not_found(:warm_thumbnail_variant, e)
   rescue LoadError => e
     Rails.logger.warn "thumbnail_variant skipped (#{log_reference}): #{e.message}"
   rescue StandardError => e
     Rails.logger.error "thumbnail_variant error (#{log_reference}): #{e.full_message}"
   end
 
-  def log_reference
-    "#{self.class.name.underscore} #{id}"
+  def log_reference = "#{self.class.name.underscore} #{id}"
+
+  def log_file_not_found(method, err)
+    Rails.logger.error "#{method} failed (#{log_reference}): " \
+                       "blob exists but file not in storage. #{err.class}: #{err.message}"
   end
 
   def build_cdn_url(key)
-    base = cdn_base_url
-    return nil if base.nil?
-
-    "#{base}/#{key}"
+    (base = cdn_base_url) ? "#{base}/#{key}" : nil
   end
 
   def cdn_base_url
@@ -122,11 +123,5 @@ module CdnAttachedFile
     false
   end
 
-  def with_thumbnail_lock(&)
-    if persisted?
-      with_lock(&)
-    else
-      yield
-    end
-  end
+  def with_thumbnail_lock(&) = persisted? ? with_lock(&) : yield
 end
