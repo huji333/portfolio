@@ -34,9 +34,7 @@ class Image < ApplicationRecord
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?
 
-    joins(:categories)
-      .where(categories: { id: category_ids })
-      .distinct
+    where(id: ImageCategory.where(category_id: category_ids).select(:image_id))
   end
 
   def self.for_gallery(category_ids: nil)
