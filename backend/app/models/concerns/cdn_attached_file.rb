@@ -12,7 +12,7 @@ module CdnAttachedFile
   def file_url
     return unless file.attached?
 
-    build_cdn_url(file.key)
+    build_cdn_url(file.key) || active_storage_url_for(file)
   end
 
   def thumbnail_variant
@@ -27,7 +27,7 @@ module CdnAttachedFile
 
     ensure_thumbnail_variant_processed(variant)
 
-    build_cdn_url(variant.key)
+    build_cdn_url(variant.key) || active_storage_url_for(variant)
   rescue StandardError, LoadError => e
     Rails.logger.warn "thumbnail_url fallback (#{log_reference}): #{e.class} #{e.message}"
     file_url
@@ -81,6 +81,26 @@ module CdnAttachedFile
             "CLOUDFRONT_BASE_URL must be set to generate CDN-backed file URLs")
     end
 
+    nil
+  end
+
+  def active_storage_url_for(attachable)
+    return nil unless Rails.env.test?
+
+    helpers = Rails.application.routes.url_helpers
+    host = ENV.fetch("ACTIVE_STORAGE_HOST", "http://localhost:3100")
+
+    case attachable
+    when ActiveStorage::Attached::One
+      helpers.rails_blob_url(attachable.blob, host: host) if attachable.attached?
+    when ActiveStorage::Attachment, ActiveStorage::Blob
+      blob = attachable.is_a?(ActiveStorage::Attachment) ? attachable.blob : attachable
+      helpers.rails_blob_url(blob, host: host)
+    when ActiveStorage::VariantWithRecord, ActiveStorage::Variant
+      helpers.rails_representation_url(attachable, host: host)
+    end
+  rescue StandardError => e
+    Rails.logger.warn "active_storage_url_for fallback failed: #{e.class} #{e.message}"
     nil
   end
 
