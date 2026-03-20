@@ -2,8 +2,20 @@ class Api::ImagesController < ApplicationController
   include Rails.application.routes.url_helpers
 
   def index
-    images = Image.for_gallery(category_ids: category_ids_param)
-    render json: images.map { |image| image_json(image) }
+    limit = [(params[:limit] || 20).to_i, 50].min
+    images = Image.for_gallery(
+      category_ids: category_ids_param,
+      cursor: params[:cursor],
+      limit: limit
+    )
+    has_more = images.size > limit
+    images = images.first(limit)
+
+    render json: {
+      images: images.map { |image| image_json(image) },
+      next_cursor: has_more ? "#{images.last.row_order},#{images.last.id}" : nil,
+      has_more: has_more
+    }
   end
 
   private

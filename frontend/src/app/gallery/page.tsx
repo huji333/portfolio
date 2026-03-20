@@ -22,7 +22,12 @@ export default async function Page() {
     <>
       <Header styles={HEADER_STYLE_PRESETS.solid} />
       <div className="min-h-screen bg-background pt-20 md:pt-24">
-        <GalleryApp initialCategories={categories} initialImages={initialImages} />
+        <GalleryApp
+          initialCategories={categories}
+          initialImages={initialImages}
+          initialNextCursor={imagesResult.nextCursor}
+          initialHasMore={imagesResult.hasMore}
+        />
       </div>
     </>
   );

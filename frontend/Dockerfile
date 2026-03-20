@@ -31,8 +31,7 @@ RUN yarn install --immutable
 
 COPY . .
 
-RUN npx next build --experimental-build-mode compile && \
-    yarn workspaces focus --production && \
+RUN npx next build && \
     yarn cache clean
 
 

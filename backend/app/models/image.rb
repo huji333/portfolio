@@ -37,12 +37,20 @@ class Image < ApplicationRecord
     where(id: ImageCategory.where(category_id: category_ids).select(:image_id))
   end
 
-  def self.for_gallery(category_ids: nil)
-    published
-      .filter_by_categories(category_ids)
-      .with_attached_file
-      .includes(:camera, :lens, :categories)
-      .ordered_for_gallery
+  def self.for_gallery(category_ids: nil, cursor: nil, limit: 20)
+    scope = published
+            .filter_by_categories(category_ids)
+            .with_attached_file
+            .includes(:camera, :lens, :categories)
+
+    if cursor.present?
+      row_order_val, id_val = cursor.split(",").map(&:to_i)
+      scope = scope.where(
+        "(row_order, id) > (?, ?)", row_order_val, id_val
+      )
+    end
+
+    scope.ordered_for_gallery.limit(limit + 1)
   end
 
   private
