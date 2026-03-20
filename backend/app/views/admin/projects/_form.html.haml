@@ -1,4 +1,4 @@
-= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
+= form_with(model: project, url: project.new_record? ? admin_projects_path : admin_project_path(project), local: true, multipart: true, data: { controller: "direct-upload" }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
   - if project.errors.any?
     .alert.alert-danger
       %ul
@@ -13,7 +13,11 @@
   .row.mb-3
     .col-md-3.col-form-label.fw-bold file
     .col-md-9
-      = form.file_field :file, class: 'form-control'
+      = form.file_field :file, direct_upload: true, class: 'form-control', data: { direct_upload_target: "input" }
+    .col-md-9.offset-md-3.mt-2
+      .progress.d-none{ data: { direct_upload_target: "progress" } }
+        .progress-bar.progress-bar-striped.progress-bar-animated{ role: "progressbar", "aria-valuenow": "0", "aria-valuemin": "0", "aria-valuemax": "100", style: "width: 0%" }
+      .alert.alert-danger.d-none.mt-2{ data: { direct_upload_target: "error" } }
       - if project.file.attached?
         %small.text-muted.d-block.mt-2
           現在のファイル:

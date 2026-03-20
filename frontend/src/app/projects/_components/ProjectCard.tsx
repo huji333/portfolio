@@ -1,3 +1,6 @@
+'use client';
+
+import { type SyntheticEvent, useCallback, useState } from 'react';
 import Image from 'next/image';
 import { ProjectType } from '@/utils/types';
 
@@ -6,7 +9,21 @@ type ProjectCardProps = {
 };
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const imageSrc = project.thumbnail ?? project.file;
+  const primarySrc = project.thumbnail ?? project.file;
+  const [imageSrc, setImageSrc] = useState(primarySrc);
+  const [imgFailed, setImgFailed] = useState(false);
+
+  const handleError = useCallback(
+    (e: SyntheticEvent<HTMLImageElement>) => {
+      if (imageSrc === project.thumbnail && project.file) {
+        setImageSrc(project.file);
+      } else {
+        setImgFailed(true);
+        (e.target as HTMLImageElement).style.display = 'none';
+      }
+    },
+    [imageSrc, project.thumbnail, project.file],
+  );
 
   const wrapperClasses =
     'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-xs transition hover:-translate-y-1 hover:border-accent hover:shadow-lg' +
@@ -18,7 +35,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     <>
       <div className="relative w-full overflow-hidden rounded-xl">
         <div className="aspect-4/3" />
-        {imageSrc ? (
+        {imageSrc && !imgFailed ? (
           <Image
             src={imageSrc}
             alt={project.title}
@@ -26,6 +43,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             sizes="(min-width: 768px) 33vw, 100vw"
             className="object-contain object-center"
             priority={false}
+            onError={handleError}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-xs uppercase tracking-widest text-accent">
