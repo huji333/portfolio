@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const BACKEND_PORT = process.env.CI ? 3000 : 3100;
-const FRONTEND_PORT = process.env.CI ? 3002 : 3102;
+const BACKEND_PORT = 3000;
+const FRONTEND_PORT = 3002;
 const BACKEND_URL = `http://localhost:${BACKEND_PORT}`;
 const FRONTEND_URL = `http://localhost:${FRONTEND_PORT}`;
 

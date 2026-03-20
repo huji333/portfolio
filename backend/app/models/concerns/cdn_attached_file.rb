@@ -89,7 +89,7 @@ module CdnAttachedFile
     return nil unless Rails.env.test?
 
     helpers = Rails.application.routes.url_helpers
-    host = ENV.fetch("ACTIVE_STORAGE_HOST", "http://localhost:3100")
+    host = ENV.fetch("ACTIVE_STORAGE_HOST", "http://localhost:3000")
 
     case attachable
     when ActiveStorage::Attached::One
