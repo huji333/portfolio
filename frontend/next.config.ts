@@ -8,6 +8,11 @@ const remotePatterns: RemotePattern[] = [
     port: '3000',
     pathname: '/rails/**',
   },
+  {
+    protocol: 'http',
+    hostname: 'localhost',
+    port: '3100',
+  },
 ];
 
 function addRemotePatternFromUrl(url: string, label: string): void {
@@ -40,6 +45,7 @@ if (s3Hostname) {
 const nextConfig: NextConfig = {
   images: {
     remotePatterns,
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== 'production',
   },
   experimental: {
     turbopackFileSystemCacheForDev: process.env.TURBOPACK_FS_CACHE !== '0',

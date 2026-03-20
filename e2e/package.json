@@ -1,0 +1,14 @@
+{
+  "name": "portfolio-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:admin": "playwright test --project=admin",
+    "test:frontend": "playwright test --project=frontend",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}
