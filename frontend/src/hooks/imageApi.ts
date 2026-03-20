@@ -1,9 +1,9 @@
+import { apiFetch, ApiRequestInit } from '@/utils/api';
 import { ImageType } from '@/utils/types';
-import { getApiBaseUrl } from '@/utils/api';
 
 type FetchImagesOptions = {
   categoryIds?: number[];
-  fetchInit?: RequestInit;
+  fetchInit?: ApiRequestInit;
 };
 
 type FetchImagesResult = {
@@ -11,32 +11,16 @@ type FetchImagesResult = {
   error: boolean;
 };
 
-function buildImagesUrl(categoryIds: number[] = []): string {
-  const baseUrl = getApiBaseUrl();
+function buildImagesPath(categoryIds: number[] = []): string {
   const query = categoryIds.length > 0 ? `?categories=${categoryIds.join(',')}` : '';
-  return `${baseUrl}/images${query}`;
+  return `/images${query}`;
 }
 
-export async function fetchImages({ categoryIds = [], fetchInit }: FetchImagesOptions = {}): Promise<FetchImagesResult> {
-  const url = buildImagesUrl(categoryIds);
-
-  const init = fetchInit ? { ...fetchInit } : undefined;
-  if (typeof window !== 'undefined' && init && 'next' in init) {
-    // `next` options are only understood by Next.js server-side fetch. Remove for browser fetches.
-    delete (init as Record<string, unknown>).next;
-  }
-
-  try {
-    const response = await fetch(url, init);
-    if (!response.ok) {
-      console.error('Failed to fetch images', response.statusText);
-      return { images: [], error: true };
-    }
-
-    const images = (await response.json()) as ImageType[];
-    return { images, error: false };
-  } catch (error) {
-    console.error('Failed to fetch images', error);
-    return { images: [], error: true };
-  }
+export async function fetchImages({
+  categoryIds = [],
+  fetchInit,
+}: FetchImagesOptions = {}): Promise<FetchImagesResult> {
+  const path = buildImagesPath(categoryIds);
+  const { data, error } = await apiFetch<ImageType[]>(path, 'images', fetchInit);
+  return { images: data, error };
 }
