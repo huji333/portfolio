@@ -65,9 +65,24 @@ jobs:
 
       - name: Install e2e dependencies
         working-directory: ./e2e
-        run: |
-          npm install
-          npx playwright install --with-deps chromium
+        run: npm install
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: ./e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+        working-directory: ./e2e
 
       - name: Run e2e tests
         working-directory: ./e2e

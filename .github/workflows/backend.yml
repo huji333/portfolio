@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -26,7 +28,21 @@ jobs:
           bundler-cache: true
           working-directory: backend
 
-      - name: Run rubocop
+      - name: Get changed Ruby files
+        id: changed
+        if: github.event_name == 'pull_request'
+        run: |
+          FILES=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }}...HEAD -- 'backend/**/*.rb' | sed 's|^backend/||' | tr '\n' ' ')
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+          echo "any=$([ -n "$FILES" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Run rubocop (changed files only)
+        if: github.event_name == 'pull_request' && steps.changed.outputs.any == 'true'
+        working-directory: ./backend
+        run: bundle exec rubocop --force-exclusion ${{ steps.changed.outputs.files }}
+
+      - name: Run rubocop (full)
+        if: github.event_name == 'push'
         working-directory: ./backend
         run: bundle exec rubocop
 
