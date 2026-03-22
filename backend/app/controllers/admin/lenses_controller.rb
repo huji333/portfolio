@@ -70,6 +70,6 @@ class Admin::LensesController < Admin::Base
   end
 
   def lens_params
-    params.require(:lens).permit(:name)
+    params.expect(lens: [:name])
   end
 end

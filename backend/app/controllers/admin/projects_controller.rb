@@ -45,6 +45,6 @@ class Admin::ProjectsController < Admin::Base
   end
 
   def project_params
-    params.require(:project).permit(:title, :link, :file)
+    params.expect(project: %i[title link file])
   end
 end

@@ -43,6 +43,6 @@ class Admin::CategoriesController < Admin::Base
   private
 
   def category_params
-    params.require(:category).permit(:name)
+    params.expect(category: [:name])
   end
 end
