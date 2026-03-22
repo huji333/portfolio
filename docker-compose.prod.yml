@@ -3,9 +3,9 @@
 #   cp .env.prod.sample .env  # 編集して実際の値を入れる
 #   docker compose -f docker-compose.prod.yml up -d --build
 #
-# TLS: Caddy が Let's Encrypt で自動取得。Caddyfile に FQDN を記載すること。
+# TLS: Cloudflare Tunnel が処理。CLOUDFLARE_TUNNEL_TOKEN を .env に設定すること。
 # Migration: 初回または schema 変更後に一度だけ migrate サービスを実行
-#   docker compose -f docker-compose.prod.yml run --rm migrate
+#   docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate
 
 services:
   backend:
@@ -75,16 +75,11 @@ services:
       retries: 10
     restart: unless-stopped
 
-  caddy:
-    image: caddy:2-alpine
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
       backend:
         condition: service_healthy
@@ -114,8 +109,6 @@ services:
 
 volumes:
   db_data:
-  caddy_data:
-  caddy_config:
 
 networks:
   frontend:
