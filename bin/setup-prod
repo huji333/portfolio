@@ -34,24 +34,24 @@ prompt_required() {
   done
 }
 
-# ---------- .env.prod ----------
+# ---------- .env ----------
 
 setup_env_prod() {
-  local target="$ROOT/.env.prod"
-  local sample="$ROOT/.env.prod.sample"
+  local target="$ROOT/.env"
+  local sample="$ROOT/.env.sample"
 
   if [ -f "$target" ]; then
-    echo "✔ .env.prod は既に存在します（スキップ）"
+    echo "✔ .env は既に存在します（スキップ）"
     return
   fi
 
   if [ ! -f "$sample" ]; then
-    echo "✖ .env.prod.sample が見つかりません" >&2
+    echo "✖ .env.sample が見つかりません" >&2
     exit 1
   fi
 
   echo ""
-  echo "── .env.prod を生成します ──"
+  echo "── .env を生成します ──"
 
   local db_password
   db_password="$(generate_secret)"
@@ -115,7 +115,7 @@ NEXT_PUBLIC_S3_HOSTNAME=
 EOF
 
   echo ""
-  echo "✔ .env.prod を生成しました"
+  echo "✔ .env を生成しました"
 }
 
 # ---------- Caddyfile ----------
@@ -134,10 +134,10 @@ setup_caddyfile() {
     exit 1
   fi
 
-  # .env.prod からドメインを読み取る（先に生成されている前提）
+  # .env からドメインを読み取る（先に生成されている前提）
   local domain=""
-  if [ -f "$ROOT/.env.prod" ]; then
-    domain="$(grep '^FRONTEND_ORIGIN=' "$ROOT/.env.prod" | sed 's|^FRONTEND_ORIGIN=https://||')"
+  if [ -f "$ROOT/.env" ]; then
+    domain="$(grep '^FRONTEND_ORIGIN=' "$ROOT/.env" | sed 's|^FRONTEND_ORIGIN=https://||')"
   fi
 
   if [ -z "$domain" ]; then
@@ -162,6 +162,6 @@ echo ""
 echo "── セットアップ完了 ──"
 echo ""
 echo "次のステップ:"
-echo "  1. .env.prod の内容を確認・調整"
+echo "  1. .env の内容を確認・調整"
 echo "  2. docker compose -f docker-compose.prod.yml up -d --build"
 echo ""

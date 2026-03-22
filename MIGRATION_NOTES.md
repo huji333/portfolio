@@ -5,7 +5,7 @@
 - ~~**Caddyセキュリティヘッダー追加**~~ — HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy (#58)
 - ~~**PostgreSQLバックアップ戦略**~~ — `bin/backup-db` (pg_dump + gzip + ローテーション) (#56)
 - ~~**Docker Composeネットワーク分離**~~ — `backend` (internal) / `frontend` ネットワークで DB を隔離 (#58)
-- ~~**初期セットアップスクリプト**~~ — `bin/setup-prod` で `.env.prod` / `Caddyfile` / 秘密鍵を自動生成 (#60)
+- ~~**初期セットアップスクリプト**~~ — `bin/setup-prod` で `.env` / `Caddyfile` / 秘密鍵を自動生成 (#60)
 
 ## デプロイチェックリスト
 
@@ -15,7 +15,7 @@
 - [ ] リポジトリを clone
 
 ### アプリケーション起動
-- [ ] `bash bin/setup-prod` で `.env.prod` / `Caddyfile` を生成
+- [ ] `bash bin/setup-prod` で `.env` / `Caddyfile` を生成
 - [ ] `docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate`
 - [ ] `docker compose -f docker-compose.prod.yml up -d --build`
 
