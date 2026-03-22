@@ -6,9 +6,11 @@
 # フロントエンド
 yourdomain.com {
   header {
+    Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     X-Content-Type-Options "nosniff"
     X-Frame-Options "DENY"
     Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
     -Server
   }
   reverse_proxy frontend:3000
@@ -17,7 +19,10 @@ yourdomain.com {
 # バックエンド API
 api.yourdomain.com {
   header {
+    Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
     X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
     -Server
   }
   reverse_proxy backend:3000

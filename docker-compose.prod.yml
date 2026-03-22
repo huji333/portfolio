@@ -20,6 +20,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - frontend
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/up || exit 1"]
       interval: 10s
@@ -46,6 +49,8 @@ services:
       API_BASE_URL: http://backend:3000/api
     depends_on:
       - backend
+    networks:
+      - frontend
     logging:
       driver: "json-file"
       options:
@@ -61,6 +66,8 @@ services:
       POSTGRES_DB: backend_production
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U backend -d backend_production"]
       interval: 5s
@@ -83,6 +90,8 @@ services:
         condition: service_healthy
       frontend:
         condition: service_started
+    networks:
+      - frontend
     restart: unless-stopped
 
   migrate:
@@ -98,6 +107,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - backend
     profiles:
       - migrate
 
@@ -105,3 +116,10 @@ volumes:
   db_data:
   caddy_data:
   caddy_config:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
