@@ -30,7 +30,7 @@ RUN bundle install && \
 COPY . .
 
 RUN bundle exec bootsnap precompile app/ lib/ && \
-    SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+    SECRET_KEY_BASE_DUMMY=1 CLOUDFRONT_BASE_URL=https://dummy ./bin/rails assets:precompile
 
 
 # Final stage for app image
