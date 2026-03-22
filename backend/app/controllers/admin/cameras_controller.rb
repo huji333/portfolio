@@ -64,6 +64,6 @@ class Admin::CamerasController < Admin::Base
   end
 
   def camera_params
-    params.require(:camera).permit(:name, :manufacturer)
+    params.expect(camera: %i[name manufacturer])
   end
 end

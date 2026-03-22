@@ -75,10 +75,10 @@ class Admin::ImagesController < Admin::Base
   end
 
   def image_params
-    params.require(:image).permit(
-      :title, :caption, :taken_at, :camera_id, :lens_id,
-      :row_order_position, :is_published, :file,
-      category_ids: []
+    params.expect(
+      image: [:title, :caption, :taken_at, :camera_id, :lens_id,
+              :row_order_position, :is_published, :file,
+              { category_ids: [] }]
     )
   end
 
