@@ -193,10 +193,20 @@ export default class extends Controller {
 
     const alertDiv = document.createElement('div')
     alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2'
-    alertDiv.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`
+
+    const messageSpan = document.createElement('span')
+    messageSpan.textContent = message
+
+    const closeButton = document.createElement('button')
+    closeButton.type = 'button'
+    closeButton.className = 'btn-close'
+    closeButton.setAttribute('data-bs-dismiss', 'alert')
+
+    alertDiv.appendChild(messageSpan)
+    alertDiv.appendChild(closeButton)
 
     form.insertBefore(alertDiv, form.firstChild)
-    setTimeout(() => alertDiv.parentNode?.remove(), 5000)
+    setTimeout(() => alertDiv.remove(), 5000)
   }
 
   showAlert(message) {
