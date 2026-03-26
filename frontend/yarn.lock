@@ -3065,9 +3065,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^20.8.4":
-  version: 20.8.4
-  resolution: "happy-dom@npm:20.8.4"
+"happy-dom@npm:^20.8.8":
+  version: 20.8.8
+  resolution: "happy-dom@npm:20.8.8"
   dependencies:
     "@types/node": "npm:>=20.0.0"
     "@types/whatwg-mimetype": "npm:^3.0.2"
@@ -3075,7 +3075,7 @@ __metadata:
     entities: "npm:^7.0.1"
     whatwg-mimetype: "npm:^3.0.0"
     ws: "npm:^8.18.3"
-  checksum: 10c0/c06eb49bcef10161248b3c5d97be2dc43eb759879a42895bf909a68fd698138c5880ca7839b0b64808f12e9f240073765cb5b5aef52c0e884219a14c1bfbf86b
+  checksum: 10c0/9b2c05f08bbb1cfdef66e1b53f3f7e7aa7ddd8ac19cefc02bf0777b6b444afa975193a26bc67ff9a1eba20724c08ffe663e6ed665177cb074d6dd6e82ea2ed03
   languageName: node
   linkType: hard
 
@@ -4349,7 +4349,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.0.1"
     eslint: "npm:^9"
     eslint-config-next: "npm:16.2.0"
-    happy-dom: "npm:^20.8.4"
+    happy-dom: "npm:^20.8.8"
     next: "npm:^16.2.0"
     postcss: "npm:^8"
     react: "npm:^19.2.4"
