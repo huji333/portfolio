@@ -1,6 +1,4 @@
 class Api::ImagesController < ApplicationController
-  include Rails.application.routes.url_helpers
-
   def index
     limit = [(params[:limit] || 20).to_i, 50].min
     images = Image.for_gallery(
@@ -23,7 +21,7 @@ class Api::ImagesController < ApplicationController
   def category_ids_param
     case params[:categories]
     when String
-      params[:categories].split(',').map(&:strip)
+      params[:categories].split(',').map { |id| id.strip.to_i }
     else
       params[:categories]
     end
