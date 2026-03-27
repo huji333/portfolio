@@ -28,14 +28,10 @@ class Admin::ImagesController < Admin::Base
 
   def update
     params_hash = image_params.except(:row_order_position)
+    @image.assign_attributes(params_hash)
+    @image.row_order_position = image_params[:row_order_position].to_i if image_params[:row_order_position].present?
 
-    if @image.update(params_hash)
-      # row_order_positionが指定されている場合は順序を更新
-      if image_params[:row_order_position].present?
-        position = image_params[:row_order_position].to_i
-        @image.row_order_position = position
-        @image.save
-      end
+    if @image.save
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
     else
       flash[:alert] = 'Image failed to update.'
