@@ -93,6 +93,7 @@ export default function GalleryApp({
         setImages((prev) => [...prev, ...result.images]);
         setNextCursor(result.nextCursor);
         setHasMore(result.hasMore);
+        setFetchError(false);
       } else {
         setFetchError(true);
       }
