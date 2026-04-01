@@ -11,11 +11,13 @@ type UseImagesOptions = {
 type UseImagesResult = {
   images: ImageType[];
   isLoading: boolean;
+  error: boolean;
 };
 
 export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImagesResult {
   const [images, setImages] = useState<ImageType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState(false);
 
   const categoryKey = useMemo(() => {
     return [...categoryIds].sort((a, b) => a - b).join(',');
@@ -34,10 +36,12 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
 
     const load = async () => {
       setIsLoading(true);
+      setError(false);
       try {
         const result = await fetchImages({ categoryIds: normalizedCategoryIds });
         if (isActive) {
           setImages(result.images);
+          setError(result.error);
         }
       } finally {
         if (isActive) {
@@ -53,5 +57,5 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
     };
   }, [categoryKey]);
 
-  return { images, isLoading };
+  return { images, isLoading, error };
 }

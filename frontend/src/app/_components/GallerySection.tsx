@@ -6,9 +6,9 @@ import ImageGrid from '@/app/gallery/_components/ImageGrid';
 import { useImages } from './useImages';
 
 export default function GallerySection() {
-  const { images, isLoading } = useImages();
+  const { images, isLoading, error } = useImages();
   const previewImages = images.slice(0, 9);
-  const showEmptyState = !isLoading && previewImages.length === 0;
+  const showEmptyState = !isLoading && !error && previewImages.length === 0;
 
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">
@@ -26,7 +26,9 @@ export default function GallerySection() {
           </Link>
         </div>
 
-        {showEmptyState ? (
+        {error ? (
+          <p className="mt-10 text-sm text-red-600">読み込みに失敗しました。</p>
+        ) : showEmptyState ? (
           <p className="mt-10 text-sm text-foreground">表示できる写真がまだありません。</p>
         ) : (
           <div className="mt-10">
