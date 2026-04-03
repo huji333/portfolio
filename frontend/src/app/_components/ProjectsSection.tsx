@@ -3,7 +3,7 @@ import ProjectCard from '../projects/_components/ProjectCard';
 import { fetchProjects } from '@/hooks/projectApi';
 
 export default async function ProjectsSection() {
-  const { projects } = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
+  const { projects, error } = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="projects-heading">
       <div className="mx-auto w-full max-w-5xl">
@@ -20,7 +20,9 @@ export default async function ProjectsSection() {
           </Link>
         </div>
 
-        {projects.length > 0 ? (
+        {error ? (
+          <p className="mt-10 text-sm text-red-600">読み込みに失敗しました。</p>
+        ) : projects.length > 0 ? (
           <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {projects.map((project) => (
               <ProjectCard key={project.id} project={project} />
