@@ -27,6 +27,7 @@ export default async function Page() {
           initialImages={initialImages}
           initialNextCursor={imagesResult.nextCursor}
           initialHasMore={imagesResult.hasMore}
+          initialFetchError={imagesResult.error || categoriesResult.error}
         />
       </div>
     </>
