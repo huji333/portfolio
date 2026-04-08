@@ -28,11 +28,11 @@ export async function apiFetch<T>(
     const response = await fetch(url, init);
     if (!response.ok) {
       console.error(`Failed to fetch ${label}:`, response.statusText);
-      return { data: [] as unknown as T, error: true };
+      return { data: null as unknown as T, error: true };
     }
     return { data: (await response.json()) as T, error: false };
   } catch (error) {
     console.error(`Failed to fetch ${label}:`, error);
-    return { data: [] as unknown as T, error: true };
+    return { data: null as unknown as T, error: true };
   }
 }
