@@ -14,5 +14,5 @@ export async function fetchCategories({
   fetchInit,
 }: FetchCategoriesOptions = {}): Promise<FetchCategoriesResult> {
   const { data, error } = await apiFetch<CategoryType[]>('/categories', 'categories', fetchInit);
-  return { categories: data, error };
+  return { categories: error ? [] : data, error };
 }

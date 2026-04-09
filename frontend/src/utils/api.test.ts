@@ -41,20 +41,20 @@ describe('apiFetch', () => {
     expect(fetch).toHaveBeenCalledWith('https://api.test/items', undefined);
   });
 
-  it('returns empty array and error on non-ok response', async () => {
+  it('returns null and error on non-ok response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: false,
       statusText: 'Not Found',
     }));
 
     const result = await apiFetch('/items', 'items');
-    expect(result).toEqual({ data: [], error: true });
+    expect(result).toEqual({ data: null, error: true });
   });
 
-  it('returns empty array and error on network failure', async () => {
+  it('returns null and error on network failure', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
 
     const result = await apiFetch('/items', 'items');
-    expect(result).toEqual({ data: [], error: true });
+    expect(result).toEqual({ data: null, error: true });
   });
 });
