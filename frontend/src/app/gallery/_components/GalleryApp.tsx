@@ -12,6 +12,7 @@ type GalleryAppProps = {
   initialImages?: ImageType[];
   initialNextCursor?: string | null;
   initialHasMore?: boolean;
+  initialFetchError?: boolean;
 };
 
 export default function GalleryApp({
@@ -19,12 +20,13 @@ export default function GalleryApp({
   initialImages = [],
   initialNextCursor = null,
   initialHasMore = false,
+  initialFetchError = false,
 }: GalleryAppProps) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
   const [images, setImages] = useState<ImageType[]>(initialImages);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
+  const [fetchError, setFetchError] = useState(initialFetchError);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const initialLoadRef = useRef(true);
