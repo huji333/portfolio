@@ -10,20 +10,20 @@ class Camera < ApplicationRecord
     # カメラ名とメーカー名の両方が提供されている場合
     if camera_name.present? && manufacturer.present?
       camera = where("LOWER(name) LIKE ? AND LOWER(manufacturer) LIKE ?",
-                     "%#{camera_name.downcase}%",
-                     "%#{manufacturer.downcase}%").first
+                     "%#{sanitize_sql_like(camera_name.downcase)}%",
+                     "%#{sanitize_sql_like(manufacturer.downcase)}%").first
       return camera if camera
     end
 
     # カメラ名のみで検索
     if camera_name.present?
-      camera = where("LOWER(name) LIKE ?", "%#{camera_name.downcase}%").first
+      camera = where("LOWER(name) LIKE ?", "%#{sanitize_sql_like(camera_name.downcase)}%").first
       return camera if camera
     end
 
     # メーカー名のみで検索
     if manufacturer.present?
-      camera = where("LOWER(manufacturer) LIKE ?", "%#{manufacturer.downcase}%").first
+      camera = where("LOWER(manufacturer) LIKE ?", "%#{sanitize_sql_like(manufacturer.downcase)}%").first
       return camera if camera
     end
 

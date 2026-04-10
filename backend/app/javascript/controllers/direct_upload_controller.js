@@ -6,17 +6,22 @@ export default class extends Controller {
   static targets = ["input", "progress", "error"]
 
   connect() {
-    this.element.addEventListener("direct-upload:initialize", this.initialize.bind(this))
-    this.element.addEventListener("direct-upload:progress", this.progress.bind(this))
-    this.element.addEventListener("direct-upload:error", this.error.bind(this))
-    this.element.addEventListener("direct-upload:end", this.end.bind(this))
+    this._boundInitialize = this.initialize.bind(this)
+    this._boundProgress = this.progress.bind(this)
+    this._boundError = this.error.bind(this)
+    this._boundEnd = this.end.bind(this)
+
+    this.element.addEventListener("direct-upload:initialize", this._boundInitialize)
+    this.element.addEventListener("direct-upload:progress", this._boundProgress)
+    this.element.addEventListener("direct-upload:error", this._boundError)
+    this.element.addEventListener("direct-upload:end", this._boundEnd)
   }
 
   disconnect() {
-    this.element.removeEventListener("direct-upload:initialize", this.initialize)
-    this.element.removeEventListener("direct-upload:progress", this.progress)
-    this.element.removeEventListener("direct-upload:error", this.error)
-    this.element.removeEventListener("direct-upload:end", this.end)
+    this.element.removeEventListener("direct-upload:initialize", this._boundInitialize)
+    this.element.removeEventListener("direct-upload:progress", this._boundProgress)
+    this.element.removeEventListener("direct-upload:error", this._boundError)
+    this.element.removeEventListener("direct-upload:end", this._boundEnd)
   }
 
   initialize(event) {
