@@ -221,7 +221,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
         </div>
 
         {/* Meta info */}
-        <div className="px-4 pb-4 space-y-1 shrink-0 wrap-break-word">
+        <div className="px-4 pb-4 space-y-1 shrink-0 break-words">
           <h3 id={titleId} className="text-lg font-semibold">
             {image.title}
           </h3>
