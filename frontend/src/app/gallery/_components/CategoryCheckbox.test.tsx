@@ -7,8 +7,6 @@ import { CategoryType } from '@/utils/types';
 const category: CategoryType = {
   id: 1,
   name: 'Landscape',
-  created_at: '2025-01-01',
-  updated_at: '2025-01-01',
 };
 
 describe('CategoryCheckbox', () => {
