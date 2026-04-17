@@ -33,7 +33,7 @@ export async function fetchImages({
 }: FetchImagesOptions = {}): Promise<FetchImagesResult> {
   const path = buildImagesPath(categoryIds, cursor);
   const { data, error } = await apiFetch<PaginatedImages>(path, 'images', fetchInit);
-  if (error) {
+  if (error || !data) {
     return { images: [], nextCursor: null, hasMore: false, error: true };
   }
   return {
