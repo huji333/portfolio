@@ -14,5 +14,5 @@ export async function fetchProjects({
   fetchInit,
 }: FetchProjectsOptions = {}): Promise<FetchProjectsResult> {
   const { data, error } = await apiFetch<ProjectType[]>('/projects', 'projects', fetchInit);
-  return { projects: error ? [] : data, error };
+  return { projects: error || !data ? [] : data, error };
 }

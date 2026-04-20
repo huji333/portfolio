@@ -69,7 +69,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       <a
         href={project.link}
         target="_blank"
-        rel="noreferrer noopener"
+        rel="noopener noreferrer"
         aria-label={`Open ${project.title} in a new tab`}
         className={wrapperClasses}
       >
