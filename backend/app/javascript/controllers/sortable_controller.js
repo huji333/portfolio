@@ -47,7 +47,10 @@ export default class extends Controller {
     const flashDiv = document.createElement('div')
     flashDiv.className = 'alert alert-danger'
     flashDiv.textContent = '並び替えに失敗しました'
-    document.querySelector('.container').insertBefore(flashDiv, document.querySelector('.table-responsive'))
+    const container = document.querySelector('.container')
+    if (container) {
+      container.insertBefore(flashDiv, document.querySelector('.table-responsive'))
+    }
   }
 
   async #updatePosition(itemId, position) {
