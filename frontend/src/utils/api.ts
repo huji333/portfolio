@@ -20,7 +20,7 @@ export async function apiFetch<T>(
   path: string,
   label: string,
   fetchInit?: ApiRequestInit,
-): Promise<{ data: T; error: boolean }> {
+): Promise<{ data: T | null; error: boolean }> {
   const url = `${getApiBaseUrl()}${path}`;
   const init = fetchInit ? stripServerOnlyOptions(fetchInit) : undefined;
 
@@ -28,11 +28,11 @@ export async function apiFetch<T>(
     const response = await fetch(url, init);
     if (!response.ok) {
       console.error(`Failed to fetch ${label}:`, response.statusText);
-      return { data: null as unknown as T, error: true };
+      return { data: null, error: true };
     }
     return { data: (await response.json()) as T, error: false };
   } catch (error) {
     console.error(`Failed to fetch ${label}:`, error);
-    return { data: null as unknown as T, error: true };
+    return { data: null, error: true };
   }
 }
