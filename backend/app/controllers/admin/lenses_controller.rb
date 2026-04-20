@@ -50,7 +50,8 @@ class Admin::LensesController < Admin::Base
       # 3. 空白を正規化して部分一致
       unless lens
         cleaned_name = name.gsub(/\s+/, ' ').strip
-        lens = Lens.where("LOWER(REPLACE(name, '  ', ' ')) LIKE ?", "%#{Lens.sanitize_sql_like(cleaned_name.downcase)}%").first
+        sanitized = Lens.sanitize_sql_like(cleaned_name.downcase)
+        lens = Lens.where("LOWER(REPLACE(name, '  ', ' ')) LIKE ?", "%#{sanitized}%").first
       end
 
       if lens
