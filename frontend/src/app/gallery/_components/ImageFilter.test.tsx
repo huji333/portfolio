@@ -5,9 +5,9 @@ import ImageFilter from './ImageFilter';
 import { CategoryType } from '@/utils/types';
 
 const categories: CategoryType[] = [
-  { id: 1, name: 'Landscape', created_at: '', updated_at: '' },
-  { id: 2, name: 'Portrait', created_at: '', updated_at: '' },
-  { id: 3, name: 'Street', created_at: '', updated_at: '' },
+  { id: 1, name: 'Landscape' },
+  { id: 2, name: 'Portrait' },
+  { id: 3, name: 'Street' },
 ];
 
 describe('ImageFilter', () => {

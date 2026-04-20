@@ -6,17 +6,19 @@ const env = { ...process.env }
 
 ;(async() => {
   // launch application
-  await exec(process.argv.slice(2).join(' '))
+  const args = process.argv.slice(2)
+  await exec(args)
 })()
 
-function exec(command) {
-  const child = spawn(command, { shell: true, stdio: 'inherit', env })
+function exec(args) {
+  const [cmd, ...rest] = args
+  const child = spawn(cmd, rest, { stdio: 'inherit', env })
   return new Promise((resolve, reject) => {
     child.on('exit', code => {
       if (code === 0) {
         resolve()
       } else {
-        reject(new Error(`${command} failed rc=${code}`))
+        reject(new Error(`${args.join(' ')} failed rc=${code}`))
       }
     })
   })
