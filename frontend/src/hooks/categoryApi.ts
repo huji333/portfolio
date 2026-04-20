@@ -13,6 +13,6 @@ type FetchCategoriesResult = {
 export async function fetchCategories({
   fetchInit,
 }: FetchCategoriesOptions = {}): Promise<FetchCategoriesResult> {
-  const { data, error } = await apiFetch<CategoryType[]>('/categories', 'categories', fetchInit);
-  return { categories: error || !data ? [] : data, error };
+  const result = await apiFetch<CategoryType[]>('/categories', 'categories', fetchInit);
+  return { categories: result.error ? [] : result.data, error: result.error };
 }

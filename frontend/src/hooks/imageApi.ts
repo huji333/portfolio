@@ -32,14 +32,14 @@ export async function fetchImages({
   fetchInit,
 }: FetchImagesOptions = {}): Promise<FetchImagesResult> {
   const path = buildImagesPath(categoryIds, cursor);
-  const { data, error } = await apiFetch<PaginatedImages>(path, 'images', fetchInit);
-  if (error || !data) {
+  const result = await apiFetch<PaginatedImages>(path, 'images', fetchInit);
+  if (result.error) {
     return { images: [], nextCursor: null, hasMore: false, error: true };
   }
   return {
-    images: data.images,
-    nextCursor: data.next_cursor,
-    hasMore: data.has_more,
+    images: result.data.images,
+    nextCursor: result.data.next_cursor,
+    hasMore: result.data.has_more,
     error: false,
   };
 }

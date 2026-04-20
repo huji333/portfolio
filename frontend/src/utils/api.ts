@@ -16,11 +16,13 @@ function stripServerOnlyOptions(init: ApiRequestInit): RequestInit {
   return init;
 }
 
+export type ApiResult<T> = { data: T; error: false } | { data: null; error: true };
+
 export async function apiFetch<T>(
   path: string,
   label: string,
   fetchInit?: ApiRequestInit,
-): Promise<{ data: T | null; error: boolean }> {
+): Promise<ApiResult<T>> {
   const url = `${getApiBaseUrl()}${path}`;
   const init = fetchInit ? stripServerOnlyOptions(fetchInit) : undefined;
 
