@@ -41,7 +41,7 @@ class Image < ApplicationRecord
     scope = published
             .filter_by_categories(category_ids)
             .with_attached_file
-            .includes(:camera, :lens, :categories)
+            .includes(:camera, :lens)
 
     if cursor.present?
       row_order_val, id_val = cursor.split(",").map(&:to_i)

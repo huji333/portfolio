@@ -1,4 +1,6 @@
 class Admin::CategoriesController < Admin::Base
+  before_action :set_category, only: %i[edit update destroy]
+
   def index
     @categories = Category.all
   end
@@ -8,7 +10,6 @@ class Admin::CategoriesController < Admin::Base
   end
 
   def edit
-    @category = Category.find(params[:id])
   end
 
   def create
@@ -22,7 +23,6 @@ class Admin::CategoriesController < Admin::Base
   end
 
   def update
-    @category = Category.find(params[:id])
     if @category.update(category_params)
       redirect_to admin_categories_path, notice: 'Category was successfully updated.'
     else
@@ -32,7 +32,6 @@ class Admin::CategoriesController < Admin::Base
   end
 
   def destroy
-    @category = Category.find(params[:id])
     if @category.destroy
       redirect_to admin_categories_path, notice: 'Category was successfully destroyed.'
     else
@@ -41,6 +40,10 @@ class Admin::CategoriesController < Admin::Base
   end
 
   private
+
+  def set_category
+    @category = Category.find(params[:id])
+  end
 
   def category_params
     params.expect(category: [:name])

@@ -30,37 +30,42 @@ export default class extends Controller {
   async readExifData(file) {
     try {
       window.EXIF.getData(file, async () => {
-        let updatedFields = 0
+        try {
+          let updatedFields = 0
 
-        const dateTime = window.EXIF.getTag(file, "DateTimeOriginal")
-        if (dateTime && this.hasTakenAtInputTarget && !this.takenAtInputTarget.value) {
-          const isoDate = this.parseExifDateTime(file)
-          if (isoDate) {
-            this.takenAtInputTarget.value = isoDate
+          const dateTime = window.EXIF.getTag(file, "DateTimeOriginal")
+          if (dateTime && this.hasTakenAtInputTarget && !this.takenAtInputTarget.value) {
+            const isoDate = this.parseExifDateTime(file)
+            if (isoDate) {
+              this.takenAtInputTarget.value = isoDate
+              updatedFields++
+            }
+          }
+
+          const make = window.EXIF.getTag(file, "Make")
+          const model = window.EXIF.getTag(file, "Model")
+          if (make && model && this.hasCameraSelectTarget) {
+            if (await this.lookupCamera(make, model)) updatedFields++
+          }
+
+          const lensName = this.extractLensName(file)
+          if (lensName && this.hasLensSelectTarget) {
+            if (await this.lookupLens(lensName)) updatedFields++
+          }
+
+          if (this.hasTitleInputTarget && !this.titleInputTarget.value) {
+            this.titleInputTarget.value = file.name.replace(/\.[^/.]+$/, "")
             updatedFields++
           }
-        }
 
-        const make = window.EXIF.getTag(file, "Make")
-        const model = window.EXIF.getTag(file, "Model")
-        if (make && model && this.hasCameraSelectTarget) {
-          if (await this.lookupCamera(make, model)) updatedFields++
-        }
-
-        const lensName = this.extractLensName(file)
-        if (lensName && this.hasLensSelectTarget) {
-          if (await this.lookupLens(lensName)) updatedFields++
-        }
-
-        if (this.hasTitleInputTarget && !this.titleInputTarget.value) {
-          this.titleInputTarget.value = file.name.replace(/\.[^/.]+$/, "")
-          updatedFields++
-        }
-
-        if (updatedFields > 0) {
-          this.setStatus(`✓ ${updatedFields}個のフィールドを自動更新しました`, "success")
-        } else {
-          this.setStatus("EXIFデータが見つかりませんでした", "warning")
+          if (updatedFields > 0) {
+            this.setStatus(`✓ ${updatedFields}個のフィールドを自動更新しました`, "success")
+          } else {
+            this.setStatus("EXIFデータが見つかりませんでした", "warning")
+          }
+        } catch (innerError) {
+          console.error("EXIFコールバックエラー:", innerError)
+          this.setStatus("EXIFデータの読み取りに失敗しました", "danger")
         }
       })
     } catch (error) {
@@ -210,6 +215,6 @@ export default class extends Controller {
   }
 
   showAlert(message) {
-    alert(message)
+    this.showNotice(message)
   }
 }

@@ -6,7 +6,7 @@ export default class extends Controller {
   static targets = ["input", "progress", "error"]
 
   connect() {
-    this._boundInitialize = this.initialize.bind(this)
+    this._boundInitialize = this.onUploadInitialize.bind(this)
     this._boundProgress = this.progress.bind(this)
     this._boundError = this.error.bind(this)
     this._boundEnd = this.end.bind(this)
@@ -24,7 +24,7 @@ export default class extends Controller {
     this.element.removeEventListener("direct-upload:end", this._boundEnd)
   }
 
-  initialize(event) {
+  onUploadInitialize(event) {
     this.clearError()
     this.progressTarget.classList.remove("d-none")
     this.updateProgressBar(0)

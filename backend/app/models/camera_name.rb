@@ -20,7 +20,7 @@ class CameraName
   end
 
   def self.load_camera_names
-    @load_camera_names ||= begin
+    @camera_names_cache ||= begin
       yaml_path = Rails.root.join("config/camera_names.yml")
       if File.exist?(yaml_path)
         YAML.safe_load_file(yaml_path, permitted_classes: [Symbol]) || {}
