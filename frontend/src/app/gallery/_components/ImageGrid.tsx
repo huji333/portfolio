@@ -1,11 +1,11 @@
 'use client';
 
-import { type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { ImageType } from '@/utils/types';
 import Loading from '@/ui/Loading';
 
-function GridImage({ src, fallbackSrc, alt, width, height }: {
+const GridImage = memo(function GridImage({ src, fallbackSrc, alt, width, height }: {
   src: string;
   fallbackSrc: string;
   alt: string;
@@ -37,7 +37,7 @@ function GridImage({ src, fallbackSrc, alt, width, height }: {
       onError={handleError}
     />
   );
-}
+});
 
 const GRID_GAP_PX = 16; // matches Tailwind gap-4
 const ROW_HEIGHT_PX = 8; // base row height for masonry grid

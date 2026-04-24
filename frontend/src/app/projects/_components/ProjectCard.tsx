@@ -25,11 +25,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     [imageSrc, project.thumbnail, project.file],
   );
 
-  const wrapperClasses =
-    'flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-xs transition hover:-translate-y-1 hover:border-accent hover:shadow-lg' +
-    (project.link
+  const wrapperClasses = `flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-xs transition hover:-translate-y-1 hover:border-accent hover:shadow-lg${
+    project.link
       ? ' focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-      : '');
+      : ''
+  }`;
 
   const content = (
     <>
