@@ -169,7 +169,7 @@ export default class extends Controller {
       return false
     } catch (error) {
       console.error("カメラ情報の取得エラー:", error)
-      this.showNotice("カメラ情報の取得中にエラーが発生しました。")
+      this.showNotice("カメラ情報の取得中にエラーが発生しました。", 'danger')
       return false
     }
   }
@@ -187,17 +187,17 @@ export default class extends Controller {
       return false
     } catch (error) {
       console.error("レンズ情報の取得エラー:", error)
-      this.showNotice("レンズ情報の取得中にエラーが発生しました。")
+      this.showNotice("レンズ情報の取得中にエラーが発生しました。", 'danger')
       return false
     }
   }
 
-  showNotice(message) {
+  showNotice(message, type = 'warning') {
     const form = this.element.closest('form')
     if (!form) return
 
     const alertDiv = document.createElement('div')
-    alertDiv.className = 'alert alert-warning alert-dismissible fade show mt-2'
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-2`
 
     const messageSpan = document.createElement('span')
     messageSpan.textContent = message

@@ -1,6 +1,6 @@
 class Api::ImagesController < ApplicationController
   def index
-    limit = [(params[:limit] || 20).to_i, 50].min
+    limit = (params[:limit]&.to_i || 20).clamp(1, 50)
     images = Image.for_gallery(
       category_ids: category_ids_param,
       cursor: params[:cursor],
