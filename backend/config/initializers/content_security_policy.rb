@@ -10,8 +10,8 @@ Rails.application.configure do
     policy.font_src    :self, :https, "fonts.gstatic.com"
     policy.img_src     :self, :https, :data
     policy.object_src  :none
-    policy.script_src  :self, "cdn.jsdelivr.net", :nonce
-    policy.style_src   :self, "cdn.jsdelivr.net", "fonts.googleapis.com", :nonce
+    policy.script_src  :self, "cdn.jsdelivr.net"
+    policy.style_src   :self, "cdn.jsdelivr.net", "fonts.googleapis.com"
     policy.connect_src :self, :https
   end
 
