@@ -50,7 +50,10 @@ export function useImages({ categoryIds = [] }: UseImagesOptions = {}): UseImage
       }
     };
 
-    load();
+    load().catch((err) => {
+      if (isActive) setError(true);
+      console.error('useImages load error:', err);
+    });
 
     return () => {
       isActive = false;

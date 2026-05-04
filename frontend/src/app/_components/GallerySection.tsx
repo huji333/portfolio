@@ -32,7 +32,7 @@ export default function GallerySection() {
           <p className="mt-10 text-sm text-foreground">表示できる写真がまだありません。</p>
         ) : (
           <div className="mt-10">
-            <ImageGrid images={previewImages} isLoading={isLoading} isInteractive={false} />
+            <ImageGrid images={previewImages} isLoading={isLoading} />
           </div>
         )}
       </div>

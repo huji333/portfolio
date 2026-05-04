@@ -117,7 +117,7 @@ export default function ImageGrid({
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, [isLoading]);
+  }, []);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
@@ -157,14 +157,15 @@ export default function ImageGrid({
       >
         {images.map((image, index) => {
           const handleFocus = () => onFocus?.(index);
-          const hasDimensions =
-            typeof image.width === 'number' && typeof image.height === 'number' && image.width > 0 && image.height > 0;
 
-          if (!hasDimensions || !image.thumbnail) {
+          if (
+            typeof image.width !== 'number' || typeof image.height !== 'number' ||
+            image.width <= 0 || image.height <= 0 || !image.thumbnail
+          ) {
             return null;
           }
 
-          const rowSpan = getRowSpan(image.width as number, image.height as number, columnWidth);
+          const rowSpan = getRowSpan(image.width, image.height, columnWidth);
           const containerClassName = isClickable ? 'cursor-pointer' : '';
           const itemStyle = { gridRowEnd: `span ${rowSpan}` } as const;
 
@@ -190,8 +191,8 @@ export default function ImageGrid({
                   src={image.thumbnail}
                   fallbackSrc={image.file}
                   alt={image.title}
-                  width={image.width as number}
-                  height={image.height as number}
+                  width={image.width}
+                  height={image.height}
                 />
               </div>
             </div>

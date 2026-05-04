@@ -4,7 +4,7 @@ export type ImageType = {
   caption: string;
   taken_at: string;
   camera_name: string;
-  lens_name: string;
+  lens_name: string | null;
   row_order: number;
   is_published: boolean;
   file: string; // 画像のURL
