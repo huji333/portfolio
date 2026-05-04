@@ -44,10 +44,11 @@ class Image < ApplicationRecord
             .includes(:camera, :lens)
 
     if cursor.present?
-      row_order_val, id_val = cursor.split(",").map(&:to_i)
-      scope = scope.where(
-        "(row_order, id) > (?, ?)", row_order_val, id_val
-      )
+      parts = cursor.split(",")
+      if parts.size == 2 && parts.all? { |p| p.match?(/\A-?\d+\z/) }
+        row_order_val, id_val = parts.map(&:to_i)
+        scope = scope.where("(row_order, id) > (?, ?)", row_order_val, id_val)
+      end
     end
 
     scope.ordered_for_gallery.limit(limit + 1)
