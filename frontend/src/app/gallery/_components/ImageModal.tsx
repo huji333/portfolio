@@ -1,17 +1,13 @@
 'use client';
 
-import { type SyntheticEvent, useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { type SyntheticEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { ImageType } from '@/utils/types';
+import { useIsClient } from '@/hooks/useIsClient';
 
 const FOCUSABLE_SELECTORS =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-const emptySubscribe = () => () => {};
-function useIsClient() {
-  return useSyncExternalStore(emptySubscribe, () => true, () => false);
-}
 
 type Props = {
   image: ImageType | null;

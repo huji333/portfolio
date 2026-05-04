@@ -169,7 +169,7 @@ export default class extends Controller {
       return false
     } catch (error) {
       console.error("カメラ情報の取得エラー:", error)
-      this.showAlert("カメラ情報の取得中にエラーが発生しました。")
+      this.showNotice("カメラ情報の取得中にエラーが発生しました。")
       return false
     }
   }
@@ -187,7 +187,7 @@ export default class extends Controller {
       return false
     } catch (error) {
       console.error("レンズ情報の取得エラー:", error)
-      this.showAlert("レンズ情報の取得中にエラーが発生しました。")
+      this.showNotice("レンズ情報の取得中にエラーが発生しました。")
       return false
     }
   }
@@ -214,7 +214,4 @@ export default class extends Controller {
     setTimeout(() => alertDiv.remove(), 5000)
   }
 
-  showAlert(message) {
-    this.showNotice(message)
-  }
 }
