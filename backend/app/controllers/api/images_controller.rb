@@ -21,7 +21,7 @@ class Api::ImagesController < ApplicationController
   def category_ids_param
     case params[:categories]
     when String
-      params[:categories].split(',').map { |id| id.strip.to_i }
+      params[:categories].split(',').filter_map { |id| (n = id.strip.to_i).positive? ? n : nil }
     else
       params[:categories]
     end
