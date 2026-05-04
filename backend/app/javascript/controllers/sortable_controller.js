@@ -7,10 +7,12 @@ export default class extends Controller {
   static targets = ['list']
 
   connect() {
+    this._orderBeforeDrag = []
     this.sortable = window.Sortable.create(this.listTarget, {
       animation: 150,
       handle: '.handle',
       ghostClass: 'sortable-ghost',
+      onStart: () => { this._orderBeforeDrag = this.sortable.toArray() },
       onEnd: this.onSortEnd.bind(this)
     })
   }
@@ -25,6 +27,7 @@ export default class extends Controller {
   async onSortEnd(evt) {
     const { item, newIndex } = evt
     const itemId = item.dataset.imageId
+    const savedOrder = this._orderBeforeDrag
 
     try {
       await this.#updatePosition(itemId, newIndex)
@@ -32,7 +35,7 @@ export default class extends Controller {
       this.#updateOrderNumbers()
     } catch {
       // エラー時は DOM を元に戻す
-      this.sortable.sort(this.sortable.toArray(), true)
+      this.sortable.sort(savedOrder, true)
       this.#showError()
     }
   }
