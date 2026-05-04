@@ -15,24 +15,26 @@ const remotePatterns: RemotePattern[] = [
   },
 ];
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 function addRemotePatternFromUrl(url: string, label: string): void {
   try {
     const parsed = new URL(url);
     const protocol = parsed.protocol.replace(':', '');
     if (protocol === 'http' || protocol === 'https') {
       remotePatterns.push({ protocol, hostname: parsed.hostname, pathname: '/**' });
-    } else {
+    } else if (isDev) {
       console.warn(`[next.config] Unsupported protocol in ${label}:`, parsed.protocol);
     }
   } catch (error) {
-    console.warn(`[next.config] Invalid ${label}:`, error);
+    if (isDev) console.warn(`[next.config] Invalid ${label}:`, error);
   }
 }
 
 const cloudfrontBaseUrl = process.env.NEXT_PUBLIC_CLOUDFRONT_BASE_URL;
 if (cloudfrontBaseUrl) {
   addRemotePatternFromUrl(cloudfrontBaseUrl, 'NEXT_PUBLIC_CLOUDFRONT_BASE_URL');
-} else {
+} else if (isDev) {
   console.warn('[next.config] NEXT_PUBLIC_CLOUDFRONT_BASE_URL is not set; CloudFront images will not be allowed.');
 }
 
