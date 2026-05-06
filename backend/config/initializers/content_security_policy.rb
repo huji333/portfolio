@@ -19,6 +19,6 @@ Rails.application.configure do
   config.content_security_policy_nonce_generator = ->(request) { request.session.id.to_s }
   config.content_security_policy_nonce_directives = %w[script-src style-src]
 
-  # Report-only mode: log violations without blocking, to verify policy before enforcement.
-  config.content_security_policy_report_only = true
+  # Enforce in production; report-only in other environments to verify policy changes safely.
+  config.content_security_policy_report_only = !Rails.env.production?
 end
