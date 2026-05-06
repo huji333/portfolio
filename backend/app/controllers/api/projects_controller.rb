@@ -7,9 +7,7 @@ class Api::ProjectsController < ApplicationController
   private
 
   def project_json(project)
-    metadata = project.file.attached? ? project.file.metadata : {}
-    width = metadata['width']&.to_i
-    height = metadata['height']&.to_i
+    width, height = file_dimensions(project.file)
 
     project.as_json(only: %i[id title link]).merge(
       file: project.file_url,

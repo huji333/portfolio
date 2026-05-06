@@ -126,14 +126,8 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
 
   const captionId = image.caption ? descriptionId : undefined;
 
-  const hasDimensions =
-    typeof image.width === 'number' &&
-    image.width > 0 &&
-    typeof image.height === 'number' &&
-    image.height > 0;
-
-  const displayWidth = hasDimensions ? image.width! : 1600;
-  const displayHeight = hasDimensions ? image.height! : 1066;
+  const displayWidth = typeof image.width === 'number' && image.width > 0 ? image.width : 1600;
+  const displayHeight = typeof image.height === 'number' && image.height > 0 ? image.height : 1066;
 
   const modalContent = (
     // Overlay
