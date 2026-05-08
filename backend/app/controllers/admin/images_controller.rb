@@ -49,7 +49,7 @@ class Admin::ImagesController < Admin::Base
   end
 
   def insert_at
-    position = insert_params.to_i # require(:position)は直接値を返すので、[:position]は不要
+    position = insert_params.to_i
     @image.row_order_position = position
     if @image.save
       head :ok
