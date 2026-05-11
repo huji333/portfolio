@@ -36,7 +36,7 @@ class Api::ImagesController < ApplicationController
       thumbnail: image.thumbnail_url,
       width: width,
       height: height,
-      camera_name: "#{image.camera.manufacturer} #{image.camera.name}".strip,
+      camera_name: "#{image.camera&.manufacturer} #{image.camera&.name}".strip,
       lens_name: image.lens&.name
     )
   end
