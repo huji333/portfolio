@@ -1,5 +1,5 @@
 class Api::CameraNamesController < ApplicationController
-  skip_before_action :verify_authenticity_token # SPA からの呼び出し用
+  skip_before_action :verify_authenticity_token # 管理画面の Stimulus コントローラから fetch で呼び出すため
 
   def create
     make  = params[:make]&.strip
