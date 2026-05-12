@@ -54,8 +54,8 @@ export default function IntroSection() {
                 Kakemu Fujii
               </h2>
               <div className="space-y-4 text-base leading-relaxed text-foreground md:text-lg">
-                {INTRO_PARAGRAPHS.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                {INTRO_PARAGRAPHS.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
                 ))}
               </div>
             </div>
