@@ -7,6 +7,4 @@ class User < ApplicationRecord
   enum :role, { guest: 0, admin: 1 }, prefix: true
 
   validates :role, presence: true, inclusion: { in: roles.keys }
-  validates :email, presence: true
-  validates :encrypted_password, presence: true
 end

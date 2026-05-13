@@ -18,7 +18,9 @@ export default async function HomePage() {
         <Suspense fallback={<Loading />}>
           <ProjectsSection />
         </Suspense>
-        <GallerySection />
+        <Suspense fallback={<Loading />}>
+          <GallerySection />
+        </Suspense>
       </main>
     </>
   );
