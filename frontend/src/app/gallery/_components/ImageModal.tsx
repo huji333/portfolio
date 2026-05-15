@@ -206,7 +206,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
             onError={handleImgError}
           />
           {imgError && (
-            <p className="text-sm text-gray-400">Failed to load image</p>
+            <p className="text-sm text-red-500">Failed to load image</p>
           )}
         </div>
 
