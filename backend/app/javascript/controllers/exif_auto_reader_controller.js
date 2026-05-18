@@ -103,7 +103,7 @@ export default class extends Controller {
       const offsetMatch = offsetTime.match(/([+-])(\d{2}):(\d{2})/)
       if (offsetMatch) {
         const [, sign, offsetHours, offsetMinutes] = offsetMatch
-        const offsetMinutesTotal = parseInt(offsetHours) * 60 + parseInt(offsetMinutes)
+        const offsetMinutesTotal = parseInt(offsetHours, 10) * 60 + parseInt(offsetMinutes, 10)
         const offsetMs = (sign === '+' ? -offsetMinutesTotal : offsetMinutesTotal) * 60 * 1000
 
         const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`)
