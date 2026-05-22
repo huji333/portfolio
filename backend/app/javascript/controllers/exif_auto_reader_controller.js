@@ -14,6 +14,10 @@ export default class extends Controller {
     "LensModel", "Lens", "LensSpec"
   ]
 
+  get csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content
+  }
+
   connect() {
     this.clearStatus()
   }
@@ -103,7 +107,7 @@ export default class extends Controller {
       const offsetMatch = offsetTime.match(/([+-])(\d{2}):(\d{2})/)
       if (offsetMatch) {
         const [, sign, offsetHours, offsetMinutes] = offsetMatch
-        const offsetMinutesTotal = parseInt(offsetHours) * 60 + parseInt(offsetMinutes)
+        const offsetMinutesTotal = parseInt(offsetHours, 10) * 60 + parseInt(offsetMinutes, 10)
         const offsetMs = (sign === '+' ? -offsetMinutesTotal : offsetMinutesTotal) * 60 * 1000
 
         const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`)
@@ -131,7 +135,7 @@ export default class extends Controller {
     try {
       const apiResponse = await fetch('/api/camera_name', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': this.csrfToken },
         body: JSON.stringify({ make, model })
       })
 

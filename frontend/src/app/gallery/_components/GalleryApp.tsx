@@ -74,7 +74,10 @@ export default function GalleryApp({
       }
     };
 
-    load();
+    load().catch((err) => {
+      if (isActive) setFetchError(true);
+      console.error('GalleryApp load error:', err);
+    });
 
     return () => {
       isActive = false;
