@@ -166,7 +166,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
           }}
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white transition group-hover:bg-black/60">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><polyline points="15 18 9 12 15 6" /></svg>
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><polyline points="15 18 9 12 15 6" /></svg>
           </span>
         </button>
       )}
@@ -181,7 +181,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
           }}
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/30 text-white transition group-hover:bg-black/60">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><polyline points="9 6 15 12 9 18" /></svg>
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><polyline points="9 6 15 12 9 18" /></svg>
           </span>
         </button>
       )}
