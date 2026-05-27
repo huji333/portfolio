@@ -1,6 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe 'Camera Names API', type: :request do
+  include Devise::Test::IntegrationHelpers
+
+  let(:user) { create(:user) }
+
+  before { sign_in user }
+
   describe 'POST /api/camera_name' do
     context 'with valid parameters' do
       it 'should resolve camera name for exact match' do
