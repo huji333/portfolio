@@ -30,6 +30,10 @@ Rails/SkipsModelValidations:
     - 'test/test_helper.rb'
 Rails/InverseOf:
   Enabled: false
+# params.expect は欠落時に例外を投げるため、デフォルト値や blank チェックで
+# 任意のクエリパラメータを扱う GET 系コントローラには不適切
+Rails/StrongParametersExpect:
+  Enabled: false
 Metrics/AbcSize:
   Max: 38
 Metrics/CyclomaticComplexity:
