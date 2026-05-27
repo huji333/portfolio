@@ -1,13 +1,13 @@
 class Api::ImagesController < ApplicationController
   def index
     limit = (params[:limit]&.to_i || 20).clamp(1, 50)
-    images = Image.for_gallery(
+    all_images = Image.for_gallery(
       category_ids: category_ids_param,
       cursor: params[:cursor],
       limit: limit
-    )
-    has_more = images.size > limit
-    images = images.first(limit)
+    ).to_a
+    has_more = all_images.size > limit
+    images = all_images.take(limit)
 
     render json: {
       images: images.map { |image| image_json(image) },
