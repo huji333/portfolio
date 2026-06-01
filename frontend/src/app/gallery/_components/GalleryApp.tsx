@@ -74,7 +74,9 @@ export default function GalleryApp({
       }
     };
 
-    load();
+    load().catch(() => {
+      if (isActive) setFetchError(true);
+    });
 
     return () => {
       isActive = false;
