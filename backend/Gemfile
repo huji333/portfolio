@@ -52,7 +52,7 @@ gem "haml-rails"
 
 gem "devise"
 
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
 
 gem "aws-sdk-s3", "~> 1.224"
 
