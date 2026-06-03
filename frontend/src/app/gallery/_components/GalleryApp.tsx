@@ -67,6 +67,8 @@ export default function GalleryApp({
           setHasMore(result.hasMore);
           setFetchError(result.error);
         }
+      } catch {
+        if (isActive) setFetchError(true);
       } finally {
         if (isActive) {
           setIsLoadingImages(false);
@@ -99,6 +101,8 @@ export default function GalleryApp({
       } else {
         setFetchError(true);
       }
+    } catch {
+      setFetchError(true);
     } finally {
       setIsLoadingMore(false);
     }

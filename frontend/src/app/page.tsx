@@ -1,4 +1,3 @@
-
 import SiteHeader from './_components/SiteHeader';
 import HeroSection from './_components/HeroSection';
 import IntroSection from './_components/IntroSection';
@@ -8,7 +7,6 @@ import { Suspense } from 'react';
 import Loading from '@/ui/Loading';
 
 export default async function HomePage() {
-
   return (
     <>
       <SiteHeader />
@@ -18,7 +16,9 @@ export default async function HomePage() {
         <Suspense fallback={<Loading />}>
           <ProjectsSection />
         </Suspense>
-        <GallerySection />
+        <Suspense fallback={<Loading />}>
+          <GallerySection />
+        </Suspense>
       </main>
     </>
   );

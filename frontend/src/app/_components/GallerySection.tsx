@@ -1,14 +1,10 @@
-
-'use client';
-
 import Link from 'next/link';
 import ImageGrid from '@/app/gallery/_components/ImageGrid';
-import { useImages } from './useImages';
+import { fetchImages } from '@/hooks/imageApi';
 
-export default function GallerySection() {
-  const { images, isLoading, error } = useImages();
+export default async function GallerySection() {
+  const { images, error } = await fetchImages({ fetchInit: { next: { revalidate: 120 } } });
   const previewImages = images.slice(0, 9);
-  const showEmptyState = !isLoading && !error && previewImages.length === 0;
 
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">
@@ -28,11 +24,11 @@ export default function GallerySection() {
 
         {error ? (
           <p className="mt-10 text-sm text-red-600">読み込みに失敗しました。</p>
-        ) : showEmptyState ? (
+        ) : previewImages.length === 0 ? (
           <p className="mt-10 text-sm text-foreground">表示できる写真がまだありません。</p>
         ) : (
           <div className="mt-10">
-            <ImageGrid images={previewImages} isLoading={isLoading} />
+            <ImageGrid images={previewImages} />
           </div>
         )}
       </div>

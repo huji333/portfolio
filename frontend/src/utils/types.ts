@@ -2,8 +2,8 @@ export type ImageType = {
   id: number;
   title: string;
   caption: string;
-  taken_at: string;
-  camera_name: string;
+  taken_at: string | null;
+  camera_name: string | null;
   lens_name: string | null;
   row_order: number;
   is_published: boolean;

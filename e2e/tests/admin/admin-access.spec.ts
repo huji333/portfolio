@@ -24,9 +24,11 @@ test.describe('Admin Access', () => {
     const page = await context.newPage();
 
     // Login as guest
+    const guestEmail = process.env.E2E_GUEST_EMAIL ?? 'guest@example.com';
+    const guestPassword = process.env.E2E_GUEST_PASSWORD ?? 'password123';
     await page.goto('/users/sign_in');
-    await page.getByRole('textbox', { name: 'Email' }).fill('guest@example.com');
-    await page.getByRole('textbox', { name: 'Password' }).fill('password123');
+    await page.getByRole('textbox', { name: 'Email' }).fill(guestEmail);
+    await page.getByRole('textbox', { name: 'Password' }).fill(guestPassword);
     await page.getByRole('button', { name: 'Log in' }).click();
 
     // Wait for login to complete (Devise redirects to root, which may 404 — that's OK)
