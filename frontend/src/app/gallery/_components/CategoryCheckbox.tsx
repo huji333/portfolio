@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { CategoryType } from '@/utils/types';
 
 type CategoryCheckboxProps = {
@@ -7,7 +8,7 @@ type CategoryCheckboxProps = {
   isDisabled?: boolean;
 };
 
-export default function CategoryCheckbox({ category, onCheck, isChecked, isDisabled = false }: CategoryCheckboxProps) {
+const CategoryCheckbox = memo(function CategoryCheckbox({ category, onCheck, isChecked, isDisabled = false }: CategoryCheckboxProps) {
   const containerClasses = isDisabled
     ? 'flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-xs transition-opacity opacity-50 cursor-not-allowed'
     : 'flex items-center gap-2 px-3 py-1.5 bg-white rounded-full shadow-xs hover:shadow-sm transition-shadow cursor-pointer';
@@ -25,4 +26,6 @@ export default function CategoryCheckbox({ category, onCheck, isChecked, isDisab
       <span className="text-sm text-gray-700">{category.name}</span>
     </label>
   );
-}
+});
+
+export default CategoryCheckbox;

@@ -15,6 +15,10 @@ class Admin::Base < ApplicationController
   def check_admin
     return if current_user&.role_admin?
 
-    render json: { error: 'You are not authorized to perform this action.' }, status: :unauthorized
+    respond_to do |format|
+      format.html { redirect_to root_path, alert: '管理者権限がありません。' }
+      format.json { render json: { error: 'You are not authorized to perform this action.' }, status: :unauthorized }
+      format.any  { head :unauthorized }
+    end
   end
 end
