@@ -3,7 +3,7 @@
 import { type SyntheticEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
-import { ImageType } from '@/utils/types';
+import type { ImageType } from '@/utils/types';
 import { useIsClient } from '@/hooks/useIsClient';
 
 const FOCUSABLE_SELECTORS =
@@ -151,7 +151,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
           onClose();
         }}
       >
-        {'\u00D7'}
+        {'×'}
       </button>
 
       {/* Navigation zones — tall hit areas along left/right edges */}

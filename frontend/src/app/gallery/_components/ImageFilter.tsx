@@ -1,4 +1,4 @@
-import { CategoryType } from '@/utils/types';
+import type { CategoryType } from '@/utils/types';
 import CategoryCheckbox from './CategoryCheckbox';
 
 type ImageFilterProps = {

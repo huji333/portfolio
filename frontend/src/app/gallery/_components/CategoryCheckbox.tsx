@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { CategoryType } from '@/utils/types';
+import type { CategoryType } from '@/utils/types';
 
 type CategoryCheckboxProps = {
   category: CategoryType;

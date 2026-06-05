@@ -2,7 +2,7 @@
 
 import { memo, type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { ImageType } from '@/utils/types';
+import type { ImageType } from '@/utils/types';
 import Loading from '@/ui/Loading';
 
 const GridImage = memo(function GridImage({ src, fallbackSrc, alt, width, height }: {

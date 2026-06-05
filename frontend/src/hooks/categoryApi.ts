@@ -1,5 +1,5 @@
-import { apiFetch, ApiRequestInit } from '@/utils/api';
-import { CategoryType } from '@/utils/types';
+import { apiFetch, type ApiRequestInit } from '@/utils/api';
+import type { CategoryType } from '@/utils/types';
 
 type FetchCategoriesOptions = {
   fetchInit?: ApiRequestInit;
