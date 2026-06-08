@@ -22,8 +22,8 @@ class Api::ImagesController < ApplicationController
     case params[:categories]
     when String
       params[:categories].split(',').filter_map { |id| (n = id.strip.to_i).positive? ? n : nil }
-    else
-      params[:categories]
+    when Array
+      params[:categories].filter_map { |id| (n = id.to_i).positive? ? n : nil }
     end
   end
 
