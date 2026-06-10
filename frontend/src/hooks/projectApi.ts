@@ -1,5 +1,5 @@
-import { apiFetch, ApiRequestInit } from '@/utils/api';
-import { ProjectType } from '@/utils/types';
+import { apiFetch, type ApiRequestInit } from '@/utils/api';
+import type { ProjectType } from '@/utils/types';
 
 type FetchProjectsOptions = {
   fetchInit?: ApiRequestInit;

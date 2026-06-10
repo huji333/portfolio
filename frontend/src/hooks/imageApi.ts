@@ -1,5 +1,5 @@
-import { apiFetch, ApiRequestInit } from '@/utils/api';
-import { PaginatedImages } from '@/utils/types';
+import { apiFetch, type ApiRequestInit } from '@/utils/api';
+import type { PaginatedImages } from '@/utils/types';
 
 type FetchImagesOptions = {
   categoryIds?: number[];

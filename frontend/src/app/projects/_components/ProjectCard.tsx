@@ -2,7 +2,7 @@
 
 import { type SyntheticEvent, useCallback, useState } from 'react';
 import Image from 'next/image';
-import { ProjectType } from '@/utils/types';
+import type { ProjectType } from '@/utils/types';
 
 type ProjectCardProps = {
   project: ProjectType;
