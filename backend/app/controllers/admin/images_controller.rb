@@ -16,7 +16,7 @@ class Admin::ImagesController < Admin::Base
 
   def create
     @image = Image.new(image_params.except(:row_order_position))
-    @image.row_order_position = image_params[:row_order_position].to_i if image_params[:row_order_position].present?
+    apply_row_order_position(@image)
 
     if @image.save
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
@@ -27,9 +27,8 @@ class Admin::ImagesController < Admin::Base
   end
 
   def update
-    params_hash = image_params.except(:row_order_position)
-    @image.assign_attributes(params_hash)
-    @image.row_order_position = image_params[:row_order_position].to_i if image_params[:row_order_position].present?
+    @image.assign_attributes(image_params.except(:row_order_position))
+    apply_row_order_position(@image)
 
     if @image.save
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
@@ -68,6 +67,10 @@ class Admin::ImagesController < Admin::Base
 
   def set_image
     @image = Image.find(params[:id])
+  end
+
+  def apply_row_order_position(image)
+    image.row_order_position = image_params[:row_order_position].to_i if image_params[:row_order_position].present?
   end
 
   def image_params

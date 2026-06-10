@@ -12,7 +12,7 @@ const categories: CategoryType[] = [
 
 describe('ImageFilter', () => {
   it('renders all categories', () => {
-    render(<ImageFilter categories={categories} selectedCategoryIds={[]} updateCategories={() => {}} />);
+    render(<ImageFilter categories={categories} selectedCategoryIds={[]} onCategoryToggle={() => {}} />);
     expect(screen.getAllByRole('checkbox')).toHaveLength(3);
     expect(screen.getByText('Landscape')).toBeInTheDocument();
     expect(screen.getByText('Portrait')).toBeInTheDocument();
@@ -20,24 +20,24 @@ describe('ImageFilter', () => {
   });
 
   it('checks selected categories', () => {
-    render(<ImageFilter categories={categories} selectedCategoryIds={[1, 3]} updateCategories={() => {}} />);
+    render(<ImageFilter categories={categories} selectedCategoryIds={[1, 3]} onCategoryToggle={() => {}} />);
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes[0]).toBeChecked();
     expect(checkboxes[1]).not.toBeChecked();
     expect(checkboxes[2]).toBeChecked();
   });
 
-  it('calls updateCategories when checkbox is toggled', async () => {
+  it('calls onCategoryToggle when checkbox is toggled', async () => {
     const user = userEvent.setup();
-    const updateCategories = vi.fn();
-    render(<ImageFilter categories={categories} selectedCategoryIds={[]} updateCategories={updateCategories} />);
+    const onCategoryToggle = vi.fn();
+    render(<ImageFilter categories={categories} selectedCategoryIds={[]} onCategoryToggle={onCategoryToggle} />);
 
     await user.click(screen.getByText('Portrait'));
-    expect(updateCategories).toHaveBeenCalledWith(2);
+    expect(onCategoryToggle).toHaveBeenCalledWith(2);
   });
 
   it('disables all checkboxes when isDisabled is true', () => {
-    render(<ImageFilter categories={categories} selectedCategoryIds={[]} updateCategories={() => {}} isDisabled />);
+    render(<ImageFilter categories={categories} selectedCategoryIds={[]} onCategoryToggle={() => {}} isDisabled />);
     screen.getAllByRole('checkbox').forEach(cb => {
       expect(cb).toBeDisabled();
     });

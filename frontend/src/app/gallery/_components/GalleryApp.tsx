@@ -67,7 +67,8 @@ export default function GalleryApp({
           setHasMore(result.hasMore);
           setFetchError(result.error);
         }
-      } catch {
+      } catch (error) {
+        console.error('Failed to load images:', error);
         if (isActive) setFetchError(true);
       } finally {
         if (isActive) {
@@ -101,7 +102,8 @@ export default function GalleryApp({
       } else {
         setFetchError(true);
       }
-    } catch {
+    } catch (error) {
+      console.error('Failed to load more images:', error);
       setFetchError(true);
     } finally {
       setIsLoadingMore(false);
@@ -147,7 +149,7 @@ export default function GalleryApp({
       <ImageFilter
         categories={categories}
         selectedCategoryIds={selectedCategoryIds}
-        updateCategories={handleCategoryToggle}
+        onCategoryToggle={handleCategoryToggle}
         isDisabled={isInteractionDisabled}
       />
       {fetchError && (
