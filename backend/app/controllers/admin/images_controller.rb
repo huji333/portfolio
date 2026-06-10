@@ -34,8 +34,8 @@ class Admin::ImagesController < Admin::Base
     if @image.save
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
     else
-      flash[:alert] = 'Image failed to update.'
-      Rails.logger.debug { "Image failed to update.#{@image.errors.full_messages}" }
+      flash.now[:alert] = 'Image failed to update.'
+      Rails.logger.debug { "Image failed to update: #{@image.errors.full_messages.join(', ')}" }
       render :edit, status: :unprocessable_content
     end
   end
