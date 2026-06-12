@@ -53,6 +53,8 @@ gem "haml-rails"
 gem "devise"
 
 gem "image_processing", "~> 2.0"
+# image_processing 2.0 dropped its automatic ruby-vips dependency, so declare it explicitly
+gem "ruby-vips", "~> 2.2"
 
 gem "aws-sdk-s3", "~> 1.225"
 
