@@ -28,7 +28,7 @@
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.2.7",
     "happy-dom": "^20.9.0",
     "typescript": "^6",
