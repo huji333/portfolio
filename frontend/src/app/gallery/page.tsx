@@ -15,16 +15,13 @@ export default async function Page() {
     fetchImages({ fetchInit: { next: { revalidate: 120 } } }),
   ]);
 
-  const categories = categoriesResult.categories;
-  const initialImages = imagesResult.images;
-
   return (
     <>
       <Header styles={HEADER_STYLE_PRESETS.solid} />
       <div className="min-h-screen bg-background pt-20 md:pt-24">
         <GalleryApp
-          initialCategories={categories}
-          initialImages={initialImages}
+          initialCategories={categoriesResult.categories}
+          initialImages={imagesResult.images}
           initialNextCursor={imagesResult.nextCursor}
           initialHasMore={imagesResult.hasMore}
           initialFetchError={imagesResult.error || categoriesResult.error}
