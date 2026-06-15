@@ -83,7 +83,6 @@ type ImageGridProps = {
   isLoadingMore?: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
-  isInteractive?: boolean;
 };
 
 export default function ImageGrid({
@@ -93,7 +92,6 @@ export default function ImageGrid({
   isLoadingMore = false,
   hasMore = false,
   onLoadMore,
-  isInteractive = true,
 }: ImageGridProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -144,7 +142,7 @@ export default function ImageGrid({
     return <Loading label="Loading images..." className="py-20" />;
   }
 
-  const isClickable = Boolean(onFocus) && isInteractive;
+  const isClickable = Boolean(onFocus);
   const columnWidth = getColumnWidth(containerWidth);
   const gridStyles = { gridAutoRows: `${ROW_HEIGHT_PX}px` } as const;
 

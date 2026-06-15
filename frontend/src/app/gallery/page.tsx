@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Header from '@/ui/Header';
-import { HEADER_STYLE_PRESETS } from '@/ui/headerStyles';
+import SiteHeader from '../_components/SiteHeader';
 import GalleryApp from './_components/GalleryApp';
 import { fetchCategories } from '@/hooks/categoryApi';
 import { fetchImages } from '@/hooks/imageApi';
@@ -17,7 +16,7 @@ export default async function Page() {
 
   return (
     <>
-      <Header styles={HEADER_STYLE_PRESETS.solid} />
+      <SiteHeader />
       <div className="min-h-screen bg-background pt-20 md:pt-24">
         <GalleryApp
           initialCategories={categoriesResult.categories}
