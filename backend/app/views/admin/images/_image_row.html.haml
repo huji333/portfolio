@@ -4,7 +4,7 @@
     %span.order-number= (image.row_order_rank || 0) + 1
   %td
     - if image.file.attached?
-      = image_tag(image.file, alt: "#{image.title} preview", style: "height: 100px; width: auto;")
+      = image_tag(image.thumbnail_variant, alt: "#{image.title} preview", style: "height: 100px; width: auto;")
     - else
       %span.text-muted プレビューなし
   %td= image.title

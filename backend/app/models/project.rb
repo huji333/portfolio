@@ -2,6 +2,7 @@ class Project < ApplicationRecord
   include CdnAttachedFile
 
   THUMBNAIL_LIMIT = [1440, 1440].freeze
+  DISPLAY_LIMIT = [1920, 1920].freeze
 
   has_one_attached :file, dependent: :purge_later
 

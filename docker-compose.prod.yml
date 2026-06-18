@@ -47,6 +47,9 @@ services:
     environment:
       NODE_ENV: production
       API_BASE_URL: http://backend:3000/api
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+      NEXT_PUBLIC_CLOUDFRONT_BASE_URL: ${NEXT_PUBLIC_CLOUDFRONT_BASE_URL}
+      NEXT_PUBLIC_S3_HOSTNAME: ${NEXT_PUBLIC_S3_HOSTNAME:-}
     depends_on:
       - backend
     networks:
