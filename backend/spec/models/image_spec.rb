@@ -82,9 +82,10 @@ RSpec.describe Image, type: :model do
         expect(image).to be_valid
       end
 
-      it 'should be invalid without camera' do
+      # fail-open: a photo whose EXIF lacks a resolvable camera must still save.
+      it 'should be valid without camera' do
         image.camera = nil
-        expect(image).to be_invalid
+        expect(image).to be_valid
       end
     end
 
@@ -94,9 +95,10 @@ RSpec.describe Image, type: :model do
         expect(image).to be_valid
       end
 
-      it 'should be invalid without lens' do
+      # fail-open: a photo without a LensModel (fixed/manual lens) must still save.
+      it 'should be valid without lens' do
         image.lens = nil
-        expect(image).to be_invalid
+        expect(image).to be_valid
       end
     end
 

@@ -3,12 +3,8 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import * as ActiveStorage from "@rails/activestorage"
 import { Sortable } from "sortablejs"
-import { EXIF } from "exif-js"
 
 ActiveStorage.start()
 
 // Make Sortable available globally
 window.Sortable = Sortable;
-
-// Make EXIF available globally
-window.EXIF = EXIF;

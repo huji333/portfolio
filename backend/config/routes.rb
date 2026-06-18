@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/BlockLength
 Rails.application.routes.draw do
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -15,17 +14,12 @@ Rails.application.routes.draw do
       member do
         post :insert_at
       end
-    end
-    resources :cameras do
       collection do
-        get :lookup
+        post :extract_exif
       end
     end
-    resources :lenses do
-      collection do
-        get :lookup
-      end
-    end
+    resources :cameras
+    resources :lenses
     resources :categories
     resources :projects
   end
@@ -33,7 +27,5 @@ Rails.application.routes.draw do
     resources :images, only: %i[index]
     resources :categories, only: %i[index]
     resources :projects, only: %i[index]
-    post :camera_name, to: 'camera_names#create'
   end
 end
-# rubocop:enable Metrics/BlockLength

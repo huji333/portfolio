@@ -4,29 +4,19 @@ class Camera < ApplicationRecord
   validates :name, presence: true
   validates :manufacturer, presence: true
 
-  def self.lookup(camera_name, manufacturer)
-    return nil if camera_name.blank? && manufacturer.blank?
+  # Resolve (and auto-create) a Camera from raw EXIF Make/Model. The raw values are
+  # the natural key; display name/manufacturer default to the raw values and are
+  # edited later in admin. Returns nil when EXIF lacks make/model (fail-open).
+  def self.resolve_from_exif(make:, model:)
+    return nil if make.blank? || model.blank?
 
-    # カメラ名とメーカー名の両方が提供されている場合
-    if camera_name.present? && manufacturer.present?
-      camera = where("LOWER(name) LIKE ? AND LOWER(manufacturer) LIKE ?",
-                     "%#{sanitize_sql_like(camera_name.downcase)}%",
-                     "%#{sanitize_sql_like(manufacturer.downcase)}%").first
-      return camera if camera
+    find_or_create_by!(make: make, model: model) do |camera|
+      camera.manufacturer = make
+      camera.name = model
     end
+  end
 
-    # カメラ名のみで検索
-    if camera_name.present?
-      camera = where("LOWER(name) LIKE ?", "%#{sanitize_sql_like(camera_name.downcase)}%").first
-      return camera if camera
-    end
-
-    # メーカー名のみで検索
-    if manufacturer.present?
-      camera = where("LOWER(manufacturer) LIKE ?", "%#{sanitize_sql_like(manufacturer.downcase)}%").first
-      return camera if camera
-    end
-
-    nil
+  def display_label
+    "#{manufacturer} #{name}".strip
   end
 end

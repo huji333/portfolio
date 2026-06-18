@@ -37,33 +37,6 @@ class Admin::LensesController < Admin::Base
     end
   end
 
-  def lookup
-    name = params[:name]&.strip
-
-    if name.present?
-      # 1. 完全一致（大文字小文字無視）
-      lens = Lens.where("LOWER(name) = ?", name.downcase).first
-
-      # 2. 部分一致（大文字小文字無視）
-      lens ||= Lens.where("LOWER(name) LIKE ?", "%#{Lens.sanitize_sql_like(name.downcase)}%").first
-
-      # 3. 空白を正規化して部分一致
-      unless lens
-        cleaned_name = name.gsub(/\s+/, ' ').strip
-        sanitized = Lens.sanitize_sql_like(cleaned_name.downcase)
-        lens = Lens.where("LOWER(REPLACE(name, '  ', ' ')) LIKE ?", "%#{sanitized}%").first
-      end
-
-      if lens
-        render json: { id: lens.id, name: lens.name }
-      else
-        render json: { error: 'Lens not found' }, status: :not_found
-      end
-    else
-      render json: { error: 'Name parameter is required' }, status: :bad_request
-    end
-  end
-
   private
 
   def set_lens
