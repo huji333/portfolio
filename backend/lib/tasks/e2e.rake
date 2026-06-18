@@ -56,10 +56,10 @@ def seed_project
 end
 
 def suppress_cdn_callbacks
-  Image.skip_callback(:commit, :after, :warm_thumbnail_variant, raise: false)
-  Image.skip_callback(:commit, :after, :analyze_attached_file, raise: false)
-  Project.skip_callback(:commit, :after, :warm_thumbnail_variant, raise: false)
-  Project.skip_callback(:commit, :after, :analyze_attached_file, raise: false)
+  [Image, Project].each do |klass|
+    klass.skip_callback(:commit, :after, :warm_variants)
+    klass.skip_callback(:commit, :after, :analyze_attached_file)
+  end
 end
 
 def analyze_and_warm_variants
