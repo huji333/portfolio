@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Header from '@/ui/Header';
-import { HEADER_STYLE_PRESETS } from '@/ui/headerStyles';
+import SiteHeader from '../_components/SiteHeader';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <>
-      <Header styles={HEADER_STYLE_PRESETS.solid} />
+      <SiteHeader />
       <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
         <span className="text-xs tracking-[0.3em] text-foreground/50 uppercase">Contact</span>
         <h1 className="mt-4 text-3xl md:text-4xl font-semibold text-foreground">Work in Progress</h1>
