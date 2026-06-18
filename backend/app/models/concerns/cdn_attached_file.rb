@@ -114,9 +114,13 @@ module CdnAttachedFile
   def ensure_variant_processed(variant)
     return variant if variant_generated?(variant)
 
-    with_variant_lock do
-      variant.processed unless variant_generated?(variant)
-    end
+    # NOTE: must NOT run inside with_lock/transaction. Processing a variant inside an
+    # open transaction makes the image_processing output Tempfile get GC-unlinked before
+    # S3Service#upload reads its size (Errno::ENOENT @ rb_file_s_size /tmp/image_processing*),
+    # so the VariantRecord is persisted but its S3 object is empty -> CloudFront 403.
+    # variant.processed (VariantWithRecord) is concurrency-safe via create_or_find_by!,
+    # and RecordNotUnique below covers the race, so no explicit lock is needed.
+    variant.processed
 
     variant
   rescue ActiveRecord::RecordNotUnique
@@ -128,6 +132,4 @@ module CdnAttachedFile
   rescue NoMethodError
     false
   end
-
-  def with_variant_lock(&) = persisted? ? with_lock(&) : yield
 end
