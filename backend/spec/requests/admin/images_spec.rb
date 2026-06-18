@@ -23,4 +23,33 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(Image.rank(:row_order).pluck(:id)).to eq([2, 3, 1, 4])
     end
   end
+
+  describe 'POST /admin/images/extract_exif' do
+    let(:blob) do
+      ActiveStorage::Blob.create_and_upload!(
+        io: Rails.root.join('spec/fixtures/files/test_image.jpg').open,
+        filename: 'test_image.jpg',
+        content_type: 'image/jpeg'
+      )
+    end
+
+    it 'resolves and auto-creates camera/lens and returns taken_at' do
+      expect do
+        post '/admin/images/extract_exif', params: { signed_id: blob.signed_id }
+      end.to change(Camera, :count).by(1).and change(Lens, :count).by(1)
+
+      expect(response).to have_http_status(:success)
+      body = response.parsed_body
+      expect(body.dig('camera', 'label')).to eq('SONY ILCE-7CM2')
+      expect(body.dig('lens', 'label')).to eq('FE 85mm F1.8')
+      expect(body['taken_at']).to eq('2024-01-01T03:56')
+    end
+
+    it 'fails open with nulls for an invalid signed id' do
+      post '/admin/images/extract_exif', params: { signed_id: 'bogus' }
+
+      expect(response).to have_http_status(:success)
+      expect(response.parsed_body).to eq('taken_at' => nil, 'camera' => nil, 'lens' => nil)
+    end
+  end
 end

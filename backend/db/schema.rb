@@ -10,29 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_06_01_082435) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_12_090000) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "active_storage_attachments", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "record_type", null: false
-    t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
 
   create_table "active_storage_blobs", force: :cascade do |t|
-    t.string "key", null: false
-    t.string "filename", null: false
-    t.string "content_type"
-    t.text "metadata"
-    t.string "service_name", null: false
     t.bigint "byte_size", null: false
     t.string "checksum"
+    t.string "content_type"
     t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
 
@@ -43,30 +43,33 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_01_082435) do
   end
 
   create_table "articles", force: :cascade do |t|
-    t.string "title", null: false
     t.text "content", null: false
-    t.integer "status", default: 0, null: false
     t.datetime "created_at", null: false
+    t.integer "status", default: 0, null: false
+    t.string "title", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "cameras", force: :cascade do |t|
-    t.string "name", null: false
-    t.string "manufacturer", null: false
     t.datetime "created_at", null: false
+    t.string "make"
+    t.string "manufacturer", null: false
+    t.string "model"
+    t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["make", "model"], name: "index_cameras_on_make_and_model", unique: true
   end
 
   create_table "categories", force: :cascade do |t|
-    t.string "name", null: false
     t.datetime "created_at", null: false
+    t.string "name", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "image_categories", force: :cascade do |t|
-    t.bigint "image_id", null: false
     t.bigint "category_id", null: false
     t.datetime "created_at", null: false
+    t.bigint "image_id", null: false
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_image_categories_on_category_id"
     t.index ["image_id", "category_id"], name: "index_image_categories_on_image_id_and_category_id", unique: true
@@ -74,14 +77,14 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_01_082435) do
   end
 
   create_table "images", force: :cascade do |t|
-    t.string "title", null: false
+    t.bigint "camera_id"
     t.string "caption", null: false
-    t.datetime "taken_at", null: false
-    t.bigint "camera_id", null: false
-    t.bigint "lens_id", null: false
-    t.integer "row_order"
-    t.boolean "is_published", default: true, null: false
     t.datetime "created_at", null: false
+    t.boolean "is_published", default: true, null: false
+    t.bigint "lens_id"
+    t.integer "row_order"
+    t.datetime "taken_at", null: false
+    t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["camera_id"], name: "index_images_on_camera_id"
     t.index ["is_published"], name: "index_images_on_is_published"
@@ -91,34 +94,36 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_01_082435) do
   end
 
   create_table "lenses", force: :cascade do |t|
-    t.string "name", null: false
     t.datetime "created_at", null: false
+    t.string "exif_name"
+    t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["exif_name"], name: "index_lenses_on_exif_name", unique: true
   end
 
   create_table "projects", force: :cascade do |t|
-    t.string "title", null: false
-    t.string "link", null: false
     t.datetime "created_at", null: false
+    t.string "link", null: false
+    t.string "title", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "publishments", force: :cascade do |t|
     t.bigint "article_id", null: false
-    t.datetime "published_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "created_at", null: false
+    t.datetime "published_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.datetime "updated_at", null: false
     t.index ["article_id"], name: "index_publishments_on_article_id"
   end
 
   create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
+    t.datetime "reset_password_sent_at"
+    t.string "reset_password_token"
     t.integer "role", default: 0, null: false
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

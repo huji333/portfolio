@@ -39,24 +39,6 @@ class Admin::CamerasController < Admin::Base
     end
   end
 
-  def lookup
-    camera_name = params[:camera_name]&.strip
-    manufacturer = params[:manufacturer]&.strip
-
-    if camera_name.present? || manufacturer.present?
-      # カメラ名とメーカー名で検索
-      camera = Camera.lookup(camera_name, manufacturer)
-
-      if camera
-        render json: { id: camera.id, name: camera.name, manufacturer: camera.manufacturer }
-      else
-        render json: { error: 'Camera not found' }, status: :not_found
-      end
-    else
-      render json: { error: 'Camera name or manufacturer parameter is required' }, status: :bad_request
-    end
-  end
-
   private
 
   def set_camera

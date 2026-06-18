@@ -8,8 +8,8 @@ class Image < ApplicationRecord
 
   has_many :image_categories, dependent: :destroy
   has_many :categories, through: :image_categories
-  belongs_to :camera
-  belongs_to :lens
+  belongs_to :camera, optional: true
+  belongs_to :lens, optional: true
 
   has_one_attached :file, dependent: :purge_later
 

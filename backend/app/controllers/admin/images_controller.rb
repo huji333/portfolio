@@ -57,6 +57,25 @@ class Admin::ImagesController < Admin::Base
     end
   end
 
+  # Server-side EXIF resolution for the new/edit form. Takes the signed blob id of
+  # an already direct-uploaded file, extracts EXIF with ruby-vips, and find_or_creates
+  # the matching Camera/Lens. fail-open: any failure returns nulls so the upload is
+  # never blocked.
+  def extract_exif
+    blob = ActiveStorage::Blob.find_signed!(params[:signed_id])
+    exif = ExifExtractor.from_blob(blob)
+    camera = Camera.resolve_from_exif(make: exif.make, model: exif.model)
+    lens = Lens.resolve_from_exif(exif.lens_model)
+
+    render json: {
+      taken_at: exif.taken_at&.in_time_zone&.strftime("%Y-%m-%dT%H:%M"),
+      camera: camera && { id: camera.id, label: camera.display_label },
+      lens: lens && { id: lens.id, label: lens.name }
+    }
+  rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
+    render json: { taken_at: nil, camera: nil, lens: nil }
+  end
+
   private
 
   def set_cameras_and_lenses_and_categories
