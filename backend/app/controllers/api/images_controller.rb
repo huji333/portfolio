@@ -32,7 +32,7 @@ class Api::ImagesController < ApplicationController
     width, height = file_dimensions(image.file)
 
     image.as_json(except: %i[camera_id lens_id]).merge(
-      file: image.file_url,
+      file: image.display_url,
       thumbnail: image.thumbnail_url,
       width: width,
       height: height,

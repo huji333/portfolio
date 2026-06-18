@@ -4,6 +4,7 @@ class Image < ApplicationRecord
 
   ranks :row_order
   THUMBNAIL_LIMIT = [960, 960].freeze
+  DISPLAY_LIMIT = [1920, 1920].freeze
 
   has_many :image_categories, dependent: :destroy
   has_many :categories, through: :image_categories
