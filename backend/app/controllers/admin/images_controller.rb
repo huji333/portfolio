@@ -3,7 +3,7 @@ class Admin::ImagesController < Admin::Base
   before_action :set_image, only: %i[show edit update destroy insert_at]
 
   def index
-    @images = Image.rank(:row_order).all
+    @images = Image.rank(:row_order).with_attached_file
   end
 
   def show; end
