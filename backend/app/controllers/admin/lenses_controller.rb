@@ -17,6 +17,7 @@ class Admin::LensesController < Admin::Base
     if @lens.save
       redirect_to admin_lenses_path, notice: 'Lens was successfully created.'
     else
+      flash.now[:alert] = 'Lens failed to create.'
       render :new, status: :unprocessable_content
     end
   end
@@ -25,6 +26,7 @@ class Admin::LensesController < Admin::Base
     if @lens.update(lens_params)
       redirect_to admin_lenses_path, notice: 'Lens was successfully updated.'
     else
+      flash.now[:alert] = 'Lens failed to update.'
       render :edit, status: :unprocessable_content
     end
   end
