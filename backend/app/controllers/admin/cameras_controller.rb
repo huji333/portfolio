@@ -19,6 +19,7 @@ class Admin::CamerasController < Admin::Base
     if @camera.save
       redirect_to admin_cameras_path, notice: 'Camera was successfully created.'
     else
+      flash.now[:alert] = 'Camera failed to create.'
       render :new, status: :unprocessable_content
     end
   end
@@ -27,6 +28,7 @@ class Admin::CamerasController < Admin::Base
     if @camera.update(camera_params)
       redirect_to admin_cameras_path, notice: 'Camera was successfully updated.'
     else
+      flash.now[:alert] = 'Camera failed to update.'
       render :edit, status: :unprocessable_content
     end
   end
