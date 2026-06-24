@@ -5,9 +5,7 @@ export type ImageType = {
   taken_at: string | null;
   camera_name: string | null;
   lens_name: string | null;
-  row_order: number;
-  is_published: boolean;
-  file: string; // 画像のURL
+  file: string;
   thumbnail?: string | null;
   width: number | null;
   height: number | null;

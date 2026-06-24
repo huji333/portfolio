@@ -59,21 +59,13 @@ export default function GalleryApp({
       setIsLoadingImages(true);
       setFetchError(false);
 
-      try {
-        const result = await fetchImages({ categoryIds: selectedCategoryIds });
-        if (isActive) {
-          setImages(result.images);
-          setNextCursor(result.nextCursor);
-          setHasMore(result.hasMore);
-          setFetchError(result.error);
-        }
-      } catch (error) {
-        console.error('Failed to load images:', error);
-        if (isActive) setFetchError(true);
-      } finally {
-        if (isActive) {
-          setIsLoadingImages(false);
-        }
+      const result = await fetchImages({ categoryIds: selectedCategoryIds });
+      if (isActive) {
+        setImages(result.images);
+        setNextCursor(result.nextCursor);
+        setHasMore(result.hasMore);
+        setFetchError(result.error);
+        setIsLoadingImages(false);
       }
     };
 
@@ -89,25 +81,19 @@ export default function GalleryApp({
     if (isLoadingMore || !hasMore || !nextCursor) return;
 
     setIsLoadingMore(true);
-    try {
-      const result = await fetchImages({
-        categoryIds: selectedCategoryIds,
-        cursor: nextCursor,
-      });
-      if (!result.error) {
-        setImages((prev) => [...prev, ...result.images]);
-        setNextCursor(result.nextCursor);
-        setHasMore(result.hasMore);
-        setFetchError(false);
-      } else {
-        setFetchError(true);
-      }
-    } catch (error) {
-      console.error('Failed to load more images:', error);
+    const result = await fetchImages({
+      categoryIds: selectedCategoryIds,
+      cursor: nextCursor,
+    });
+    if (!result.error) {
+      setImages((prev) => [...prev, ...result.images]);
+      setNextCursor(result.nextCursor);
+      setHasMore(result.hasMore);
+      setFetchError(false);
+    } else {
       setFetchError(true);
-    } finally {
-      setIsLoadingMore(false);
     }
+    setIsLoadingMore(false);
   }, [isLoadingMore, hasMore, nextCursor, selectedCategoryIds]);
 
   const handleCategoryToggle = useCallback((id: number) => {
