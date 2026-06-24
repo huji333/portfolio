@@ -3,8 +3,7 @@ import ImageGrid from '@/app/gallery/_components/ImageGrid';
 import { fetchImages } from '@/hooks/imageApi';
 
 export default async function GallerySection() {
-  const { images, error } = await fetchImages({ fetchInit: { next: { revalidate: 120 } } });
-  const previewImages = images.slice(0, 9);
+  const { images: previewImages, error } = await fetchImages({ limit: 9, fetchInit: { next: { revalidate: 120 } } });
 
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">

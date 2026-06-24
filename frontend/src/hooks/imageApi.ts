@@ -4,6 +4,7 @@ import type { PaginatedImages } from '@/utils/types';
 type FetchImagesOptions = {
   categoryIds?: number[];
   cursor?: string | null;
+  limit?: number;
   fetchInit?: ApiRequestInit;
 };
 
@@ -14,13 +15,16 @@ type FetchImagesResult = {
   error: boolean;
 };
 
-function buildImagesPath(categoryIds: number[] = [], cursor?: string | null): string {
+function buildImagesPath(categoryIds: number[] = [], cursor?: string | null, limit?: number): string {
   const params = new URLSearchParams();
   if (categoryIds.length > 0) {
     params.set('categories', categoryIds.join(','));
   }
   if (cursor) {
     params.set('cursor', cursor);
+  }
+  if (limit !== undefined) {
+    params.set('limit', String(limit));
   }
   const query = params.toString();
   return `/images${query ? `?${query}` : ''}`;
@@ -29,9 +33,10 @@ function buildImagesPath(categoryIds: number[] = [], cursor?: string | null): st
 export async function fetchImages({
   categoryIds = [],
   cursor,
+  limit,
   fetchInit,
 }: FetchImagesOptions = {}): Promise<FetchImagesResult> {
-  const path = buildImagesPath(categoryIds, cursor);
+  const path = buildImagesPath(categoryIds, cursor, limit);
   const result = await apiFetch<PaginatedImages>(path, 'images', fetchInit);
   if (result.error) {
     return { images: [], nextCursor: null, hasMore: false, error: true };

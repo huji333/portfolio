@@ -27,17 +27,19 @@ class Api::ImagesController < ApplicationController
     end
   end
 
-  # カメラのidとレンズのidを名前に変更して渡す
   def image_json(image)
     width, height = file_dimensions(image.file)
-
-    image.as_json(except: %i[camera_id lens_id]).merge(
+    {
+      id: image.id,
+      title: image.title,
+      caption: image.caption,
+      taken_at: image.taken_at,
       file: image.display_url,
       thumbnail: image.thumbnail_url,
       width: width,
       height: height,
       camera_name: image.camera&.display_label,
       lens_name: image.lens&.name
-    )
+    }
   end
 end
