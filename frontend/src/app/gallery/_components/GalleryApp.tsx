@@ -36,7 +36,7 @@ export default function GalleryApp({
 
   const hasPrevious = focusedImageIndex !== null && focusedImageIndex > 0;
   const hasNext = focusedImageIndex !== null && focusedImageIndex < images.length - 1;
-  const isInteractionDisabled = isLoadingImages;
+  const isInteractionDisabled = isLoadingImages || isLoadingMore;
 
   const isInteractionDisabledRef = useRef(isInteractionDisabled);
   const imagesLengthRef = useRef(images.length);
