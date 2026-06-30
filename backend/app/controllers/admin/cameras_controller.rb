@@ -2,7 +2,7 @@ class Admin::CamerasController < Admin::Base
   before_action :set_camera, only: %i[show edit update destroy]
 
   def index
-    @cameras = Camera.all
+    @cameras = Camera.order(:manufacturer, :name)
   end
 
   def show; end

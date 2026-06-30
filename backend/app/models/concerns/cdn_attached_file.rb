@@ -92,7 +92,7 @@ module CdnAttachedFile
   end
 
   def active_storage_url_for(attachable)
-    return nil unless Rails.env.test?
+    return nil unless Rails.env.local?
 
     helpers = Rails.application.routes.url_helpers
     host = ENV.fetch("ACTIVE_STORAGE_HOST", "http://localhost:3000")

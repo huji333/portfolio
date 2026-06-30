@@ -79,9 +79,9 @@ class Admin::ImagesController < Admin::Base
   private
 
   def set_cameras_and_lenses_and_categories
-    @cameras = Camera.all
-    @lenses = Lens.all
-    @categories = Category.all
+    @cameras = Camera.order(:manufacturer, :name)
+    @lenses = Lens.order(:name)
+    @categories = Category.order(:name)
   end
 
   def set_image

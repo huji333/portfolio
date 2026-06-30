@@ -2,7 +2,7 @@ class Admin::LensesController < Admin::Base
   before_action :set_lens, only: %i[edit update destroy]
 
   def index
-    @lenses = Lens.all
+    @lenses = Lens.order(:name)
   end
 
   def new
