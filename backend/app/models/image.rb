@@ -33,11 +33,7 @@ class Image < ApplicationRecord
   before_validation :fill_metadata_from_exif, on: :create
 
   def category_ids=(ids)
-    super
-    # 保存後にカテゴリーの関連付けを更新
-    return unless persisted?
-
-    self.categories = Category.where(id: ids.compact_blank)
+    super(Array(ids).compact_blank)
   end
 
   def publishable?
@@ -86,6 +82,6 @@ class Image < ApplicationRecord
   def taken_at_is_in_the_past
     return if taken_at.nil?
 
-    errors.add(:taken_at, 'must be in the past') if taken_at > Time.zone.now
+    errors.add(:taken_at, 'must be in the past') if taken_at > 1.minute.from_now
   end
 end
