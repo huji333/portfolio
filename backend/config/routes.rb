@@ -18,6 +18,7 @@ Rails.application.routes.draw do
         post :extract_exif
       end
     end
+    resource :image_bulk_import, only: %i[new create]
     resources :cameras
     resources :lenses
     resources :categories

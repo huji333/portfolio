@@ -8,5 +8,15 @@ FactoryBot.define do
     is_published { true }
     camera { build(:camera) }
     lens { build(:lens) }
+
+    # Fresh bulk-ingested state: nothing curated yet, metadata to be filled by EXIF.
+    trait :draft do
+      title { nil }
+      caption { nil }
+      taken_at { nil }
+      is_published { false }
+      camera { nil }
+      lens { nil }
+    end
   end
 end

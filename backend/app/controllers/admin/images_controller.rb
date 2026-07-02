@@ -4,6 +4,8 @@ class Admin::ImagesController < Admin::Base
 
   def index
     @images = Image.rank(:row_order).with_attached_file
+    @uncurated_count = Image.uncurated.count
+    @images = @images.uncurated if params[:filter] == "uncurated"
   end
 
   def show; end
@@ -31,6 +33,8 @@ class Admin::ImagesController < Admin::Base
     apply_row_order_position(@image)
 
     if @image.save
+      return redirect_to_next_uncurated if params[:save_and_next].present?
+
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
     else
       flash.now[:alert] = 'Image failed to update.'
@@ -86,6 +90,16 @@ class Admin::ImagesController < Admin::Base
 
   def set_image
     @image = Image.find(params[:id])
+  end
+
+  def redirect_to_next_uncurated
+    next_image = Image.uncurated.where.not(id: @image.id).rank(:row_order).first
+    if next_image
+      remaining = Image.uncurated.where.not(id: @image.id).count
+      redirect_to edit_admin_image_path(next_image), notice: "保存しました。残り#{remaining}枚の下書きがあります。"
+    else
+      redirect_to admin_images_path, notice: '保存しました。未編集の下書きはありません。'
+    end
   end
 
   def apply_row_order_position(image)

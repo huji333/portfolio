@@ -14,15 +14,20 @@ class Image < ApplicationRecord
   has_one_attached :file, dependent: :purge_later
 
   validates :file, presence: true
-  validates :title, presence: true
-  validates :caption, presence: true
-  validates :taken_at, presence: true
+  # Records exist as drafts first (bulk ingest); title/taken_at are
+  # publish-quality requirements, not record-existence requirements.
+  validates :title, presence: true, if: :is_published?
+  validates :taken_at, presence: true, if: :is_published?
   validates :is_published, inclusion: { in: [true, false] }
 
   scope :published, -> { where(is_published: true) }
+  scope :draft, -> { where(is_published: false) }
+  scope :uncurated, -> { draft.where(title: [nil, ""]) }
   scope :ordered_for_gallery, -> { order(row_order: :asc, id: :asc) }
 
   validate :taken_at_is_in_the_past
+
+  before_validation :fill_metadata_from_exif, on: :create
 
   def category_ids=(ids)
     super
@@ -56,6 +61,20 @@ class Image < ApplicationRecord
   end
 
   private
+
+  # Fills taken_at/camera/lens from the attached file's EXIF so every creation
+  # path (admin form, bulk ingest, rake, API) gets metadata without client JS.
+  # Only fills blanks — human input always wins — and only runs when the blob
+  # is already in storage (direct upload / io attach). Fail-open via ExifExtractor.
+  def fill_metadata_from_exif
+    return unless file.attached? && file.blob&.persisted?
+    return if taken_at.present? && camera_id.present? && lens_id.present?
+
+    exif = ExifExtractor.from_blob(file.blob)
+    self.taken_at ||= exif.taken_at
+    self.camera ||= Camera.resolve_from_exif(make: exif.make, model: exif.model)
+    self.lens ||= Lens.resolve_from_exif(exif.lens_model)
+  end
 
   def taken_at_is_in_the_past
     return if taken_at.nil?
