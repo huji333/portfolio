@@ -36,5 +36,9 @@
               %a.nav-link{:href => "/admin/categories"} カテゴリ
             %li.nav-item
               %a.nav-link{:href => "/admin/projects"} プロジェクト
-    .container
+    .container.mt-3
+      - if flash.notice
+        .alert.alert-info= flash.notice
+      - if flash.alert
+        .alert.alert-danger= flash.alert
       = yield

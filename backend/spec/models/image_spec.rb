@@ -4,6 +4,10 @@ RSpec.describe Image, type: :model do
   let(:image) { build(:image) }
 
   describe 'validations' do
+    # Isolate validation behavior from the EXIF auto-fill hook (tested separately
+    # below) — otherwise the fixture's real EXIF would refill a blanked taken_at.
+    before { allow(ExifExtractor).to receive(:from_blob).and_return(ExifExtractor::EMPTY) }
+
     context 'file' do
       it 'should be valid with file' do
         image.file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/test_image.jpg"), 'image/jpeg')
@@ -16,15 +20,24 @@ RSpec.describe Image, type: :model do
       end
     end
 
+    # title/taken_at are publish-quality requirements: required when published,
+    # free to be blank while the record lives as a draft (bulk ingest).
     context 'title' do
       it 'should be valid with title' do
         image.title = 'Test Image'
         expect(image).to be_valid
       end
 
-      it 'should be invalid with blank title' do
+      it 'should be invalid with blank title when published' do
+        image.is_published = true
         image.title = ''
         expect(image).to be_invalid
+      end
+
+      it 'should be valid with blank title when draft' do
+        image.is_published = false
+        image.title = ''
+        expect(image).to be_valid
       end
     end
 
@@ -34,9 +47,10 @@ RSpec.describe Image, type: :model do
         expect(image).to be_valid
       end
 
-      it 'should be invalid with blank caption' do
+      it 'should be valid with blank caption even when published' do
+        image.is_published = true
         image.caption = ''
-        expect(image).to be_invalid
+        expect(image).to be_valid
       end
     end
 
@@ -46,9 +60,16 @@ RSpec.describe Image, type: :model do
         expect(image).to be_valid
       end
 
-      it 'should be invalid with nil taken_at' do
+      it 'should be invalid with nil taken_at when published' do
+        image.is_published = true
         image.taken_at = nil
         expect(image).to be_invalid
+      end
+
+      it 'should be valid with nil taken_at when draft' do
+        image.is_published = false
+        image.taken_at = nil
+        expect(image).to be_valid
       end
 
       it 'should be invalid with future taken_at' do
@@ -109,6 +130,74 @@ RSpec.describe Image, type: :model do
         image.categories << category
         expect(image).to be_valid
       end
+    end
+  end
+
+  describe 'EXIF metadata auto-fill on create' do
+    let(:exif_blob) do
+      ActiveStorage::Blob.create_and_upload!(
+        io: Rails.root.join('spec/fixtures/files/test_image.jpg').open,
+        filename: 'test_image.jpg', content_type: 'image/jpeg'
+      )
+    end
+
+    it 'fills taken_at, camera and lens for a draft created without them' do
+      image = Image.create!(file: exif_blob.signed_id, is_published: false)
+
+      expect(image.taken_at).to eq(Time.utc(2024, 1, 1, 3, 56, 27))
+      expect(image.camera).to have_attributes(make: 'SONY', model: 'ILCE-7CM2')
+      expect(image.lens).to have_attributes(exif_name: 'FE 85mm F1.8')
+    end
+
+    it 'does not overwrite human-provided values' do
+      camera = create(:camera)
+      lens = create(:lens)
+      taken_at = 2.days.ago.change(usec: 0)
+
+      image = Image.create!(file: exif_blob.signed_id, is_published: false,
+                            taken_at: taken_at, camera: camera, lens: lens)
+
+      expect(image.taken_at).to eq(taken_at)
+      expect(image.camera).to eq(camera)
+      expect(image.lens).to eq(lens)
+    end
+
+    it 'still saves a draft when the file has no EXIF (fail-open)' do
+      blank_blob = ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new(Vips::Image.black(4, 4).write_to_buffer('.jpg')),
+        filename: 'blank.jpg', content_type: 'image/jpeg'
+      )
+
+      image = Image.create!(file: blank_blob.signed_id, is_published: false)
+
+      expect(image).to be_persisted
+      expect(image.taken_at).to be_nil
+      expect(image.camera).to be_nil
+      expect(image.lens).to be_nil
+    end
+  end
+
+  describe '.uncurated' do
+    it 'returns only drafts without a title' do
+      untitled_draft = create(:image, :draft)
+      titled_draft = create(:image, title: 'done', is_published: false)
+      published = create(:image, is_published: true)
+
+      expect(Image.uncurated).to include(untitled_draft)
+      expect(Image.uncurated).not_to include(titled_draft, published)
+    end
+  end
+
+  describe '#publishable?' do
+    it 'is true when all publish requirements (title, taken_at) are present' do
+      image = build(:image, is_published: false)
+
+      expect(image.publishable?).to be(true)
+    end
+
+    it 'is false when title or taken_at is blank' do
+      expect(build(:image, title: nil).publishable?).to be(false)
+      expect(build(:image, taken_at: nil).publishable?).to be(false)
     end
   end
 

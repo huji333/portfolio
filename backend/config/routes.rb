@@ -13,11 +13,13 @@ Rails.application.routes.draw do
     resources :images do
       member do
         post :insert_at
+        patch :toggle_publish
       end
       collection do
         post :extract_exif
       end
     end
+    resource :image_bulk_import, only: %i[new create]
     resources :cameras
     resources :lenses
     resources :categories

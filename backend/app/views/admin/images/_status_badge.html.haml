@@ -1,0 +1,6 @@
+- if image.is_published?
+  %span.badge.text-bg-success 公開中
+- elsif image.publishable?
+  %span.badge.text-bg-secondary 下書き
+- else
+  %span.badge.text-bg-warning 未編集

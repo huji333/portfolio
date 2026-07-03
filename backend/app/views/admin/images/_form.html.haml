@@ -1,65 +1,72 @@
-= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-fill direct-upload" }, style: "border: 2px dashed #ccc; padding: 20px; border-radius: 8px;") do |form|
+= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-fill direct-upload" }) do |form|
   - if image.errors.any?
     .alert.alert-danger
-      %ul
+      %ul.mb-0
         - image.errors.full_messages.each do |message|
           %li= message
-  - unless image.file.attached?
-    .row.mb-3
-      .col-md-3
-        = form.label :file, 'Image File', class: 'col-form-label fw-bold'
-      .col-md-9
-        = form.file_field :file, direct_upload: true, class: 'form-control', data: { direct_upload_target: "input", exif_fill_target: "fileInput", action: "change->exif-fill#fileSelected" }
-        %div{ data: { exif_fill_target: 'status' } }
-    .row.mb-3
-      .col-md-9.offset-md-3
-        .progress.d-none{ data: { direct_upload_target: "progress" } }
-          .progress-bar.progress-bar-striped.progress-bar-animated{ role: "progressbar", "aria-valuenow": "0", "aria-valuemin": "0", "aria-valuemax": "100", style: "width: 0%" }
-        .alert.alert-danger.d-none.mt-2{ data: { direct_upload_target: "error" } }
-  .row.mb-3
-    .col-md-3
-      = form.label :title, 'Title', class: 'col-form-label fw-bold'
-    .col-md-9= form.text_field :title, class: 'form-control', data: { exif_fill_target: "titleInput" }
-  .row.mb-3
-    .col-md-3
-      = form.label :caption, 'Caption', class: 'col-form-label fw-bold'
-    .col-md-9= form.text_area :caption, class: 'form-control'
-  .row.mb-3
-    .col-md-3
-      = form.label :taken_at, 'Taken At', class: 'col-form-label fw-bold'
-    .col-md-9= form.datetime_field :taken_at, class: 'form-control', data: { exif_fill_target: "takenAtInput" }
-  .row.mb-3
-    .col-md-3
-      = form.label :camera_id, 'Camera', class: 'col-form-label fw-bold'
-    .col-md-9= form.collection_select :camera_id, cameras, :id, :name, { include_blank: "Please select" }, class: 'form-control', data: { exif_fill_target: "cameraSelect" }
-  .row.mb-3
-    .col-md-3
-      = form.label :lens_id, 'Lens', class: 'col-form-label fw-bold'
-    .col-md-9= form.collection_select :lens_id, lenses, :id, :name, { include_blank: "Please select" }, class: 'form-control', data: { exif_fill_target: "lensSelect" }
-  .row.mb-3
-    .col-md-3
-      = form.label :row_order_position, 'Display Order', class: 'col-form-label fw-bold'
-    .col-md-9
-      = form.number_field :row_order_position, class: 'form-control', value: (image.persisted? ? (image.row_order_rank || 0) : nil)
-      %small.text-muted.d-block.mt-1
-        - if image.persisted?
-          = "現在の順序: #{(image.row_order_rank || 0) + 1}番目（0始まりで入力）"
+
+  .card
+    .row.g-0
+      .col-lg-6.d-flex.align-items-center.justify-content-center.bg-body-tertiary.p-3{style: 'min-height: 320px;'}
+        - if image.file.attached?
+          = image_tag image.thumbnail_variant, class: 'img-fluid rounded', style: 'max-height: 70vh; object-fit: contain;', alt: image.title.presence || 'preview'
         - else
-          = "0始まりで入力してください（例: 0 = 最初、1 = 2番目）"
+          .w-100
+            = form.label :file, '画像ファイル', class: 'form-label fw-bold'
+            = form.file_field :file, direct_upload: true, class: 'form-control', data: { direct_upload_target: "input", exif_fill_target: "fileInput", action: "change->exif-fill#fileSelected" }
+            %div{ data: { exif_fill_target: 'status' } }
+            .progress.d-none.mt-2{ data: { direct_upload_target: "progress" } }
+              .progress-bar.progress-bar-striped.progress-bar-animated{ role: "progressbar", "aria-valuenow": "0", "aria-valuemin": "0", "aria-valuemax": "100", style: "width: 0%" }
+            .alert.alert-danger.d-none.mt-2{ data: { direct_upload_target: "error" } }
 
-  %h3 Categories
-  - categories.each do |category|
-    .form-check
-      = form.check_box :category_ids, { multiple: true, checked: image.categories.include?(category), id: "category_#{category.id}" }, category.id, nil
-      = form.label "category_#{category.id}", category.name, class: "form-check-label"
+      .col-lg-6.d-flex.flex-column
+        .card-body
+          - if image.persisted?
+            .d-flex.justify-content-between.align-items-center.mb-3
+              = render 'admin/images/status_badge', image: image
+              - if local_assigns[:images_total]
+                %small.text-muted= "#{(image.row_order_rank || 0) + 1} / #{local_assigns[:images_total]} 枚目"
+          .mb-3
+            = form.label :title, 'タイトル', class: 'form-label fw-bold'
+            = form.text_field :title, class: 'form-control', data: { exif_fill_target: "titleInput" }
+          .mb-3
+            = form.label :caption, 'キャプション', class: 'form-label fw-bold'
+            = form.text_area :caption, rows: 2, class: 'form-control'
+          .row
+            .col-md-6.mb-3
+              = form.label :taken_at, '撮影日時', class: 'form-label fw-bold'
+              = form.datetime_field :taken_at, class: 'form-control', data: { exif_fill_target: "takenAtInput" }
+            .col-md-6.mb-3
+              = form.label :row_order_position, '表示順（0始まり）', class: 'form-label fw-bold'
+              = form.number_field :row_order_position, class: 'form-control', value: (image.persisted? ? (image.row_order_rank || 0) : nil)
+          .row
+            .col-md-6.mb-3
+              = form.label :camera_id, 'カメラ', class: 'form-label fw-bold'
+              = form.collection_select :camera_id, cameras, :id, :name, { include_blank: "未選択" }, class: 'form-select', data: { exif_fill_target: "cameraSelect" }
+            .col-md-6.mb-3
+              = form.label :lens_id, 'レンズ', class: 'form-label fw-bold'
+              = form.collection_select :lens_id, lenses, :id, :name, { include_blank: "未選択" }, class: 'form-select', data: { exif_fill_target: "lensSelect" }
+          .mb-2
+            %span.form-label.fw-bold.d-block カテゴリ
+            - if categories.any?
+              - categories.each do |category|
+                .form-check.form-check-inline
+                  = form.check_box :category_ids, { multiple: true, checked: image.categories.include?(category), id: "category_#{category.id}" }, category.id, nil
+                  = form.label "category_#{category.id}", category.name, class: "form-check-label"
+            - else
+              %span.text-muted カテゴリが未登録です
 
-  .row.mb-3
-    .col-md-3
-      = form.label :is_published, 'Publish Settings', class: 'col-form-label fw-bold'
-    .col-md-9
-      .form-check
-        = form.check_box :is_published, class: 'form-check-input'
-        = form.label :is_published, 'Publish', class: 'form-check-label'
-  .row
-    .col
-      = form.submit 'Save', class: 'btn btn-primary d-block w-100'
+        .card-footer.mt-auto
+          .d-flex.justify-content-between.align-items-center.gap-2
+            - if image.persisted?
+              = form.submit '← 前へ', name: 'nav_prev', class: 'btn btn-outline-secondary', disabled: local_assigns[:prev_image].nil?
+            .d-flex.gap-2.mx-auto
+              = form.submit '保存', class: 'btn btn-primary'
+              - if image.is_published?
+                = form.submit '非公開に戻す', name: 'commit_draft', class: 'btn btn-outline-secondary'
+              - else
+                = form.submit '公開する', name: 'commit_publish', class: 'btn btn-success'
+            - if image.persisted?
+              = form.submit '次へ →', name: 'nav_next', class: 'btn btn-outline-secondary', disabled: local_assigns[:next_image].nil?
+          - unless image.is_published?
+            %small.text-muted.d-block.text-center.mt-1 公開にはタイトルと撮影日時が必要です

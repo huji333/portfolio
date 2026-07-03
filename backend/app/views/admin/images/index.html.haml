@@ -1,7 +1,12 @@
 %h1 画像一覧
 
-- if flash.notice
-  .alert.alert-info= flash[:notice]
+- if @uncurated_count.positive?
+  .alert.alert-warning
+    = "未編集の下書きが #{@uncurated_count} 枚あります。"
+    - if params[:filter] == "uncurated"
+      = link_to 'すべて表示', admin_images_path
+    - else
+      = link_to '下書きのみ表示', admin_images_path(filter: "uncurated")
 
 .table-responsive
   %table.table.table-striped{"data-controller": "sortable"}
@@ -10,12 +15,12 @@
         %th 表示順
         %th プレビュー
         %th タイトル
-        %th 閲覧
-        %th 編集
-        %th 削除
+        %th 公開状態
+        %th 操作
     %tbody{"data-sortable-target": "list",
            "data-sortable-update-url-value": insert_at_admin_image_path(":id")}
       - @images.each do |image|
         = render 'image_row', image: image
 
 = link_to '新規作成', new_admin_image_path, class: 'btn btn-primary mt-3'
+= link_to '一括取り込み', new_admin_image_bulk_import_path, class: 'btn btn-outline-primary mt-3 ms-2'

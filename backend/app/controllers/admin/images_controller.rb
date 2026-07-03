@@ -1,9 +1,14 @@
 class Admin::ImagesController < Admin::Base
+  include Admin::ImageCurationFlow
+
   before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
-  before_action :set_image, only: %i[show edit update destroy insert_at]
+  before_action :set_image, only: %i[show edit update destroy insert_at toggle_publish]
+  before_action :set_adjacent_images, only: %i[edit update]
 
   def index
     @images = Image.rank(:row_order).with_attached_file
+    @uncurated_count = Image.uncurated.count
+    @images = @images.uncurated if params[:filter] == "uncurated"
   end
 
   def show; end
@@ -16,10 +21,11 @@ class Admin::ImagesController < Admin::Base
 
   def create
     @image = Image.new(image_params.except(:row_order_position))
+    @image.is_published = publish_intent || false
     apply_row_order_position(@image)
 
     if @image.save
-      redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
+      redirect_to admin_images_path, notice: update_notice
     else
       flash.now[:alert] = 'Image failed to create.'
       render :new, status: :unprocessable_content
@@ -28,13 +34,16 @@ class Admin::ImagesController < Admin::Base
 
   def update
     @image.assign_attributes(image_params.except(:row_order_position))
+    intent = publish_intent
+    @image.is_published = intent unless intent.nil?
     apply_row_order_position(@image)
 
     if @image.save
-      redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
+      redirect_to after_save_edit_path, notice: update_notice
     else
+      # 公開しようとして弾かれた場合もフォームは元の公開状態のまま再描画する
+      @image.restore_attributes(%i[is_published])
       flash.now[:alert] = 'Image failed to update.'
-      Rails.logger.debug { "Image failed to update: #{@image.errors.full_messages.join(', ')}" }
       render :edit, status: :unprocessable_content
     end
   end
@@ -47,9 +56,23 @@ class Admin::ImagesController < Admin::Base
     end
   end
 
+  # Index の行から公開/非公開をワンクリックで切り替える。公開条件を満たさない
+  # 下書きにはボタン自体を出さないが、直リンク等で来た場合は編集画面へ誘導する。
+  def toggle_publish
+    if !@image.is_published? && !@image.publishable?
+      return redirect_to edit_admin_image_path(@image), alert: '公開にはタイトルと撮影日時が必要です。'
+    end
+
+    if @image.update(is_published: !@image.is_published)
+      status = @image.is_published? ? '公開しました' : '非公開にしました'
+      redirect_back_or_to(admin_images_path, notice: "「#{@image.title}」を#{status}。")
+    else
+      redirect_back_or_to(admin_images_path, alert: "更新できません: #{@image.errors.full_messages.join('、')}")
+    end
+  end
+
   def insert_at
-    position = insert_params.to_i
-    @image.row_order_position = position
+    @image.row_order_position = insert_params.to_i
     if @image.save
       head :ok
     else
@@ -95,7 +118,7 @@ class Admin::ImagesController < Admin::Base
   def image_params
     params.expect(
       image: [:title, :caption, :taken_at, :camera_id, :lens_id,
-              :row_order_position, :is_published, :file,
+              :row_order_position, :file,
               { category_ids: [] }]
     )
   end
