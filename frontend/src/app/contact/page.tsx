@@ -3,6 +3,11 @@ import SiteHeader from '../_components/SiteHeader';
 
 export const metadata: Metadata = {
   title: 'Contact',
+  description: '藤井駆陸への連絡先・お問い合わせ。制作依頼やご質問はこちらから。',
+  openGraph: {
+    title: 'Contact | Kakemu Fujii',
+    description: '藤井駆陸への連絡先・お問い合わせ。制作依頼やご質問はこちらから。',
+  },
 };
 
 export default function Page() {

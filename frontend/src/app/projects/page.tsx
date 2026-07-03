@@ -6,6 +6,11 @@ import ProjectApp from './_components/ProjectApp';
 
 export const metadata: Metadata = {
   title: 'Projects',
+  description: '藤井駆陸が手がけた web 開発プロジェクトの一覧。個人開発を中心に、制作物とその背景をまとめています。',
+  openGraph: {
+    title: 'Projects | Kakemu Fujii',
+    description: '藤井駆陸が手がけた web 開発プロジェクトの一覧。個人開発を中心に、制作物とその背景をまとめています。',
+  },
 };
 
 export default function Page() {
