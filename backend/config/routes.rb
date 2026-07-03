@@ -13,6 +13,7 @@ Rails.application.routes.draw do
     resources :images do
       member do
         post :insert_at
+        patch :toggle_publish
       end
       collection do
         post :extract_exif

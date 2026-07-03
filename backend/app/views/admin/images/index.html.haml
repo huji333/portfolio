@@ -3,6 +3,9 @@
 - if flash.notice
   .alert.alert-info= flash[:notice]
 
+- if flash.alert
+  .alert.alert-danger= flash[:alert]
+
 - if @uncurated_count.positive?
   .alert.alert-warning
     = "未編集の下書きが #{@uncurated_count} 枚あります。"
@@ -18,9 +21,8 @@
         %th 表示順
         %th プレビュー
         %th タイトル
-        %th 閲覧
-        %th 編集
-        %th 削除
+        %th 公開状態
+        %th 操作
     %tbody{"data-sortable-target": "list",
            "data-sortable-update-url-value": insert_at_admin_image_path(":id")}
       - @images.each do |image|

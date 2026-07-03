@@ -5,13 +5,14 @@ RSpec.describe 'Admin::Images', type: :request do
 
   let(:user) { create(:user, :admin) }
 
-  before do
-    sign_in user
-    create(:image, title: 'Test Image 1', row_order: 100, id: 1)
-    create(:image, title: 'Test Image 2', row_order: 200, id: 2)
-    create(:image, title: 'Test Image 3', row_order: 300, id: 3)
-    create(:image, title: 'Test Image 4', row_order: 400, id: 4)
-  end
+  # NOTE: id を固定して create すると PG のシーケンスが進まず、
+  # 以降の自動採番 create が duplicate key で落ちるため自動採番に任せる。
+  let!(:image1) { create(:image, title: 'Test Image 1', row_order: 100) }
+  let!(:image2) { create(:image, title: 'Test Image 2', row_order: 200) }
+  let!(:image3) { create(:image, title: 'Test Image 3', row_order: 300) }
+  let!(:image4) { create(:image, title: 'Test Image 4', row_order: 400) }
+
+  before { sign_in user }
 
   describe 'GET /admin/images' do
     it 'renders and surfaces the uncurated draft count with a filter link' do
@@ -33,14 +34,66 @@ RSpec.describe 'Admin::Images', type: :request do
     end
   end
 
+  describe 'PATCH /admin/images/:id/toggle_publish' do
+    it 'unpublishes a published image' do
+      patch "/admin/images/#{image1.id}/toggle_publish"
+
+      expect(response).to redirect_to(admin_images_path)
+      expect(image1.reload.is_published).to be(false)
+      expect(flash[:notice]).to include('非公開にしました')
+    end
+
+    it 'publishes a curated draft' do
+      draft = create(:image, :draft, title: 'Curated', taken_at: 1.day.ago, row_order: 500)
+
+      patch "/admin/images/#{draft.id}/toggle_publish"
+
+      expect(response).to redirect_to(admin_images_path)
+      expect(draft.reload.is_published).to be(true)
+      expect(flash[:notice]).to include('公開しました')
+    end
+
+    it 'rejects publishing an uncurated draft and surfaces the errors' do
+      draft = create(:image, :draft, row_order: 500)
+
+      patch "/admin/images/#{draft.id}/toggle_publish"
+
+      expect(response).to redirect_to(admin_images_path)
+      expect(draft.reload.is_published).to be(false)
+      expect(flash[:alert]).to include('公開できません')
+    end
+
+    it 'redirects back to the filtered index when toggled from there' do
+      draft = create(:image, :draft, row_order: 500)
+
+      patch "/admin/images/#{draft.id}/toggle_publish",
+            headers: { 'HTTP_REFERER' => admin_images_url(filter: 'uncurated') }
+
+      expect(response).to redirect_to(admin_images_url(filter: 'uncurated'))
+    end
+  end
+
+  describe 'GET /admin/images publish status column' do
+    it 'shows publish state badges and toggle buttons' do
+      create(:image, :draft, row_order: 500)
+
+      get '/admin/images'
+
+      expect(response.body).to include('公開中')
+      expect(response.body).to include('下書き')
+      expect(response.body).to include('公開する')
+      expect(response.body).to include('非公開にする')
+    end
+  end
+
   describe 'POST /admin/images/:id/insert_at' do
     it 'should insert the image at the given position' do
-      expect(Image.rank(:row_order).pluck(:id)).to eq([1, 2, 3, 4])
+      expect(Image.rank(:row_order).pluck(:id)).to eq([image1.id, image2.id, image3.id, image4.id])
 
-      post "/admin/images/1/insert_at", params: { position: 2 }
+      post "/admin/images/#{image1.id}/insert_at", params: { position: 2 }
       expect(response).to have_http_status(:success)
 
-      expect(Image.rank(:row_order).pluck(:id)).to eq([2, 3, 1, 4])
+      expect(Image.rank(:row_order).pluck(:id)).to eq([image2.id, image3.id, image1.id, image4.id])
     end
   end
 

@@ -1,6 +1,6 @@
 class Admin::ImagesController < Admin::Base
   before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
-  before_action :set_image, only: %i[show edit update destroy insert_at]
+  before_action :set_image, only: %i[show edit update destroy insert_at toggle_publish]
 
   def index
     @images = Image.rank(:row_order).with_attached_file
@@ -51,9 +51,20 @@ class Admin::ImagesController < Admin::Base
     end
   end
 
+  # Index の行から公開/非公開をワンクリックで切り替える。公開条件
+  # （title/taken_at）を欠く下書きはバリデーションで弾かれ flash に出る。
+  def toggle_publish
+    @image.is_published = !@image.is_published
+    if @image.save
+      status = @image.is_published? ? '公開しました' : '非公開にしました'
+      redirect_back_or_to(admin_images_path, notice: "「#{@image.title}」を#{status}。")
+    else
+      redirect_back_or_to(admin_images_path, alert: "公開できません: #{@image.errors.full_messages.join('、')}")
+    end
+  end
+
   def insert_at
-    position = insert_params.to_i
-    @image.row_order_position = position
+    @image.row_order_position = insert_params.to_i
     if @image.save
       head :ok
     else
@@ -93,13 +104,11 @@ class Admin::ImagesController < Admin::Base
   end
 
   def redirect_to_next_uncurated
-    next_image = Image.uncurated.where.not(id: @image.id).rank(:row_order).first
-    if next_image
-      remaining = Image.uncurated.where.not(id: @image.id).count
-      redirect_to edit_admin_image_path(next_image), notice: "保存しました。残り#{remaining}枚の下書きがあります。"
-    else
-      redirect_to admin_images_path, notice: '保存しました。未編集の下書きはありません。'
-    end
+    remaining = Image.uncurated.where.not(id: @image.id)
+    next_image = remaining.rank(:row_order).first
+    return redirect_to admin_images_path, notice: '保存しました。未編集の下書きはありません。' if next_image.nil?
+
+    redirect_to edit_admin_image_path(next_image), notice: "保存しました。残り#{remaining.count}枚の下書きがあります。"
   end
 
   def apply_row_order_position(image)
