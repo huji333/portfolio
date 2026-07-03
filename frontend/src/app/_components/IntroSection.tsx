@@ -23,7 +23,7 @@ const SOCIAL_LINKS: { href: string; label: string; icon: IconType }[] = [
 ];
 
 const INTRO_PARAGRAPHS: string[] = [
-  '京都大学理学研究科生物科学専攻 M1',
+  '京都大学理学研究科生物科学専攻動物生態学分科 M2',
   '昆虫が葉につける食痕についての研究。その傍でweb開発と写真撮影をしています。',
 ];
 
