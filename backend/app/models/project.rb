@@ -8,4 +8,10 @@ class Project < ApplicationRecord
 
   validates :title, presence: true
   validates :link, presence: true, format: { with: %r{\Ahttps?://.+\z}, message: "は正しいURLの形式で入力してください (http:// または https:// で始まる必要があります)" }
+
+  # Admin form submits tags as a comma-separated string.
+  def tags=(value)
+    value = value.split(",").map(&:strip).reject(&:empty?) if value.is_a?(String)
+    super
+  end
 end

@@ -11,6 +11,16 @@
     .col-md-3.col-form-label.fw-bold link
     .col-md-9= form.url_field :link, class: 'form-control'
   .row.mb-3
+    .col-md-3.col-form-label.fw-bold description
+    .col-md-9
+      = form.text_area :description, rows: 4, class: 'form-control'
+      %small.text-muted 何を・なぜ・どんな役割で作ったか（2〜3文）
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold tags
+    .col-md-9
+      = form.text_field :tags, value: project.tags.join(', '), class: 'form-control', placeholder: 'Rails, Next.js, 個人開発, 記事'
+      %small.text-muted カンマ区切りで入力（技術に限らず「個人開発」「記事」「写真活動」等の性質も可）
+  .row.mb-3
     .col-md-3.col-form-label.fw-bold file
     .col-md-9
       = form.file_field :file, direct_upload: true, class: 'form-control', data: { direct_upload_target: "input" }

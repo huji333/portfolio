@@ -5,6 +5,8 @@
     %thead
       %tr
         %th プロジェクト名
+        %th 説明
+        %th タグ
         %th リンク
         %th 編集
         %th 削除
@@ -12,6 +14,8 @@
       - @projects.each do |project|
         %tr
           %td= project.title
+          %td= project.description.present? ? truncate(project.description, length: 40) : 'ー'
+          %td= project.tags.any? ? project.tags.join(', ') : 'ー'
           %td
             - if project.link.present?
               = link_to project.link, project.link, target: '_blank', rel: 'noreferrer'
