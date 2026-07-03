@@ -28,15 +28,15 @@ test.describe('Image Create with EXIF', () => {
 
     // Fill remaining required fields
     await page.fill('#image_caption', 'Auto-populated from a7C II EXIF');
-    await page.check('#image_is_published');
 
     // Check a category
     const categoryCheckbox = page.locator('input[id^="category_"]').first();
     await categoryCheckbox.check();
 
-    await page.click('button:has-text("Save"), input[type="submit"][value="Save"]');
+    // 公開状態はチェックボックスではなく送信ボタンで決まる（"公開する" = commit_publish）
+    await page.click('input[type="submit"][value="公開する"]');
 
     await expect(page).toHaveURL(/\/admin\/images$/);
-    await expect(page.locator('body')).toContainText('Image was successfully created.');
+    await expect(page.locator('body')).toContainText('公開しました。');
   });
 });

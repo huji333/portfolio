@@ -25,12 +25,18 @@ test.describe('Image Sort', () => {
       const sourceX = sourceBbox.x + sourceBbox.width / 2;
       const sourceY = sourceBbox.y + sourceBbox.height / 2;
       const targetX = targetBbox.x + targetBbox.width / 2;
-      const targetY = targetBbox.y + targetBbox.height / 2;
+      // Seed Image 1 の行より上までオーバーシュートする。ドラッグ中は行が
+      // リフローして bbox が古くなるため、中央狙いだと直下に入って「上へ移動」
+      // にならない。行の上端を明確に越える位置へ落とす。
+      const targetY = targetBbox.y - targetBbox.height / 2;
 
       await page.mouse.move(sourceX, sourceY);
       await page.mouse.down();
-      // Move in steps for sortable to detect
-      await page.mouse.move(targetX, targetY, { steps: 10 });
+      // まず少し動かして Sortable のドラッグ開始をトリガーする
+      await page.mouse.move(sourceX, sourceY - 8, { steps: 4 });
+      // ターゲット行の上へ複数ステップで移動して確実に先頭へ差し込む
+      await page.mouse.move(targetX, targetY, { steps: 15 });
+      await page.waitForTimeout(150);
       await page.mouse.up();
     }
 

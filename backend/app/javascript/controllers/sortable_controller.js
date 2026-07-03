@@ -11,6 +11,9 @@ export default class extends Controller {
     this.sortable = window.Sortable.create(this.listTarget, {
       animation: 150,
       handle: '.handle',
+      // ネイティブ HTML5 DnD はブラウザ差が大きく合成イベントにも応答しないため、
+      // pointer ベースのフォールバックに固定して挙動を一貫させる（E2E も安定する）。
+      forceFallback: true,
       ghostClass: 'sortable-ghost',
       onStart: () => { this._orderBeforeDrag = this.sortable.toArray() },
       onEnd: this.onSortEnd.bind(this)
