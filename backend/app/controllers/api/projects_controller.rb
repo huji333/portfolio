@@ -9,7 +9,7 @@ class Api::ProjectsController < ApplicationController
   def project_json(project)
     width, height = file_dimensions(project.file)
 
-    project.as_json(only: %i[id title link]).merge(
+    project.as_json(only: %i[id title link description tags]).merge(
       file: project.display_url,
       thumbnail: project.thumbnail_url,
       width: width,

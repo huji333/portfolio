@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe 'Projects API', type: :request do
   let!(:project_one) do
-    create(:project, title: 'Test Project 1', id: 1, link: 'https://example.com/project-1')
+    create(:project, title: 'Test Project 1', id: 1, link: 'https://example.com/project-1',
+                     description: 'A sample project', tags: %w[Rails Next.js])
   end
   let!(:project_two) do
     create(:project, title: 'Test Project 2', id: 2, link: 'https://example.com/project-2')
@@ -21,6 +22,14 @@ RSpec.describe 'Projects API', type: :request do
 
       links = projects.pluck('link')
       expect(links).to include(project_one.link, project_two.link)
+    end
+
+    it 'includes description and tags in each project' do
+      get '/api/projects'
+
+      project = response.parsed_body.find { |p| p['id'] == project_one.id }
+      expect(project['description']).to eq('A sample project')
+      expect(project['tags']).to eq(%w[Rails Next.js])
     end
   end
 end

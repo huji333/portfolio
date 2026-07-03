@@ -60,6 +60,21 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             </span>
           )}
         </h3>
+        {project.description && (
+          <p className="text-sm leading-relaxed text-foreground/80">{project.description}</p>
+        )}
+        {project.tags.length > 0 && (
+          <ul className="mt-auto flex flex-wrap gap-2">
+            {project.tags.map((tag) => (
+              <li
+                key={tag}
+                className="rounded-full border border-accent-light/60 px-2.5 py-0.5 text-xs text-foreground/70"
+              >
+                {tag}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </>
   );

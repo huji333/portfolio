@@ -45,6 +45,6 @@ class Admin::ProjectsController < Admin::Base
   end
 
   def project_params
-    params.expect(project: %i[title link file])
+    params.expect(project: %i[title link file description tags])
   end
 end
