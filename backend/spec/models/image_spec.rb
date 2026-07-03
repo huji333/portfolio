@@ -188,6 +188,19 @@ RSpec.describe Image, type: :model do
     end
   end
 
+  describe '#publishable?' do
+    it 'is true when all publish requirements (title, taken_at) are present' do
+      image = build(:image, is_published: false)
+
+      expect(image.publishable?).to be(true)
+    end
+
+    it 'is false when title or taken_at is blank' do
+      expect(build(:image, title: nil).publishable?).to be(false)
+      expect(build(:image, taken_at: nil).publishable?).to be(false)
+    end
+  end
+
   describe '.for_gallery' do
     let!(:img1) { create(:image, title: 'A', row_order: 0, is_published: true) }
     let!(:img2) { create(:image, title: 'B', row_order: 1, is_published: true) }

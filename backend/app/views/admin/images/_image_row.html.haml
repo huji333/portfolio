@@ -12,16 +12,12 @@
       = image.title
     - else
       %span.text-muted （無題）
-  %td
-    - if image.is_published?
-      %span.badge.text-bg-success 公開中
-    - else
-      %span.badge.text-bg-secondary 下書き
+  %td= render 'admin/images/status_badge', image: image
   %td
     .d-flex.gap-1
       - if image.is_published?
         = button_to '非公開にする', toggle_publish_admin_image_path(image), method: :patch, class: 'btn btn-outline-secondary btn-sm'
-      - else
+      - elsif image.publishable?
         = button_to '公開する', toggle_publish_admin_image_path(image), method: :patch, class: 'btn btn-outline-success btn-sm'
       = link_to '閲覧', admin_image_path(image), class: 'btn btn-primary btn-sm'
       = link_to '編集', edit_admin_image_path(image), class: 'btn btn-secondary btn-sm'

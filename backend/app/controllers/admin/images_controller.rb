@@ -1,6 +1,9 @@
 class Admin::ImagesController < Admin::Base
+  include Admin::ImageCurationFlow
+
   before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
   before_action :set_image, only: %i[show edit update destroy insert_at toggle_publish]
+  before_action :set_next_draft_flag, only: %i[edit update]
 
   def index
     @images = Image.rank(:row_order).with_attached_file
@@ -18,6 +21,7 @@ class Admin::ImagesController < Admin::Base
 
   def create
     @image = Image.new(image_params.except(:row_order_position))
+    @image.is_published = publish_intent || false
     apply_row_order_position(@image)
 
     if @image.save
@@ -30,15 +34,18 @@ class Admin::ImagesController < Admin::Base
 
   def update
     @image.assign_attributes(image_params.except(:row_order_position))
+    intent = publish_intent
+    @image.is_published = intent unless intent.nil?
     apply_row_order_position(@image)
 
     if @image.save
-      return redirect_to_next_uncurated if params[:save_and_next].present?
+      return redirect_to_next_uncurated if advance_to_next?
 
       redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
     else
+      # 公開しようとして弾かれた場合もフォームは元の公開状態のまま再描画する
+      @image.restore_attributes(%i[is_published])
       flash.now[:alert] = 'Image failed to update.'
-      Rails.logger.debug { "Image failed to update: #{@image.errors.full_messages.join(', ')}" }
       render :edit, status: :unprocessable_content
     end
   end
@@ -51,15 +58,18 @@ class Admin::ImagesController < Admin::Base
     end
   end
 
-  # Index の行から公開/非公開をワンクリックで切り替える。公開条件
-  # （title/taken_at）を欠く下書きはバリデーションで弾かれ flash に出る。
+  # Index の行から公開/非公開をワンクリックで切り替える。公開条件を満たさない
+  # 下書きにはボタン自体を出さないが、直リンク等で来た場合は編集画面へ誘導する。
   def toggle_publish
-    @image.is_published = !@image.is_published
-    if @image.save
+    if !@image.is_published? && !@image.publishable?
+      return redirect_to edit_admin_image_path(@image), alert: '公開にはタイトルと撮影日時が必要です。'
+    end
+
+    if @image.update(is_published: !@image.is_published)
       status = @image.is_published? ? '公開しました' : '非公開にしました'
       redirect_back_or_to(admin_images_path, notice: "「#{@image.title}」を#{status}。")
     else
-      redirect_back_or_to(admin_images_path, alert: "公開できません: #{@image.errors.full_messages.join('、')}")
+      redirect_back_or_to(admin_images_path, alert: "更新できません: #{@image.errors.full_messages.join('、')}")
     end
   end
 
@@ -103,14 +113,6 @@ class Admin::ImagesController < Admin::Base
     @image = Image.find(params[:id])
   end
 
-  def redirect_to_next_uncurated
-    remaining = Image.uncurated.where.not(id: @image.id)
-    next_image = remaining.rank(:row_order).first
-    return redirect_to admin_images_path, notice: '保存しました。未編集の下書きはありません。' if next_image.nil?
-
-    redirect_to edit_admin_image_path(next_image), notice: "保存しました。残り#{remaining.count}枚の下書きがあります。"
-  end
-
   def apply_row_order_position(image)
     image.row_order_position = image_params[:row_order_position].to_i if image_params[:row_order_position].present?
   end
@@ -118,7 +120,7 @@ class Admin::ImagesController < Admin::Base
   def image_params
     params.expect(
       image: [:title, :caption, :taken_at, :camera_id, :lens_id,
-              :row_order_position, :is_published, :file,
+              :row_order_position, :file,
               { category_ids: [] }]
     )
   end

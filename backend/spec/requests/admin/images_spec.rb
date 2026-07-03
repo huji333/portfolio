@@ -53,18 +53,18 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(flash[:notice]).to include('公開しました')
     end
 
-    it 'rejects publishing an uncurated draft and surfaces the errors' do
-      draft = create(:image, :draft, row_order: 500)
+    it 'redirects an unpublishable draft to the edit form instead of publishing' do
+      draft = create(:image, :draft, taken_at: nil, row_order: 500)
 
       patch "/admin/images/#{draft.id}/toggle_publish"
 
-      expect(response).to redirect_to(admin_images_path)
+      expect(response).to redirect_to(edit_admin_image_path(draft))
       expect(draft.reload.is_published).to be(false)
-      expect(flash[:alert]).to include('公開できません')
+      expect(flash[:alert]).to include('タイトルと撮影日時が必要')
     end
 
     it 'redirects back to the filtered index when toggled from there' do
-      draft = create(:image, :draft, row_order: 500)
+      draft = create(:image, :draft, title: 'Curated', taken_at: 1.day.ago, row_order: 500)
 
       patch "/admin/images/#{draft.id}/toggle_publish",
             headers: { 'HTTP_REFERER' => admin_images_url(filter: 'uncurated') }
@@ -74,15 +74,74 @@ RSpec.describe 'Admin::Images', type: :request do
   end
 
   describe 'GET /admin/images publish status column' do
-    it 'shows publish state badges and toggle buttons' do
-      create(:image, :draft, row_order: 500)
+    it 'shows badges and offers the publish button only for publishable drafts' do
+      create(:image, :draft, title: 'Curated Draft', taken_at: 1.day.ago, row_order: 500)
+      uncurated = create(:image, :draft, taken_at: nil, row_order: 600)
 
       get '/admin/images'
 
       expect(response.body).to include('公開中')
       expect(response.body).to include('下書き')
-      expect(response.body).to include('公開する')
+      expect(response.body).to include('未編集')
       expect(response.body).to include('非公開にする')
+      # 公開ボタンは publishable な下書き1件分だけ
+      expect(response.body.scan('公開する').size).to eq(1)
+      expect(uncurated.reload.publishable?).to be(false)
+    end
+  end
+
+  describe 'POST /admin/images (publish via submit buttons)' do
+    let(:file) { fixture_file_upload('test_image.jpg', 'image/jpeg') }
+
+    it 'creates a draft with 下書きとして保存' do
+      post '/admin/images', params: { commit_draft: '下書きとして保存', image: { title: 'New Draft', file: file } }
+
+      expect(Image.order(:id).last).to have_attributes(title: 'New Draft', is_published: false)
+    end
+
+    it 'creates a published image with 公開して保存' do
+      post '/admin/images',
+           params: { commit_publish: '公開して保存',
+                     image: { title: 'New Published', taken_at: 1.day.ago, file: file } }
+
+      expect(Image.order(:id).last).to have_attributes(title: 'New Published', is_published: true)
+    end
+  end
+
+  describe 'PATCH /admin/images/:id (publish via submit buttons)' do
+    let!(:draft) { create(:image, :draft, row_order: 500) }
+
+    it 'publishes with 公開して保存 once curated' do
+      patch "/admin/images/#{draft.id}",
+            params: { commit_publish: '公開して保存', image: { title: 'Curated', taken_at: '2026-01-01T10:00' } }
+
+      expect(draft.reload.is_published).to be(true)
+    end
+
+    it 're-renders as draft when publish requirements are missing' do
+      patch "/admin/images/#{draft.id}", params: { commit_publish: '公開して保存', image: { title: '' } }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(draft.reload.is_published).to be(false)
+      # 再描画されたフォームは下書き状態のボタンを出す
+      expect(response.body).to include('下書きとして保存')
+    end
+
+    it 'unpublishes a published image with 非公開にして保存' do
+      patch "/admin/images/#{image1.id}", params: { commit_draft: '非公開にして保存', image: { title: image1.title } }
+
+      expect(image1.reload.is_published).to be(false)
+    end
+
+    it 'publishes and advances to the next draft with 公開して次へ' do
+      next_draft = create(:image, :draft, row_order: 600)
+
+      patch "/admin/images/#{draft.id}",
+            params: { publish_and_next: '公開して次へ', image: { title: 'Curated', taken_at: '2026-01-01T10:00' } }
+
+      expect(draft.reload.is_published).to be(true)
+      expect(response).to redirect_to(edit_admin_image_path(next_draft))
+      expect(flash[:notice]).to include('公開しました')
     end
   end
 

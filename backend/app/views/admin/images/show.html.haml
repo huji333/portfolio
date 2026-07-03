@@ -20,8 +20,8 @@
   .col-md-3.fw-bold Lens
   .col-md-9= @image.lens&.name
 .row.py-1
-  .col-md-3.fw-bold Is published
-  .col-md-9= @image.is_published
+  .col-md-3.fw-bold 公開状態
+  .col-md-9= render 'admin/images/status_badge', image: @image
 
 = link_to '編集', edit_admin_image_path(@image)
 \|

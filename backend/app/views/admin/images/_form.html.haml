@@ -53,17 +53,28 @@
       = form.check_box :category_ids, { multiple: true, checked: image.categories.include?(category), id: "category_#{category.id}" }, category.id, nil
       = form.label "category_#{category.id}", category.name, class: "form-check-label"
 
-  .row.mb-3
-    .col-md-3
-      = form.label :is_published, 'Publish Settings', class: 'col-form-label fw-bold'
-    .col-md-9
-      .form-check
-        = form.check_box :is_published, class: 'form-check-input'
-        = form.label :is_published, 'Publish', class: 'form-check-label'
-  .row
-    .col
-      = form.submit 'Save', class: 'btn btn-primary d-block w-100'
-  - if image.persisted? && !image.is_published
-    .row.mt-2
+  - if image.persisted?
+    .row.mb-3
+      .col-md-3
+        %span.col-form-label.fw-bold 公開状態
+      .col-md-9= render 'admin/images/status_badge', image: image
+
+  - if image.is_published?
+    .row
       .col
-        = form.submit 'Save & Next（次の下書きへ）', name: 'save_and_next', class: 'btn btn-outline-primary d-block w-100'
+        .d-flex.gap-2
+          = form.submit '保存', class: 'btn btn-primary flex-fill'
+          = form.submit '非公開にして保存', name: 'commit_draft', class: 'btn btn-outline-secondary flex-fill'
+  - else
+    .row
+      .col
+        .d-flex.gap-2
+          = form.submit '下書きとして保存', name: 'commit_draft', class: 'btn btn-outline-secondary flex-fill'
+          = form.submit '公開して保存', name: 'commit_publish', class: 'btn btn-primary flex-fill'
+        %small.text-muted.d-block.mt-1 公開にはタイトルと撮影日時が必要です
+    - if image.persisted? && local_assigns.fetch(:next_draft_exists, false)
+      .row.mt-2
+        .col
+          .d-flex.gap-2
+            = form.submit '下書きのまま次へ', name: 'save_and_next', class: 'btn btn-outline-primary flex-fill'
+            = form.submit '公開して次へ', name: 'publish_and_next', class: 'btn btn-outline-success flex-fill'

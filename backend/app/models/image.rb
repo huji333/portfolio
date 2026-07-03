@@ -13,11 +13,14 @@ class Image < ApplicationRecord
 
   has_one_attached :file, dependent: :purge_later
 
+  # 公開に必要な項目の単一ソース。バリデーションと publishable?
+  # （UI で公開ボタンを出すかの判定）を両方ここから導出する。
+  PUBLISH_REQUIREMENTS = %i[title taken_at].freeze
+
   validates :file, presence: true
   # Records exist as drafts first (bulk ingest); title/taken_at are
   # publish-quality requirements, not record-existence requirements.
-  validates :title, presence: true, if: :is_published?
-  validates :taken_at, presence: true, if: :is_published?
+  PUBLISH_REQUIREMENTS.each { |attr| validates attr, presence: true, if: :is_published? }
   validates :is_published, inclusion: { in: [true, false] }
 
   scope :published, -> { where(is_published: true) }
@@ -35,6 +38,10 @@ class Image < ApplicationRecord
     return unless persisted?
 
     self.categories = Category.where(id: ids.compact_blank)
+  end
+
+  def publishable?
+    PUBLISH_REQUIREMENTS.all? { |attr| public_send(attr).present? }
   end
 
   def self.filter_by_categories(category_ids)
