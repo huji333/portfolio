@@ -1,11 +1,5 @@
 %h1 画像一覧
 
-- if flash.notice
-  .alert.alert-info= flash[:notice]
-
-- if flash.alert
-  .alert.alert-danger= flash[:alert]
-
 - if @uncurated_count.positive?
   .alert.alert-warning
     = "未編集の下書きが #{@uncurated_count} 枚あります。"

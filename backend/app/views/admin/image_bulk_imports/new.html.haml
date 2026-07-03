@@ -4,9 +4,6 @@
   選択したファイルはすべて「下書き」として保存されます。taken_at / カメラ / レンズは EXIF から自動で入ります。
   タイトルは取り込み後に1枚ずつ編集してください。
 
-- if flash.now[:alert]
-  .alert.alert-danger= flash.now[:alert]
-
 - if @results.present?
   %ul.list-group.mb-3
     - @results.each do |result|

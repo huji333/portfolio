@@ -93,15 +93,15 @@ RSpec.describe 'Admin::Images', type: :request do
   describe 'POST /admin/images (publish via submit buttons)' do
     let(:file) { fixture_file_upload('test_image.jpg', 'image/jpeg') }
 
-    it 'creates a draft with 下書きとして保存' do
-      post '/admin/images', params: { commit_draft: '下書きとして保存', image: { title: 'New Draft', file: file } }
+    it 'creates a draft with plain 保存' do
+      post '/admin/images', params: { image: { title: 'New Draft', file: file } }
 
       expect(Image.order(:id).last).to have_attributes(title: 'New Draft', is_published: false)
     end
 
-    it 'creates a published image with 公開して保存' do
+    it 'creates a published image with 公開する' do
       post '/admin/images',
-           params: { commit_publish: '公開して保存',
+           params: { commit_publish: '公開する',
                      image: { title: 'New Published', taken_at: 1.day.ago, file: file } }
 
       expect(Image.order(:id).last).to have_attributes(title: 'New Published', is_published: true)
@@ -111,37 +111,59 @@ RSpec.describe 'Admin::Images', type: :request do
   describe 'PATCH /admin/images/:id (publish via submit buttons)' do
     let!(:draft) { create(:image, :draft, row_order: 500) }
 
-    it 'publishes with 公開して保存 once curated' do
+    it 'publishes with 公開する and stays on the card' do
       patch "/admin/images/#{draft.id}",
-            params: { commit_publish: '公開して保存', image: { title: 'Curated', taken_at: '2026-01-01T10:00' } }
+            params: { commit_publish: '公開する', image: { title: 'Curated', taken_at: '2026-01-01T10:00' } }
 
       expect(draft.reload.is_published).to be(true)
+      expect(response).to redirect_to(edit_admin_image_path(draft))
+      expect(flash[:notice]).to include('公開しました')
     end
 
     it 're-renders as draft when publish requirements are missing' do
-      patch "/admin/images/#{draft.id}", params: { commit_publish: '公開して保存', image: { title: '' } }
+      patch "/admin/images/#{draft.id}", params: { commit_publish: '公開する', image: { title: '' } }
 
       expect(response).to have_http_status(:unprocessable_content)
       expect(draft.reload.is_published).to be(false)
-      # 再描画されたフォームは下書き状態のボタンを出す
-      expect(response.body).to include('下書きとして保存')
+      # 再描画されたフォームは下書き状態のボタン（公開する）を出す
+      expect(response.body).to include('公開する')
     end
 
-    it 'unpublishes a published image with 非公開にして保存' do
-      patch "/admin/images/#{image1.id}", params: { commit_draft: '非公開にして保存', image: { title: image1.title } }
+    it 'unpublishes a published image with 非公開に戻す' do
+      patch "/admin/images/#{image1.id}", params: { commit_draft: '非公開に戻す', image: { title: image1.title } }
 
       expect(image1.reload.is_published).to be(false)
+      expect(response).to redirect_to(edit_admin_image_path(image1))
+    end
+  end
+
+  describe 'PATCH /admin/images/:id (card navigation)' do
+    it 'saves and moves to the next image in display order with 次へ' do
+      patch "/admin/images/#{image2.id}", params: { nav_next: '次へ →', image: { title: 'Renamed' } }
+
+      expect(image2.reload.title).to eq('Renamed')
+      expect(response).to redirect_to(edit_admin_image_path(image3))
     end
 
-    it 'publishes and advances to the next draft with 公開して次へ' do
-      next_draft = create(:image, :draft, row_order: 600)
+    it 'saves and moves to the previous image with 前へ' do
+      patch "/admin/images/#{image2.id}", params: { nav_prev: '← 前へ', image: { title: 'Renamed' } }
 
-      patch "/admin/images/#{draft.id}",
-            params: { publish_and_next: '公開して次へ', image: { title: 'Curated', taken_at: '2026-01-01T10:00' } }
+      expect(response).to redirect_to(edit_admin_image_path(image1))
+    end
 
-      expect(draft.reload.is_published).to be(true)
-      expect(response).to redirect_to(edit_admin_image_path(next_draft))
-      expect(flash[:notice]).to include('公開しました')
+    it 'stays on the current card after a plain 保存' do
+      patch "/admin/images/#{image2.id}", params: { image: { title: 'Renamed' } }
+
+      expect(response).to redirect_to(edit_admin_image_path(image2))
+      expect(flash[:notice]).to include('保存しました')
+    end
+
+    it 'disables 前へ on the first card and 次へ on the last card' do
+      get "/admin/images/#{image1.id}/edit"
+      expect(response.body).to match(/nav_prev[^>]*disabled/)
+
+      get "/admin/images/#{image4.id}/edit"
+      expect(response.body).to match(/nav_next[^>]*disabled/)
     end
   end
 
@@ -185,30 +207,14 @@ RSpec.describe 'Admin::Images', type: :request do
     end
   end
 
-  describe 'PATCH /admin/images/:id with save_and_next' do
-    let!(:draft_a) { create(:image, :draft, row_order: 500) }
-    let!(:draft_b) { create(:image, :draft, row_order: 600) }
+  describe 'GET /admin/images/:id/edit' do
+    it 'shows the image preview and card position on the edit card' do
+      get "/admin/images/#{image2.id}/edit"
 
-    it 'redirects to the next uncurated draft after saving' do
-      patch "/admin/images/#{draft_a.id}",
-            params: { save_and_next: '1', image: { title: 'Titled now' } }
-
-      expect(response).to redirect_to(edit_admin_image_path(draft_b))
-    end
-
-    it 'redirects to the index when no uncurated drafts remain' do
-      draft_b.update!(title: 'already titled')
-
-      patch "/admin/images/#{draft_a.id}",
-            params: { save_and_next: '1', image: { title: 'Titled now' } }
-
-      expect(response).to redirect_to(admin_images_path)
-    end
-
-    it 'keeps the normal redirect when save_and_next is absent' do
-      patch "/admin/images/#{draft_a.id}", params: { image: { title: 'Titled now' } }
-
-      expect(response).to redirect_to(admin_images_path(draft_a, format: nil))
+      expect(response).to have_http_status(:success)
+      # プレビュー画像（Active Storage の representation URL）が描画される
+      expect(response.body).to include('/rails/active_storage/representations/')
+      expect(response.body).to include('2 / 4 枚目')
     end
   end
 end

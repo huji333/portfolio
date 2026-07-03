@@ -3,7 +3,7 @@ class Admin::ImagesController < Admin::Base
 
   before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
   before_action :set_image, only: %i[show edit update destroy insert_at toggle_publish]
-  before_action :set_next_draft_flag, only: %i[edit update]
+  before_action :set_adjacent_images, only: %i[edit update]
 
   def index
     @images = Image.rank(:row_order).with_attached_file
@@ -25,7 +25,7 @@ class Admin::ImagesController < Admin::Base
     apply_row_order_position(@image)
 
     if @image.save
-      redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully created.'
+      redirect_to admin_images_path, notice: update_notice
     else
       flash.now[:alert] = 'Image failed to create.'
       render :new, status: :unprocessable_content
@@ -39,9 +39,7 @@ class Admin::ImagesController < Admin::Base
     apply_row_order_position(@image)
 
     if @image.save
-      return redirect_to_next_uncurated if advance_to_next?
-
-      redirect_to admin_images_path(@image, format: nil), notice: 'Image was successfully updated.'
+      redirect_to after_save_edit_path, notice: update_notice
     else
       # 公開しようとして弾かれた場合もフォームは元の公開状態のまま再描画する
       @image.restore_attributes(%i[is_published])
