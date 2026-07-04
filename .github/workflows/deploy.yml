@@ -95,6 +95,8 @@ jobs:
           tags: tag:ci
 
       - name: Deploy to mr2
+        # git pull を前置: bin/deploy 自体の更新を反映してから実行する
+        # （script 内の pull だけだと script 新規追加/更新時に古いものが走る）
         run: |
           ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 \
-            huji333@mr2 "~/portfolio/bin/deploy $IMAGE_TAG"
+            huji333@mr2 "git -C ~/portfolio pull --ff-only origin main && ~/portfolio/bin/deploy $IMAGE_TAG"
