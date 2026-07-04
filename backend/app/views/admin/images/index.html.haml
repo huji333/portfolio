@@ -1,3 +1,5 @@
+- sorting_enabled = params[:filter].blank?
+
 %h1 画像一覧
 
 - if @uncurated_count.positive?
@@ -8,19 +10,22 @@
     - else
       = link_to '下書きのみ表示', admin_images_path(filter: "uncurated")
 
+- unless sorting_enabled
+  %p.text-muted.small フィルタ中は並び替えできません。並び替えは全体表示で行います。
+
 .table-responsive
-  %table.table.table-striped{"data-controller": "sortable"}
+  %table.table.table-striped{ data: (sorting_enabled ? { controller: "sortable" } : {}) }
     %thead
       %tr
-        %th 表示順
+        - if sorting_enabled
+          %th 表示順
         %th プレビュー
         %th タイトル
         %th 公開状態
         %th 操作
-    %tbody{"data-sortable-target": "list",
-           "data-sortable-update-url-value": insert_at_admin_image_path(":id")}
+    %tbody{ data: (sorting_enabled ? { "sortable-target": "list", "sortable-update-url-value": insert_at_admin_image_path(":id") } : {}) }
       - @images.each do |image|
-        = render 'image_row', image: image
+        = render 'image_row', image: image, sorting_enabled: sorting_enabled
 
 = link_to '新規作成', new_admin_image_path, class: 'btn btn-primary mt-3'
 = link_to '一括取り込み', new_admin_image_bulk_import_path, class: 'btn btn-outline-primary mt-3 ms-2'

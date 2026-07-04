@@ -1,6 +1,39 @@
 .container.mt-4
   %h1.mb-4 管理者ページ
 
+  -# 作業導線: メタデータ付与（編纂）と並び替えを別の起点として最優先に置く
+  .row.g-3.mb-4
+    .col-md-6
+      = link_to admin_images_path(filter: "uncurated"), class: 'card text-decoration-none h-100 border-warning' do
+        .card-body
+          .text-muted.small.text-uppercase メタデータ付与
+          %span.display-5.fw-bold.text-warning-emphasis= @uncurated_count
+          %span.ms-2 枚の未編集下書き
+          %p.card-text.text-muted.mb-0.mt-2 タイトル・カテゴリ・機材を付けて編纂する →
+    .col-md-6
+      = link_to admin_images_path, class: 'card text-decoration-none h-100 border-primary' do
+        .card-body
+          .text-muted.small.text-uppercase 並び替え
+          %span.display-5.fw-bold.text-primary-emphasis= @published_count
+          %span.ms-2 枚の公開画像
+          %p.card-text.text-muted.mb-0.mt-2 ギャラリーの表示順を並び替える →
+
+  -# 統計サマリ: 未編集・公開を主役に、下書きは従（アーカイブ滞留もありうる）
+  .row.g-3.mb-4.text-center
+    .col-4
+      .border.rounded.py-2
+        .h4.mb-0= @published_count
+        .small.text-muted 公開
+    .col-4
+      .border.rounded.py-2
+        .h4.mb-0= @uncurated_count
+        .small.text-muted 未編集
+    .col-4
+      .border.rounded.py-2.bg-light
+        .h4.mb-0.text-muted= @draft_count
+        .small.text-muted 下書き（アーカイブ含む）
+
+  %h2.h5.mb-3 各セクション
   .row
     .col-md-4.mb-4
       = link_to admin_images_path, class: 'card text-decoration-none' do
@@ -8,6 +41,19 @@
           %h5.card-title 画像管理
           %p.card-text.text-muted 画像のアップロードと管理
 
+    .col-md-4.mb-4
+      = link_to admin_categories_path, class: 'card text-decoration-none' do
+        .card-body
+          %h5.card-title カテゴリ管理
+          %p.card-text.text-muted カテゴリの管理
+
+    .col-md-4.mb-4
+      = link_to admin_projects_path, class: 'card text-decoration-none' do
+        .card-body
+          %h5.card-title プロジェクト管理
+          %p.card-text.text-muted プロジェクトの管理
+
+    -# #251 で /admin/gear（カメラ・レンズ統合ビュー）に差し替え予定
     .col-md-4.mb-4
       = link_to admin_cameras_path, class: 'card text-decoration-none' do
         .card-body
@@ -19,3 +65,9 @@
         .card-body
           %h5.card-title レンズ管理
           %p.card-text.text-muted レンズ情報の管理
+
+    .col-md-4.mb-4
+      = link_to new_admin_image_bulk_import_path, class: 'card text-decoration-none' do
+        .card-body
+          %h5.card-title 一括取り込み
+          %p.card-text.text-muted 複数画像をまとめて取り込む
