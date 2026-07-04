@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ──────────────────────────────────────────────
+# bin/deploy — GHCR のイメージで本番を更新する（mr2 上で実行）
+#
+# Usage:
+#   bin/deploy <image-tag>   # image-tag = commit SHA（CI が push したタグ）
+#
+# 通常は GitHub Actions (deploy.yml) から Tailscale SSH 経由で呼ばれる。
+# ロールバックは過去の SHA を渡して手動実行でも可。
+# ──────────────────────────────────────────────
+
+TAG="${1:?Usage: bin/deploy <image-tag>}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+COMPOSE=(docker compose -f docker-compose.prod.yml)
+
+echo "[deploy $(date -Iseconds)] start: tag=${TAG}"
+
+# compose ファイル等を最新化（ロールバック時は古いイメージ×最新 compose になる点に注意）
+git pull --ff-only origin main
+
+# IMAGE_TAG は .env に永続化する（compose の変数展開の single source。
+# 以後の手動 `docker compose up -d` も同じタグを使う）
+if grep -q '^IMAGE_TAG=' .env; then
+  sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${TAG}|" .env
+else
+  printf '\nIMAGE_TAG=%s\n' "$TAG" >> .env
+fi
+
+echo "[deploy] pulling images"
+"${COMPOSE[@]}" pull backend frontend
+
+echo "[deploy] backing up db"
+bash bin/backup-db
+
+echo "[deploy] running migrations"
+"${COMPOSE[@]}" --profile migrate run --rm migrate
+
+echo "[deploy] restarting services"
+"${COMPOSE[@]}" up -d
+
+echo "[deploy] healthcheck"
+for _ in $(seq 1 30); do
+  if curl -fsS -o /dev/null --max-time 5 https://kakemu.work \
+     && curl -fsS -o /dev/null --max-time 5 https://api.kakemu.work/up; then
+    echo "[deploy $(date -Iseconds)] OK: tag=${TAG}"
+    exit 0
+  fi
+  sleep 2
+done
+
+echo "[deploy $(date -Iseconds)] FAILED: healthcheck timed out (tag=${TAG})" >&2
+"${COMPOSE[@]}" ps >&2
+exit 1

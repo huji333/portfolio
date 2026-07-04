@@ -7,8 +7,13 @@
 # Migration: 初回または schema 変更後に一度だけ migrate サービスを実行
 #   docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate
 
+# CD: 通常運用では CI (deploy.yml) が GHCR に push したイメージを IMAGE_TAG で指定して
+# pull する（bin/deploy が .env の IMAGE_TAG を更新）。build: は緊急時のローカルビルド
+# フォールバック（--build 指定時のみ使われる）。
+
 services:
   backend:
+    image: ghcr.io/huji333/portfolio-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -37,6 +42,7 @@ services:
     restart: unless-stopped
 
   frontend:
+    image: ghcr.io/huji333/portfolio-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -93,6 +99,8 @@ services:
     restart: unless-stopped
 
   migrate:
+    # backend と同一イメージ（backend の pull で解決されるため個別 pull 不要）
+    image: ghcr.io/huji333/portfolio-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile

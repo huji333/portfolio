@@ -1,0 +1,100 @@
+# Deploy — GHCR にイメージを build/push し、Tailscale 経由で mr2 に反映する
+#
+# 認証はすべて短命トークン（静的 secret なし）:
+#   - GHCR push: ジョブ毎に自動発行される GITHUB_TOKEN
+#   - tailnet 参加: GitHub OIDC → Tailscale workload identity federation
+#   - mr2 への SSH: Tailscale SSH（ACL の ssh ルールで tag:ci → mr2 のみ許可）
+#
+# 事前セットアップ（Tailscale 管理画面・mr2 側の手順）は DEPLOY.md を参照。
+#
+# ロールバック: Actions の Run workflow から image_tag に過去の commit SHA を
+# 指定して手動実行すると、build をスキップしてそのイメージを再デプロイする。
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.prod.yml'
+      - 'bin/deploy'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'デプロイするイメージタグ（commit SHA）。空なら HEAD を build してデプロイ'
+        required: false
+        default: ''
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  build:
+    # ロールバック（image_tag 指定）時は build をスキップ
+    if: github.event_name == 'push' || inputs.image_tag == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - service: backend
+            build_args: ''
+          - service: frontend
+            # NEXT_PUBLIC_* はクライアント JS に焼き込まれる公開値（mr2 の .env と同値を維持すること）
+            build_args: |
+              NEXT_PUBLIC_API_BASE_URL=https://api.kakemu.work/api
+              NEXT_PUBLIC_CLOUDFRONT_BASE_URL=https://d3dl8ofusrny5i.cloudfront.net
+              NEXT_PUBLIC_S3_HOSTNAME=
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: ./${{ matrix.service }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/portfolio-${{ matrix.service }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/portfolio-${{ matrix.service }}:latest
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,scope=${{ matrix.service }},mode=max
+
+  deploy:
+    needs: build
+    # build 成功時 or ロールバックで build がスキップされた時に実行
+    if: ${{ !cancelled() && !failure() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write # Tailscale workload identity federation (OIDC)
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag != '' && inputs.image_tag || github.sha }}
+    steps:
+      - name: Connect to tailnet
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8 # v4
+        with:
+          oauth-client-id: ${{ vars.TS_FEDERATED_CLIENT_ID }}
+          audience: ${{ vars.TS_AUDIENCE }}
+          tags: tag:ci
+
+      - name: Deploy to mr2
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=30 \
+            huji333@mr2 "~/portfolio/bin/deploy $IMAGE_TAG"
