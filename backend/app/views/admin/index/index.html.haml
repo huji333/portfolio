@@ -1,21 +1,44 @@
 .container.mt-4
   %h1.mb-4 管理者ページ
 
-  .row
-    .col-md-4.mb-4
-      = link_to admin_images_path, class: 'card text-decoration-none' do
+  -# 作業ランチャー: 「取り込む → 編纂する → 並べる」の3作業を起点に置く
+  .row.g-3.mb-5
+    .col-md-4
+      = link_to new_admin_image_bulk_import_path, class: 'card text-decoration-none h-100' do
         .card-body
-          %h5.card-title 画像管理
-          %p.card-text.text-muted 画像のアップロードと管理
+          %h5.card-title 取り込む
+          %p.card-text.text-muted.mb-0 画像をまとめてアップロードして下書きにする →
+    .col-md-4
+      = link_to admin_images_path(filter: "uncurated"), class: 'card text-decoration-none h-100 border-warning' do
+        .card-body
+          %h5.card-title
+            編纂する
+            - if @uncurated_count.positive?
+              %span.badge.text-bg-warning.ms-1= "残 #{@uncurated_count} 件"
+          %p.card-text.text-muted.mb-0 タイトル・カテゴリ・機材を付けて仕上げる →
+    .col-md-4
+      = link_to arrange_admin_images_path, class: 'card text-decoration-none h-100' do
+        .card-body
+          %h5.card-title 並べる
+          %p.card-text.text-muted.mb-0 公開ギャラリーの表示順をドラッグで整える →
 
-    .col-md-4.mb-4
-      = link_to admin_cameras_path, class: 'card text-decoration-none' do
+  %h2.h5.mb-3.text-muted マスタ
+  .row.g-3
+    .col-md-4
+      = link_to admin_gear_path, class: 'card text-decoration-none h-100' do
         .card-body
-          %h5.card-title カメラ管理
-          %p.card-text.text-muted カメラ情報の管理
-
-    .col-md-4.mb-4
-      = link_to admin_lenses_path, class: 'card text-decoration-none' do
+          %h5.card-title
+            機材
+            - if @uncurated_gear_count.positive?
+              %span.badge.text-bg-warning.ms-1= "未整備 #{@uncurated_gear_count}"
+          %p.card-text.text-muted.mb-0 カメラ・レンズ
+    .col-md-4
+      = link_to admin_categories_path, class: 'card text-decoration-none h-100' do
         .card-body
-          %h5.card-title レンズ管理
-          %p.card-text.text-muted レンズ情報の管理
+          %h5.card-title カテゴリ
+          %p.card-text.text-muted.mb-0 タグ付けの選択肢
+    .col-md-4
+      = link_to admin_projects_path, class: 'card text-decoration-none h-100' do
+        .card-body
+          %h5.card-title プロジェクト
+          %p.card-text.text-muted.mb-0 まとまり単位の展示

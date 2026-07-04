@@ -21,7 +21,7 @@ RSpec.describe 'Admin::Images', type: :request do
       get '/admin/images'
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include('未編集の下書きが 1 枚あります')
+      expect(response.body).to include('未編集の下書き 1 枚を表示')
     end
 
     it 'filters to uncurated drafts only' do
@@ -34,47 +34,22 @@ RSpec.describe 'Admin::Images', type: :request do
     end
   end
 
-  describe 'PATCH /admin/images/:id/toggle_publish' do
-    it 'unpublishes a published image' do
-      patch "/admin/images/#{image1.id}/toggle_publish"
+  describe 'GET /admin/images/arrange' do
+    it 'lists only published images for reordering' do
+      draft = create(:image, :draft, row_order: 500)
 
-      expect(response).to redirect_to(admin_images_path)
-      expect(image1.reload.is_published).to be(false)
-      expect(flash[:notice]).to include('非公開にしました')
-    end
+      get '/admin/images/arrange'
 
-    it 'publishes a curated draft' do
-      draft = create(:image, :draft, title: 'Curated', taken_at: 1.day.ago, row_order: 500)
-
-      patch "/admin/images/#{draft.id}/toggle_publish"
-
-      expect(response).to redirect_to(admin_images_path)
-      expect(draft.reload.is_published).to be(true)
-      expect(flash[:notice]).to include('公開しました')
-    end
-
-    it 'redirects an unpublishable draft to the edit form instead of publishing' do
-      draft = create(:image, :draft, taken_at: nil, row_order: 500)
-
-      patch "/admin/images/#{draft.id}/toggle_publish"
-
-      expect(response).to redirect_to(edit_admin_image_path(draft))
-      expect(draft.reload.is_published).to be(false)
-      expect(flash[:alert]).to include('タイトルと撮影日時が必要')
-    end
-
-    it 'redirects back to the filtered index when toggled from there' do
-      draft = create(:image, :draft, title: 'Curated', taken_at: 1.day.ago, row_order: 500)
-
-      patch "/admin/images/#{draft.id}/toggle_publish",
-            headers: { 'HTTP_REFERER' => admin_images_url(filter: 'uncurated') }
-
-      expect(response).to redirect_to(admin_images_url(filter: 'uncurated'))
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("data-image-id='#{image1.id}'").or include("data-image-id=\"#{image1.id}\"")
+      # 下書きは並び替え画面に出さない（公開ギャラリーの鏡）
+      expect(response.body).not_to include("data-image-id='#{draft.id}'")
+      expect(response.body).not_to include("data-image-id=\"#{draft.id}\"")
     end
   end
 
   describe 'GET /admin/images publish status column' do
-    it 'shows badges and offers the publish button only for publishable drafts' do
+    it 'shows status badges without inline publish/unpublish buttons' do
       create(:image, :draft, title: 'Curated Draft', taken_at: 1.day.ago, row_order: 500)
       uncurated = create(:image, :draft, taken_at: nil, row_order: 600)
 
@@ -83,9 +58,9 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(response.body).to include('公開中')
       expect(response.body).to include('下書き')
       expect(response.body).to include('未編集')
-      expect(response.body).to include('非公開にする')
-      # 公開ボタンは publishable な下書き1件分だけ
-      expect(response.body.scan('公開する').size).to eq(1)
+      # インラインの公開/非公開ボタンは廃止（公開切替は編集画面へ集約）
+      expect(response.body).not_to include('非公開にする')
+      expect(response.body).not_to include('公開する')
       expect(uncurated.reload.publishable?).to be(false)
     end
   end
@@ -175,6 +150,32 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(response).to have_http_status(:success)
 
       expect(Image.rank(:row_order).pluck(:id)).to eq([image2.id, image3.id, image1.id, image4.id])
+    end
+
+    it 'translates a published-list index into a global position, stepping over an interleaved draft' do
+      # global順: image1(100) < draft(150) < image2(200) < image3(300) < image4(400)
+      draft = create(:image, :draft, taken_at: nil, row_order: 150)
+
+      # 公開リスト [image1, image2, image3, image4] の index 1 へ image4 を移動
+      post "/admin/images/#{image4.id}/insert_at", params: { position: 1 }
+      expect(response).to have_http_status(:success)
+
+      # draft は image1 の直後に留まり、image4 は image2 の直前へ入る
+      expect(Image.rank(:row_order).pluck(:id))
+        .to eq([image1.id, draft.id, image4.id, image2.id, image3.id])
+    end
+
+    it 'drops to the tail of the published list without overtaking a trailing draft' do
+      # 末尾の公開画像より後ろに滞留する下書き
+      draft = create(:image, :draft, taken_at: nil, row_order: 500)
+
+      # 公開リスト末尾（index 3）へ image1 を移動
+      post "/admin/images/#{image1.id}/insert_at", params: { position: 3 }
+      expect(response).to have_http_status(:success)
+
+      # image1 は最後の公開画像 image4 の直後、末尾の draft の前に入る
+      expect(Image.rank(:row_order).pluck(:id))
+        .to eq([image2.id, image3.id, image4.id, image1.id, draft.id])
     end
   end
 

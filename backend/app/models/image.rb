@@ -40,6 +40,22 @@ class Image < ApplicationRecord
     PUBLISH_REQUIREMENTS.all? { |attr| public_send(attr).present? }
   end
 
+  # 並び替え画面は公開画像のみを表示するため、ドロップ位置は「公開リスト内の index」で
+  # 届く。これを全画像共有の row_order 空間での position に変換する。ドロップ位置の次に
+  # 来る公開画像の直前へ、末尾なら最後の公開画像の直後へ挿入する（末尾より後ろの下書きは
+  # 追い越さない）。全画像が公開のときは index と一致する。
+  def self.published_index_to_row_order_position(image, published_index)
+    others = where.not(id: image.id)
+    published = others.published.rank(:row_order).to_a
+    if (successor = published[published_index])
+      others.where(row_order: ...successor.row_order).count
+    elsif (last = published.last)
+      others.where(row_order: ..last.row_order).count
+    else
+      0
+    end
+  end
+
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?
 

@@ -1,0 +1,5 @@
+.container.mt-4
+  %h1.mb-4 機材
+
+  = render 'gear_section', title: 'カメラ', records: @cameras, usage: @camera_usage, model_class: Camera, show_manufacturer: true
+  = render 'gear_section', title: 'レンズ', records: @lenses, usage: @lens_usage, model_class: Lens, show_manufacturer: false

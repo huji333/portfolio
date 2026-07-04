@@ -13,15 +13,16 @@ Rails.application.routes.draw do
     resources :images do
       member do
         post :insert_at
-        patch :toggle_publish
       end
       collection do
+        get :arrange
         post :extract_exif
       end
     end
     resource :image_bulk_import, only: %i[new create]
-    resources :cameras
-    resources :lenses
+    get 'gear', to: 'gear#index'
+    resources :cameras, except: %i[index show]
+    resources :lenses, except: %i[index show]
     resources :categories
     resources :projects
   end

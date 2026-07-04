@@ -2,13 +2,18 @@ class Admin::ImagesController < Admin::Base
   include Admin::ImageCurationFlow
 
   before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
-  before_action :set_image, only: %i[show edit update destroy insert_at toggle_publish]
+  before_action :set_image, only: %i[show edit update destroy insert_at]
   before_action :set_adjacent_images, only: %i[edit update]
 
   def index
     @images = Image.rank(:row_order).with_attached_file
     @uncurated_count = Image.uncurated.count
     @images = @images.uncurated if params[:filter] == "uncurated"
+  end
+
+  # 並び替え専用画面。公開ギャラリーの鏡として公開画像のみを表示する。
+  def arrange
+    @images = Image.published.rank(:row_order).with_attached_file
   end
 
   def show; end
@@ -56,23 +61,10 @@ class Admin::ImagesController < Admin::Base
     end
   end
 
-  # Index の行から公開/非公開をワンクリックで切り替える。公開条件を満たさない
-  # 下書きにはボタン自体を出さないが、直リンク等で来た場合は編集画面へ誘導する。
-  def toggle_publish
-    if !@image.is_published? && !@image.publishable?
-      return redirect_to edit_admin_image_path(@image), alert: '公開にはタイトルと撮影日時が必要です。'
-    end
-
-    if @image.update(is_published: !@image.is_published)
-      status = @image.is_published? ? '公開しました' : '非公開にしました'
-      redirect_back_or_to(admin_images_path, notice: "「#{@image.title}」を#{status}。")
-    else
-      redirect_back_or_to(admin_images_path, alert: "更新できません: #{@image.errors.full_messages.join('、')}")
-    end
-  end
-
+  # 並び替え画面は公開画像のみを表示するため、ドロップ位置は「公開リスト内の
+  # index」で届く。全画像共有の row_order 空間での position への変換は Image が担う。
   def insert_at
-    @image.row_order_position = insert_params.to_i
+    @image.row_order_position = Image.published_index_to_row_order_position(@image, insert_params.to_i)
     if @image.save
       head :ok
     else

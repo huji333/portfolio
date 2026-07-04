@@ -1,0 +1,4 @@
+- if image.file.attached?
+  = image_tag(image.thumbnail_variant, alt: "#{image.title} preview", style: "height: 64px; width: auto;")
+- else
+  %span.text-muted プレビューなし

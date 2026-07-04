@@ -1,26 +1,26 @@
-%h1 画像一覧
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1.mb-0 画像一覧
+  .d-flex.gap-2
+    = link_to '並び替え', arrange_admin_images_path, class: 'btn btn-outline-secondary'
+    = link_to '新規作成', new_admin_image_path, class: 'btn btn-primary'
+    = link_to '一括取り込み', new_admin_image_bulk_import_path, class: 'btn btn-outline-primary'
 
 - if @uncurated_count.positive?
-  .alert.alert-warning
-    = "未編集の下書きが #{@uncurated_count} 枚あります。"
+  %p.text-muted.small
     - if params[:filter] == "uncurated"
+      = "未編集の下書きのみ表示中。"
       = link_to 'すべて表示', admin_images_path
     - else
-      = link_to '下書きのみ表示', admin_images_path(filter: "uncurated")
+      = "未編集の下書き #{@uncurated_count} 枚を表示。"
+      = link_to '未編集のみ表示', admin_images_path(filter: "uncurated")
 
 .table-responsive
-  %table.table.table-striped{"data-controller": "sortable"}
+  %table.table.table-hover
     %thead
       %tr
-        %th 表示順
         %th プレビュー
         %th タイトル
-        %th 公開状態
-        %th 操作
-    %tbody{"data-sortable-target": "list",
-           "data-sortable-update-url-value": insert_at_admin_image_path(":id")}
+        %th 状態
+    %tbody
       - @images.each do |image|
         = render 'image_row', image: image
-
-= link_to '新規作成', new_admin_image_path, class: 'btn btn-primary mt-3'
-= link_to '一括取り込み', new_admin_image_bulk_import_path, class: 'btn btn-outline-primary mt-3 ms-2'

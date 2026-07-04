@@ -11,4 +11,10 @@ class Lens < ApplicationRecord
 
     find_or_create_by!(exif_name: exif_name) { |lens| lens.name = exif_name }
   end
+
+  # EXIF 自動生成のまま表示名を整えていない機材を「未整備」とする。
+  # 手動作成（exif_name が blank）は整備済み扱い。
+  def uncurated?
+    exif_name.present? && name == exif_name
+  end
 end

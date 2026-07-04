@@ -1,10 +1,6 @@
 class Admin::LensesController < Admin::Base
   before_action :set_lens, only: %i[edit update destroy]
 
-  def index
-    @lenses = Lens.order(:name)
-  end
-
   def new
     @lens = Lens.new
   end
@@ -15,7 +11,7 @@ class Admin::LensesController < Admin::Base
     @lens = Lens.new(lens_params)
 
     if @lens.save
-      redirect_to admin_lenses_path, notice: 'Lens was successfully created.'
+      redirect_to admin_gear_path, notice: 'Lens was successfully created.'
     else
       flash.now[:alert] = 'Lens failed to create.'
       render :new, status: :unprocessable_content
@@ -24,7 +20,7 @@ class Admin::LensesController < Admin::Base
 
   def update
     if @lens.update(lens_params)
-      redirect_to admin_lenses_path, notice: 'Lens was successfully updated.'
+      redirect_to admin_gear_path, notice: 'Lens was successfully updated.'
     else
       flash.now[:alert] = 'Lens failed to update.'
       render :edit, status: :unprocessable_content
@@ -33,9 +29,9 @@ class Admin::LensesController < Admin::Base
 
   def destroy
     if @lens.destroy
-      redirect_to admin_lenses_path, notice: 'Lens was successfully destroyed.'
+      redirect_to admin_gear_path, notice: 'Lens was successfully destroyed.'
     else
-      redirect_to admin_lenses_path, alert: 'Lens could not be destroyed.'
+      redirect_to admin_gear_path, alert: 'Lens could not be destroyed.'
     end
   end
 

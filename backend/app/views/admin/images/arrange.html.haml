@@ -1,0 +1,24 @@
+.d-flex.justify-content-between.align-items-center.mb-3
+  %h1.mb-0 並び替え
+  = link_to '← 一覧へ戻る', admin_images_path, class: 'btn btn-outline-secondary'
+
+%p.text-muted.small 公開ギャラリーの表示順。ドラッグで即保存されます。
+
+- if @images.any?
+  .table-responsive
+    %table.table.table-hover{ data: { controller: 'sortable' } }
+      %thead
+        %tr
+          %th 表示順
+          %th プレビュー
+          %th タイトル
+      %tbody{ data: { "sortable-target": "list" } }
+        - @images.each_with_index do |image, index|
+          %tr{"data-image-id": image.id}
+            %td.handle.cursor-grab.user-select-none
+              %span.material-symbols-outlined.text-muted.me-1 drag_indicator
+              %span.order-number= index + 1
+            %td= render 'admin/images/image_preview', image: image
+            %td= render 'admin/images/image_title', image: image
+- else
+  %p.text-muted 公開中の画像がまだありません。編纂して公開すると、ここに並びます。

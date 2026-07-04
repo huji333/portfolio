@@ -22,6 +22,7 @@
   %body
     %nav.navbar.navbar-expand-lg.navbar-light.bg-light
       .container
+        %a.navbar-brand{:href => "/admin"} ダッシュボード
         %button.navbar-toggler{"aria-controls" => "navbarNav", "aria-expanded" => "false", "aria-label" => "Toggle navigation", "data-bs-target" => "#navbarNav", "data-bs-toggle" => "collapse", :type => "button"}
           %span.navbar-toggler-icon
         #navbarNav.collapse.navbar-collapse
@@ -29,9 +30,7 @@
             %li.nav-item
               %a.nav-link{:href => "/admin/images"} 画像
             %li.nav-item
-              %a.nav-link{:href => "/admin/cameras"} カメラ
-            %li.nav-item
-              %a.nav-link{:href => "/admin/lenses"} レンズ
+              %a.nav-link{:href => "/admin/gear"} 機材
             %li.nav-item
               %a.nav-link{:href => "/admin/categories"} カテゴリ
             %li.nav-item
