@@ -22,6 +22,6 @@
             - else
               ー
           %td= link_to '編集', edit_admin_project_path(project), class: 'btn btn-secondary btn-sm'
-          %td= button_to '削除', admin_project_path(project), method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'
+          %td= button_to '削除', admin_project_path(project), method: :delete, data: { turbo_confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'
 
 = link_to '新規作成', new_admin_project_path, class: 'btn btn-primary mt-3'

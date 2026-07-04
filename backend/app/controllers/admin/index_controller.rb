@@ -1,8 +1,9 @@
 class Admin::IndexController < Admin::Base
-  # 統計はキャッシュしない。admin のみ・低トラフィックなので単純 count で十分（YAGNI）。
+  # ダッシュボードは作業ランチャー。残作業カウントのみ持つ（統計タイルは廃止）。
+  # admin のみ・低トラフィックなので単純 count で十分（YAGNI）。
   def index
-    @published_count = Image.published.count
-    @draft_count     = Image.draft.count
     @uncurated_count = Image.uncurated.count
+    # 未整備機材数はモデル述語で判定するため Ruby 側で集計（admin のみ・低件数で YAGNI）
+    @uncurated_gear_count = Camera.count(&:uncurated?) + Lens.count(&:uncurated?)
   end
 end

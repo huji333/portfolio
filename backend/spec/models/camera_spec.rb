@@ -53,4 +53,18 @@ RSpec.describe Camera, type: :model do
       expect(Camera.resolve_from_exif(make: '', model: 'ILCE-7CM2')).to be_nil
     end
   end
+
+  describe '#uncurated?' do
+    it 'is uncurated when display values still equal the raw EXIF make/model' do
+      expect(Camera.new(make: 'SONY', model: 'ILCE-7CM2', manufacturer: 'SONY', name: 'ILCE-7CM2')).to be_uncurated
+    end
+
+    it 'is curated once display values have been edited' do
+      expect(Camera.new(make: 'SONY', model: 'ILCE-7CM2', manufacturer: 'Sony', name: 'a7C II')).not_to be_uncurated
+    end
+
+    it 'treats manually-created cameras (blank make/model) as curated' do
+      expect(Camera.new(make: nil, model: nil, manufacturer: 'Fujifilm', name: 'X-T5')).not_to be_uncurated
+    end
+  end
 end

@@ -1,11 +1,5 @@
 class Admin::CamerasController < Admin::Base
-  before_action :set_camera, only: %i[show edit update destroy]
-
-  def index
-    @cameras = Camera.order(:manufacturer, :name)
-  end
-
-  def show; end
+  before_action :set_camera, only: %i[edit update destroy]
 
   def new
     @camera = Camera.new
@@ -17,7 +11,7 @@ class Admin::CamerasController < Admin::Base
     @camera = Camera.new(camera_params)
 
     if @camera.save
-      redirect_to admin_cameras_path, notice: 'Camera was successfully created.'
+      redirect_to admin_gear_path, notice: 'Camera was successfully created.'
     else
       flash.now[:alert] = 'Camera failed to create.'
       render :new, status: :unprocessable_content
@@ -26,7 +20,7 @@ class Admin::CamerasController < Admin::Base
 
   def update
     if @camera.update(camera_params)
-      redirect_to admin_cameras_path, notice: 'Camera was successfully updated.'
+      redirect_to admin_gear_path, notice: 'Camera was successfully updated.'
     else
       flash.now[:alert] = 'Camera failed to update.'
       render :edit, status: :unprocessable_content
@@ -35,9 +29,9 @@ class Admin::CamerasController < Admin::Base
 
   def destroy
     if @camera.destroy
-      redirect_to admin_cameras_path, notice: 'Camera was successfully destroyed.'
+      redirect_to admin_gear_path, notice: 'Camera was successfully destroyed.'
     else
-      redirect_to admin_cameras_path, alert: 'Camera could not be destroyed.'
+      redirect_to admin_gear_path, alert: 'Camera could not be destroyed.'
     end
   end
 

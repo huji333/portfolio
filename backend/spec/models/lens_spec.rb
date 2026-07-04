@@ -39,4 +39,18 @@ RSpec.describe Lens, type: :model do
       expect(Lens.resolve_from_exif('')).to be_nil
     end
   end
+
+  describe '#uncurated?' do
+    it 'is uncurated when the display name still equals the raw exif name' do
+      expect(Lens.new(exif_name: 'XF35mmF1.4 R', name: 'XF35mmF1.4 R')).to be_uncurated
+    end
+
+    it 'is curated once the display name has been edited' do
+      expect(Lens.new(exif_name: 'XF35mmF1.4 R', name: 'Fujifilm XF 35mm F1.4')).not_to be_uncurated
+    end
+
+    it 'treats manually-created lenses (blank exif_name) as curated' do
+      expect(Lens.new(exif_name: nil, name: 'Built-in lens')).not_to be_uncurated
+    end
+  end
 end

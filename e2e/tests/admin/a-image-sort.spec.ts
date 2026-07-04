@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Image Sort', () => {
   test('reorders images via drag and drop', async ({ page }) => {
-    await page.goto('/admin/images');
+    await page.goto('/admin/images/arrange');
 
     // Verify seed images exist
     await expect(page.locator('tr[data-image-id]', { hasText: 'Seed Image 1' })).toBeVisible();

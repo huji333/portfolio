@@ -1,25 +1,8 @@
-%tr{"data-image-id": image.id}
-  - if sorting_enabled
-    %td.handle.cursor-grab.user-select-none
-      %span.material-symbols-outlined.text-muted.me-1 drag_indicator
-      %span.order-number= (image.row_order_rank || 0) + 1
+%tr.cursor-pointer{"data-image-id": image.id}
   %td
-    - if image.file.attached?
-      = image_tag(image.thumbnail_variant, alt: "#{image.title} preview", style: "height: 64px; width: auto;")
-    - else
-      %span.text-muted プレビューなし
+    = link_to edit_admin_image_path(image), class: 'd-block' do
+      = render 'admin/images/image_preview', image: image
   %td
-    - if image.title.present?
-      = image.title
-    - else
-      %span.text-muted （無題）
+    = link_to edit_admin_image_path(image), class: 'text-decoration-none' do
+      = render 'admin/images/image_title', image: image
   %td= render 'admin/images/status_badge', image: image
-  %td
-    .d-flex.gap-1
-      - if image.is_published?
-        = button_to '非公開にする', toggle_publish_admin_image_path(image), method: :patch, class: 'btn btn-outline-secondary btn-sm'
-      - elsif image.publishable?
-        = button_to '公開する', toggle_publish_admin_image_path(image), method: :patch, class: 'btn btn-outline-success btn-sm'
-      = link_to '閲覧', admin_image_path(image), class: 'btn btn-primary btn-sm'
-      = link_to '編集', edit_admin_image_path(image), class: 'btn btn-secondary btn-sm'
-      = button_to '削除', admin_image_path(image), method: :delete, data: { confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'

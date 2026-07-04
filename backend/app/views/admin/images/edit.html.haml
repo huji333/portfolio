@@ -6,3 +6,8 @@
 = link_to '閲覧', admin_image_path(@image)
 \|
 = link_to '戻る', admin_images_path
+
+.mt-4.pt-3.border-top
+  = button_to '削除', admin_image_path(@image), method: :delete,
+              data: { turbo_confirm: '本当に削除しますか？' },
+              class: 'btn btn-outline-danger btn-sm'
