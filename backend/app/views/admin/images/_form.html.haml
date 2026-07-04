@@ -7,16 +7,16 @@
 
   .card
     .row.g-0
-      .col-lg-6.d-flex.align-items-center.justify-content-center.bg-body-tertiary.p-3{style: 'min-height: 320px;'}
+      .col-lg-6.d-flex.align-items-center.justify-content-center.bg-body-tertiary.p-3.admin-form-dropzone
         - if image.file.attached?
-          = image_tag image.thumbnail_variant, class: 'img-fluid rounded', style: 'max-height: 70vh; object-fit: contain;', alt: image.title.presence || 'preview'
+          = image_tag image.thumbnail_variant, class: 'img-fluid rounded admin-form-preview', alt: image.title.presence || 'preview'
         - else
           .w-100
             = form.label :file, '画像ファイル', class: 'form-label fw-bold'
             = form.file_field :file, direct_upload: true, class: 'form-control', data: { direct_upload_target: "input", exif_fill_target: "fileInput", action: "change->exif-fill#fileSelected" }
             %div{ data: { exif_fill_target: 'status' } }
             .progress.d-none.mt-2{ data: { direct_upload_target: "progress" } }
-              .progress-bar.progress-bar-striped.progress-bar-animated{ role: "progressbar", "aria-valuenow": "0", "aria-valuemin": "0", "aria-valuemax": "100", style: "width: 0%" }
+              .progress-bar.progress-bar-striped.progress-bar-animated.admin-progress-bar{ role: "progressbar", "aria-valuenow": "0", "aria-valuemin": "0", "aria-valuemax": "100" }
             .alert.alert-danger.d-none.mt-2{ data: { direct_upload_target: "error" } }
 
       .col-lg-6.d-flex.flex-column

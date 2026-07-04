@@ -1,0 +1,33 @@
+/* 管理画面用スタイル。
+ * prod は CSP 強制 + style-src に unsafe-inline 無しのため、要素の style= 属性は
+ * ブラウザにブロックされる。サイズ・装飾はここのクラスで当てる（inline style 禁止）。 */
+
+.admin-thumb-list {
+  height: 64px;
+  width: auto;
+}
+
+.admin-thumb-show {
+  max-width: 300px;
+}
+
+.admin-form-preview {
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.admin-form-dropzone {
+  min-height: 320px;
+}
+
+.admin-dropzone {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* progress-bar の初期幅。アップロード進捗は direct_upload_controller が
+ * bar.style.width（CSSOM 代入=CSP 対象外）で更新する。 */
+.admin-progress-bar {
+  width: 0;
+}
