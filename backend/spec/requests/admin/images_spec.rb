@@ -24,6 +24,14 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(response.body).to include('未編集の下書き 1 枚を表示')
     end
 
+    it 'renders the bulk edit form with per-row checkboxes' do
+      get '/admin/images'
+
+      expect(response.body).to include('bulk_update')
+      expect(response.body).to include("select_image_#{image1.id}")
+      expect(response.body).to include('選択した画像に適用')
+    end
+
     it 'filters to uncurated drafts only' do
       draft = create(:image, :draft, row_order: 500)
 

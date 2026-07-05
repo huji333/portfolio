@@ -56,6 +56,21 @@ class Image < ApplicationRecord
     end
   end
 
+  # 一括メタデータ付与。nil の属性は変更せず、カテゴリは既存への追加（union）。
+  # 部分成功を作らない：ID の欠落や 1 件の失敗で全体をロールバックする（fail-loud）。
+  def self.bulk_assign!(ids, camera: nil, lens: nil, categories: [])
+    images = where(id: ids).to_a
+    raise ActiveRecord::RecordNotFound, 'Some images not found' if images.size != ids.uniq.size
+
+    transaction do
+      images.each do |image|
+        image.update!({ camera: camera, lens: lens }.compact)
+        categories.each { |category| image.image_categories.find_or_create_by!(category: category) }
+      end
+    end
+    images
+  end
+
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?
 

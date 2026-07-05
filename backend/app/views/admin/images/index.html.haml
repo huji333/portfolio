@@ -14,13 +14,44 @@
       = "未編集の下書き #{@uncurated_count} 枚を表示。"
       = link_to '未編集のみ表示', admin_images_path(filter: "uncurated")
 
-.table-responsive
-  %table.table.table-hover
-    %thead
-      %tr
-        %th プレビュー
-        %th タイトル
-        %th 状態
-    %tbody
-      - @images.each do |image|
-        = render 'image_row', image: image
+= form_with(url: admin_image_bulk_update_path, method: :patch, local: true, data: { controller: "bulk-edit" }) do
+  = hidden_field_tag :filter, params[:filter]
+  .table-responsive
+    %table.table.table-hover.align-middle
+      %thead
+        %tr
+          %th
+            %input.form-check-input{ type: "checkbox", "aria-label": "全選択",
+              data: { bulk_edit_target: "selectAll", action: "bulk-edit#toggleAll" } }
+          %th プレビュー
+          %th タイトル
+          %th 状態
+      %tbody
+        - @images.each do |image|
+          = render 'image_row', image: image
+
+  -# 選択中のみ表示される一括操作バー。空欄の項目は変更されない（クリアは単体編集で）。
+  .card.position-sticky.bottom-0.mb-3.shadow.d-none{ data: { bulk_edit_target: "bar" } }
+    .card-body.py-2
+      .d-flex.flex-wrap.align-items-center.gap-3
+        .fw-bold.text-nowrap
+          %span{ data: { bulk_edit_target: "count" } } 0
+          枚を選択中
+        .d-flex.align-items-center.gap-1
+          = label_tag :camera_id, 'カメラ', class: 'col-form-label col-form-label-sm text-nowrap'
+          = select_tag :camera_id, options_from_collection_for_select(@cameras, :id, :name),
+            include_blank: '変更しない', class: 'form-select form-select-sm'
+        .d-flex.align-items-center.gap-1
+          = label_tag :lens_id, 'レンズ', class: 'col-form-label col-form-label-sm text-nowrap'
+          = select_tag :lens_id, options_from_collection_for_select(@lenses, :id, :name),
+            include_blank: '変更しない', class: 'form-select form-select-sm'
+        - if @categories.any?
+          .d-flex.align-items-center.gap-2
+            %span.col-form-label.col-form-label-sm.text-nowrap カテゴリ追加
+            - @categories.each do |category|
+              .form-check.form-check-inline.mb-0
+                = check_box_tag 'category_ids[]', category.id, false,
+                  id: "bulk_category_#{category.id}", class: 'form-check-input'
+                = label_tag "bulk_category_#{category.id}", category.name, class: 'form-check-label'
+        = submit_tag '選択した画像に適用', class: 'btn btn-primary btn-sm ms-auto',
+          data: { bulk_edit_target: "submit" }

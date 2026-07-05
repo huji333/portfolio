@@ -1,7 +1,7 @@
 class Admin::ImagesController < Admin::Base
   include Admin::ImageCurationFlow
 
-  before_action :set_cameras_and_lenses_and_categories, only: %i[new edit create update]
+  before_action :set_cameras_and_lenses_and_categories, only: %i[index new edit create update]
   before_action :set_image, only: %i[show edit update destroy insert_at]
   before_action :set_adjacent_images, only: %i[edit update]
 
