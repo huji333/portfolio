@@ -11,15 +11,14 @@ Rails.application.routes.draw do
   namespace :admin do
     root to: 'index#index'
     resources :images do
-      member do
-        post :insert_at
-      end
+      post :insert_at, on: :member
       collection do
         get :arrange
         post :extract_exif
       end
     end
     resource :image_bulk_import, only: %i[new create]
+    resource :image_bulk_update, only: %i[update]
     get 'gear', to: 'gear#index'
     resources :cameras, except: %i[index show]
     resources :lenses, except: %i[index show]
