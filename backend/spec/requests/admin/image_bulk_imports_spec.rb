@@ -46,6 +46,22 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
       end
     end
 
+    it 'applies an explicitly chosen shared camera/lens over EXIF' do
+      camera = create(:camera)
+      lens = create(:lens)
+
+      post '/admin/image_bulk_import',
+           params: { bulk: { files: [upload_fixture_blob.signed_id],
+                             camera_id: camera.id, lens_id: lens.id } }
+
+      expect(response).to redirect_to(admin_images_path(filter: 'uncurated'))
+      draft = Image.order(:id).last
+      # EXIF（SONY ILCE-7CM2）ではなく手動選択が勝つ。taken_at は EXIF から入る
+      expect(draft.camera).to eq(camera)
+      expect(draft.lens).to eq(lens)
+      expect(draft.taken_at).to eq(Time.utc(2024, 1, 1, 3, 56, 27))
+    end
+
     it 'isolates failures per file: valid files are ingested, invalid ones reported' do
       signed_ids = [upload_fixture_blob.signed_id, 'bogus-signed-id']
 
