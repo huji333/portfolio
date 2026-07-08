@@ -76,6 +76,17 @@ class Image < ApplicationRecord
     images
   end
 
+  # 同一ファイル（checksum + byte_size 一致）を持つ既存レコードを返す。
+  # 一括取込の重複スキップ判定に使う（DB unique index は direct upload の
+  # blob 作成時点で弾いてしまうため、アプリ層で ingest 時に照合する）。
+  # 未 attach の新規 blob は join に現れないため自分自身とは一致しない。
+  # 同一 signed_id の二重 POST では attach 済みの自分に一致し、重複として弾ける。
+  def self.duplicate_for_blob(blob)
+    joins(file_attachment: :blob)
+      .where(active_storage_blobs: { checksum: blob.checksum, byte_size: blob.byte_size })
+      .first
+  end
+
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?
 

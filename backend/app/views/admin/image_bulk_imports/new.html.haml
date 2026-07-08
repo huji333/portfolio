@@ -7,8 +7,11 @@
 - if @results.present?
   %ul.list-group.mb-3
     - @results.each do |result|
-      - if result[:image]&.persisted?
+      - case result[:status]
+      - when :created
         %li.list-group-item.list-group-item-success ✓ #{result[:filename]} — 下書きとして作成しました
+      - when :duplicate
+        %li.list-group-item.list-group-item-warning ⏭ #{result[:filename]} — 取り込み済みのためスキップしました
       - else
         %li.list-group-item.list-group-item-danger ✗ #{result[:filename]} — #{result[:errors].join('、')}
 

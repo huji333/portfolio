@@ -8,7 +8,10 @@ class ProcessAttachedFileJob < ApplicationJob
   # io attach（rake/runner/フォーム）では after_commit のエンキューが S3 アップロード
   # 完了より先に走りうる（callback 定義順の race）。transient なので有限リトライし、
   # 使い切ったら fail-loud（failed executions に残る）。
-  retry_on ActiveStorage::FileNotFoundError, wait: :polynomially_longer, attempts: 5
+  # NoSuchKey も対象: S3Service#stream はチャンク GET 途中の NoSuchKey を
+  # FileNotFoundError に包まず生のまま上げる（初回 GET しか wrap されない）。
+  retry_on ActiveStorage::FileNotFoundError, Aws::S3::Errors::NoSuchKey,
+           wait: :polynomially_longer, attempts: 5
 
   def perform(record)
     record.process_attached_file!
