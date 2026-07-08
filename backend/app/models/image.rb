@@ -38,8 +38,13 @@ class Image < ApplicationRecord
     PUBLISH_REQUIREMENTS.all? { |attr| public_send(attr).present? }
   end
 
-  # ProcessAttachedFileJob から呼ばれる。EXIF 抽出は S3 フルダウンロードを伴うため
-  # リクエスト内（旧: before_validation on: :create）では行わない。
+  # variant 生成後に CdnAttachedFile#process_attached_file! から呼ばれる後処理フック。
+  # EXIF 抽出は S3 フルダウンロードを伴うためリクエスト内では行わずここ（ジョブ内）で実行する。
+  def after_attached_file_processed
+    fill_exif_metadata!
+  end
+
+  # EXIF 補完（旧: before_validation on: :create）。フック経由のほか spec からも直接叩く。
   def fill_exif_metadata!
     fill_metadata_from_exif
     save! if changed?

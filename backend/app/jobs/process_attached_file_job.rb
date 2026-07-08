@@ -1,7 +1,6 @@
 # CdnAttachedFile を include するモデル（Image / Project）の添付ファイル後処理。
-# analyze と variant 生成を先に済ませてから EXIF 補完の save を行う——この順序で
-# save 時の after_commit 再エンキュー判定（attached_file_needs_processing?）が
-# false になり、ジョブの連鎖が止まる。
+# analyze・variant 生成・モデル固有の後処理（after_attached_file_processed）までを
+# process_attached_file! が順序込みで担う（順序保証の詳細は concern 側に集約）。
 class ProcessAttachedFileJob < ApplicationJob
   queue_as :default
 
@@ -12,6 +11,5 @@ class ProcessAttachedFileJob < ApplicationJob
 
   def perform(record)
     record.process_attached_file!
-    record.fill_exif_metadata! if record.respond_to?(:fill_exif_metadata!)
   end
 end

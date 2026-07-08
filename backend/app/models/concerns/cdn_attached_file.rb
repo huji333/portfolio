@@ -15,8 +15,13 @@ module CdnAttachedFile
     return unless file.attached?
 
     file.analyze unless file.analyzed?
-    [thumbnail_limit, display_limit].each { |limit| ensure_variant_processed(variant_for(limit)) }
+    variant_limits.each { |limit| ensure_variant_processed(variant_for(limit)) }
+    after_attached_file_processed
   end
+
+  # variant 生成後・同一ジョブ内で呼ばれるモデル固有の後処理フック（デフォルト no-op）。
+  # variants-before-save の順序保証はここに集約する（Image は EXIF 補完を差し込む）。
+  def after_attached_file_processed; end
 
   def file_url
     return unless file.attached?
@@ -52,6 +57,9 @@ module CdnAttachedFile
   def thumbnail_limit = self.class::THUMBNAIL_LIMIT
   def display_limit = self.class::DISPLAY_LIMIT
 
+  # 後処理・再エンキュー判定の両方が参照する variant サイズの単一ソース。
+  def variant_limits = [thumbnail_limit, display_limit]
+
   def enqueue_attached_file_processing
     return unless attached_file_needs_processing?
 
@@ -64,7 +72,7 @@ module CdnAttachedFile
     return false unless file.attached?
 
     !file.analyzed? ||
-      [thumbnail_limit, display_limit].any? { |limit| !variant_generated?(variant_for(limit)) }
+      variant_limits.any? { |limit| !variant_generated?(variant_for(limit)) }
   end
 
   def log_reference = "#{self.class.name.underscore} #{id}"
