@@ -22,6 +22,8 @@ services:
     environment:
       RAILS_ENV: production
       DATABASE_URL: postgres://backend:${BACKEND_DATABASE_PASSWORD}@db:5432/backend_production
+      # Solid Queue ワーカーを Puma 内で起動（config/puma.rb の plugin を有効化）
+      SOLID_QUEUE_IN_PUMA: "1"
     depends_on:
       db:
         condition: service_healthy

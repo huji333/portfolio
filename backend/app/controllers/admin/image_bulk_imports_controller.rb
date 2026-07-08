@@ -5,9 +5,10 @@ class Admin::ImageBulkImportsController < Admin::Base
     @results = nil
   end
 
-  # Ingests each direct-uploaded blob as a draft Image (EXIF metadata is filled
-  # by the model layer). Failures are isolated per file so one bad frame never
-  # aborts the rest of the roll; the result list says exactly which files failed.
+  # Ingests each direct-uploaded blob as a draft Image. Record creation is
+  # DB-only and fast; EXIF fill / analyze / variants run in ProcessAttachedFileJob
+  # so the request never downloads from S3. Failures are isolated per file so one
+  # bad frame never aborts the rest of the roll; the result list says which failed.
   def create
     signed_ids = Array(params.dig(:bulk, :files)).compact_blank
 
@@ -21,7 +22,8 @@ class Admin::ImageBulkImportsController < Admin::Base
 
     if failed.zero?
       redirect_to admin_images_path(filter: "uncurated"),
-                  notice: "#{@results.size}枚を下書きとして取り込みました。1枚ずつタイトルを付けて公開してください。"
+                  notice: "#{@results.size}枚を下書きとして取り込みました。EXIF・サムネイルはバックグラウンドで処理されます。" \
+                          "1枚ずつタイトルを付けて公開してください。"
     else
       flash.now[:alert] = "#{failed}枚の取り込みに失敗しました（#{@results.size - failed}枚は成功）。"
       render :new, status: :unprocessable_content

@@ -25,6 +25,8 @@ Rails.application.routes.draw do
     resources :categories
     resources :projects
   end
+  # ジョブダッシュボード（認証は Admin::Base 経由、config/application.rb 参照）
+  mount MissionControl::Jobs::Engine, at: "/admin/jobs"
   namespace :api do
     resources :images, only: %i[index]
     resources :categories, only: %i[index]

@@ -47,3 +47,7 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
+
+# Solid Queue のワーカーを Puma プロセス内で動かす（別コンテナ不要の最小構成）。
+# 負荷が問題になったら env を外して worker service に分離する。
+plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]

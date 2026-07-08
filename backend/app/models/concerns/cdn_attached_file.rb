@@ -4,8 +4,18 @@ module CdnAttachedFile
   class MissingCdnBaseUrlError < StandardError; end
 
   included do
-    after_commit :analyze_attached_file, on: %i[create update]
-    after_commit :warm_variants, on: %i[create update]
+    # analyze / variant 生成は S3 ダウンロードを伴うためリクエスト内では行わず、
+    # ジョブに退避する（大量一括取込でのタイムアウト回避）。
+    after_commit :enqueue_attached_file_processing, on: %i[create update]
+  end
+
+  # ProcessAttachedFileJob から呼ばれる。リクエスト経路の variant_url と違い
+  # rescue しない（fail-loud）：失敗は Solid Queue の failed executions に残る。
+  def process_attached_file!
+    return unless file.attached?
+
+    file.analyze unless file.analyzed?
+    [thumbnail_limit, display_limit].each { |limit| ensure_variant_processed(variant_for(limit)) }
   end
 
   def file_url
@@ -42,38 +52,22 @@ module CdnAttachedFile
   def thumbnail_limit = self.class::THUMBNAIL_LIMIT
   def display_limit = self.class::DISPLAY_LIMIT
 
-  def analyze_attached_file
-    return unless file.attached?
-    return if file.analyzed?
+  def enqueue_attached_file_processing
+    return unless attached_file_needs_processing?
 
-    file.analyze
-  rescue ActiveStorage::FileNotFoundError => e
-    log_file_not_found(:analyze_attached_file, e)
-  rescue StandardError => e
-    Rails.logger.error "analyze_attached_file failed (#{log_reference}): #{e.class} #{e.message}"
+    ProcessAttachedFileJob.perform_later(self)
   end
 
-  def warm_variants
-    return unless file.attached?
+  # 導出で判定する（処理状態カラムは持たない）。analyze 済み・variant 生成済みなら
+  # 保存しても再エンキューされず、ジョブ内の save で連鎖が止まる。
+  def attached_file_needs_processing?
+    return false unless file.attached?
 
-    [thumbnail_limit, display_limit].each do |limit|
-      variant = variant_for(limit)
-      ensure_variant_processed(variant) if variant
-    end
-  rescue ActiveStorage::FileNotFoundError => e
-    log_file_not_found(:warm_variants, e)
-  rescue LoadError => e
-    Rails.logger.warn "variant warm skipped (#{log_reference}): #{e.message}"
-  rescue StandardError => e
-    Rails.logger.error "variant warm error (#{log_reference}): #{e.full_message}"
+    !file.analyzed? ||
+      [thumbnail_limit, display_limit].any? { |limit| !variant_generated?(variant_for(limit)) }
   end
 
   def log_reference = "#{self.class.name.underscore} #{id}"
-
-  def log_file_not_found(method, err)
-    Rails.logger.error "#{method} failed (#{log_reference}): " \
-                       "blob exists but file not in storage. #{err.class}: #{err.message}"
-  end
 
   def build_cdn_url(key)
     (base = cdn_base_url) ? "#{base}/#{key}" : nil
