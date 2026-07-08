@@ -1,7 +1,7 @@
 export type ImageType = {
   id: number;
   title: string;
-  caption: string;
+  caption: string | null;
   taken_at: string | null;
   camera_name: string | null;
   lens_name: string | null;
