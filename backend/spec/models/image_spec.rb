@@ -4,10 +4,6 @@ RSpec.describe Image, type: :model do
   let(:image) { build(:image) }
 
   describe 'validations' do
-    # Isolate validation behavior from the EXIF auto-fill hook (tested separately
-    # below) — otherwise the fixture's real EXIF would refill a blanked taken_at.
-    before { allow(ExifExtractor).to receive(:from_blob).and_return(ExifExtractor::EMPTY) }
-
     context 'file' do
       it 'should be valid with file' do
         image.file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/test_image.jpg"), 'image/jpeg')
@@ -133,7 +129,9 @@ RSpec.describe Image, type: :model do
     end
   end
 
-  describe 'EXIF metadata auto-fill on create' do
+  # EXIF 補完はリクエスト内では走らず ProcessAttachedFileJob から呼ばれる
+  # （エンキューの配線はジョブ側の spec で検証）。
+  describe '#fill_exif_metadata!' do
     let(:exif_blob) do
       ActiveStorage::Blob.create_and_upload!(
         io: Rails.root.join('spec/fixtures/files/test_image.jpg').open,
@@ -143,6 +141,7 @@ RSpec.describe Image, type: :model do
 
     it 'fills taken_at, camera and lens for a draft created without them' do
       image = Image.create!(file: exif_blob.signed_id, is_published: false)
+      image.fill_exif_metadata!
 
       expect(image.taken_at).to eq(Time.utc(2024, 1, 1, 3, 56, 27))
       expect(image.camera).to have_attributes(make: 'SONY', model: 'ILCE-7CM2')
@@ -156,19 +155,21 @@ RSpec.describe Image, type: :model do
 
       image = Image.create!(file: exif_blob.signed_id, is_published: false,
                             taken_at: taken_at, camera: camera, lens: lens)
+      image.fill_exif_metadata!
 
       expect(image.taken_at).to eq(taken_at)
       expect(image.camera).to eq(camera)
       expect(image.lens).to eq(lens)
     end
 
-    it 'still saves a draft when the file has no EXIF (fail-open)' do
+    it 'keeps the draft intact when the file has no EXIF (fail-open)' do
       blank_blob = ActiveStorage::Blob.create_and_upload!(
         io: StringIO.new(Vips::Image.black(4, 4).write_to_buffer('.jpg')),
         filename: 'blank.jpg', content_type: 'image/jpeg'
       )
 
       image = Image.create!(file: blank_blob.signed_id, is_published: false)
+      image.fill_exif_metadata!
 
       expect(image).to be_persisted
       expect(image.taken_at).to be_nil

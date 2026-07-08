@@ -15,6 +15,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       PGHOST: db
       FRONTEND_ORIGIN: "http://localhost:3002"
+      # Solid Queue ワーカーを Puma 内で起動（本番と同じ構成）
+      SOLID_QUEUE_IN_PUMA: "1"
     depends_on:
       - db
   frontend:

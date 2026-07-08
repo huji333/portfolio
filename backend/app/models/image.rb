@@ -30,14 +30,24 @@ class Image < ApplicationRecord
 
   validate :taken_at_is_in_the_past
 
-  before_validation :fill_metadata_from_exif, on: :create
-
   def category_ids=(ids)
     super(Array(ids).compact_blank)
   end
 
   def publishable?
     PUBLISH_REQUIREMENTS.all? { |attr| public_send(attr).present? }
+  end
+
+  # variant 生成後に CdnAttachedFile#process_attached_file! から呼ばれる後処理フック。
+  # EXIF 抽出は S3 フルダウンロードを伴うためリクエスト内では行わずここ（ジョブ内）で実行する。
+  def after_attached_file_processed
+    fill_exif_metadata!
+  end
+
+  # EXIF 補完（旧: before_validation on: :create）。フック経由のほか spec からも直接叩く。
+  def fill_exif_metadata!
+    fill_metadata_from_exif
+    save! if changed?
   end
 
   # 並び替え画面は公開画像のみを表示するため、ドロップ位置は「公開リスト内の index」で

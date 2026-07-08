@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe 'Admin::ImageBulkImports', type: :request do
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   let(:user) { create(:user, :admin) }
 
@@ -25,7 +26,7 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
   end
 
   describe 'POST /admin/image_bulk_import' do
-    it 'creates a draft per file with EXIF metadata and shared categories' do
+    it 'creates a draft per file with shared categories; EXIF fills after the job runs' do
       category = create(:category)
       signed_ids = [upload_fixture_blob.signed_id, upload_fixture_blob.signed_id]
 
@@ -36,13 +37,21 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
 
       expect(response).to redirect_to(admin_images_path(filter: 'uncurated'))
 
+      # リクエスト内では S3 ダウンロードを伴う処理をしない（EXIF はジョブで補完）
       drafts = Image.order(:id).last(2)
       drafts.each do |draft|
         expect(draft.is_published).to be(false)
         expect(draft.title).to be_nil
+        expect(draft.taken_at).to be_nil
+        expect(draft.categories).to eq([category])
+      end
+
+      perform_enqueued_jobs
+
+      drafts.each(&:reload)
+      drafts.each do |draft|
         expect(draft.taken_at).to eq(Time.utc(2024, 1, 1, 3, 56, 27))
         expect(draft.camera).to have_attributes(make: 'SONY', model: 'ILCE-7CM2')
-        expect(draft.categories).to eq([category])
       end
     end
 
@@ -55,6 +64,8 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
                              camera_id: camera.id, lens_id: lens.id } }
 
       expect(response).to redirect_to(admin_images_path(filter: 'uncurated'))
+      perform_enqueued_jobs
+
       draft = Image.order(:id).last
       # EXIF（SONY ILCE-7CM2）ではなく手動選択が勝つ。taken_at は EXIF から入る
       expect(draft.camera).to eq(camera)

@@ -17,6 +17,11 @@ module Backend
     config.autoload_paths << Rails.root.join('lib')
     config.autoload_paths << Rails.root.join("app/models/concerns")
 
+    # ジョブダッシュボード（/admin/jobs）。認証は Admin::Base に委譲し、
+    # gem 既定の HTTP Basic 認証は使わない。
+    config.mission_control.jobs.base_controller_class = "Admin::Base"
+    config.mission_control.jobs.http_basic_auth_enabled = false
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
