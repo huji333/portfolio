@@ -4,9 +4,9 @@ RSpec.describe 'Admin::ImageBulkUpdates', type: :request do
   include Devise::Test::IntegrationHelpers
 
   let(:user) { create(:user, :admin) }
-  let!(:image1) { create(:image, title: 'Test Image 1', row_order: 100) }
-  let!(:image2) { create(:image, title: 'Test Image 2', row_order: 200) }
-  let!(:image3) { create(:image, title: 'Test Image 3', row_order: 300) }
+  let!(:image1) { create(:image, title: 'Test Image 1') }
+  let!(:image2) { create(:image, title: 'Test Image 2') }
+  let!(:image3) { create(:image, title: 'Test Image 3') }
   let(:camera) { create(:camera) }
   let(:lens) { create(:lens) }
   let(:category) { create(:category) }

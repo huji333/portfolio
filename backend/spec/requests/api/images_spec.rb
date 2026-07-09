@@ -4,12 +4,12 @@ RSpec.describe 'Images API', type: :request do
   let(:cdn_base_url) { ENV.fetch('CLOUDFRONT_BASE_URL', nil) }
 
   before do
-    create(:image, title: 'Test Image 1', id: 1, row_order: 0)
-    create(:image, title: 'Test Image 2', row_order: 1)
+    create(:image, title: 'Test Image 1', id: 1, taken_at: 1.day.ago)
+    create(:image, title: 'Test Image 2', taken_at: 2.days.ago)
     create(:image, title: 'Test Image unpublished', is_published: false)
-    create(:image, title: 'Test Image with category 1', row_order: 2,
+    create(:image, title: 'Test Image with category 1', taken_at: 3.days.ago,
                    categories: [create(:category, name: 'Test Category 1', id: 1)])
-    create(:image, title: 'Test Image with category 2', row_order: 3,
+    create(:image, title: 'Test Image with category 2', taken_at: 4.days.ago,
                    categories: [create(:category, name: 'Test Category 2', id: 2)])
   end
 
@@ -96,7 +96,7 @@ RSpec.describe 'Images API', type: :request do
         expect(first_page_titles & second_page_titles).to be_empty
       end
 
-      it 'returns images ordered by row_order and id' do
+      it 'returns images ordered by taken_at desc and id desc' do
         get '/api/images'
         titles = response.parsed_body['images'].pluck('title')
 
@@ -116,8 +116,8 @@ RSpec.describe 'Images API', type: :request do
       it 'applies cursor with category filter' do
         # Create extra images for the same category so we can paginate
         cat = Category.find(1)
-        create(:image, title: 'Cat1 Extra 1', row_order: 4, categories: [cat])
-        create(:image, title: 'Cat1 Extra 2', row_order: 5, categories: [cat])
+        create(:image, title: 'Cat1 Extra 1', taken_at: 5.days.ago, categories: [cat])
+        create(:image, title: 'Cat1 Extra 2', taken_at: 6.days.ago, categories: [cat])
 
         get '/api/images', params: { categories: '1', limit: 1 }
         first_page = response.parsed_body
@@ -130,6 +130,32 @@ RSpec.describe 'Images API', type: :request do
 
         expect(second_page['images'].length).to eq(2)
         expect(second_page['has_more']).to be false
+      end
+    end
+
+    context 'featured pinning' do
+      let!(:featured) { create(:image, :featured, title: 'Featured 1', featured_rank: 0, taken_at: 10.days.ago) }
+
+      it 'lists featured images first without duplicating them in the timeline' do
+        get '/api/images', params: { limit: 10 }
+        titles = response.parsed_body['images'].pluck('title')
+
+        expect(titles.first).to eq('Featured 1')
+        expect(titles.count('Featured 1')).to eq(1)
+      end
+
+      it 'round-trips a cursor across the featured -> timeline segment boundary' do
+        get '/api/images', params: { limit: 1 }
+        first_page = response.parsed_body
+
+        expect(first_page['images'].pluck('title')).to eq(['Featured 1'])
+        expect(first_page['next_cursor']).to match(/\Af,/)
+
+        get '/api/images', params: { limit: 10, cursor: first_page['next_cursor'] }
+        second_page = response.parsed_body
+
+        expect(second_page['images'].pluck('title')).not_to include('Featured 1')
+        expect(second_page['images'].length).to eq(4)
       end
     end
   end

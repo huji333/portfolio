@@ -4,7 +4,6 @@ FactoryBot.define do
     title { Faker::Lorem.word }
     caption { Faker::Lorem.sentence }
     taken_at { Faker::Date.between(from: 1.year.ago, to: Time.zone.today) }
-    row_order { 1 }
     is_published { true }
     camera { build(:camera) }
     lens { build(:lens) }
@@ -17,6 +16,11 @@ FactoryBot.define do
       is_published { false }
       camera { nil }
       lens { nil }
+    end
+
+    # 手動キュレーション対象。featured_rank は呼び出し側で明示指定して重複を避ける想定。
+    trait :featured do
+      featured_rank { 0 }
     end
   end
 end

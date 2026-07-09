@@ -7,16 +7,17 @@ RSpec.describe 'Admin::Images', type: :request do
 
   # NOTE: id を固定して create すると PG のシーケンスが進まず、
   # 以降の自動採番 create が duplicate key で落ちるため自動採番に任せる。
-  let!(:image1) { create(:image, title: 'Test Image 1', row_order: 100) }
-  let!(:image2) { create(:image, title: 'Test Image 2', row_order: 200) }
-  let!(:image3) { create(:image, title: 'Test Image 3', row_order: 300) }
-  let!(:image4) { create(:image, title: 'Test Image 4', row_order: 400) }
+  # id 順が編集カードの ←/→ 遷移順にもなるため、作成順がそのままテストの前提になる。
+  let!(:image1) { create(:image, title: 'Test Image 1') }
+  let!(:image2) { create(:image, title: 'Test Image 2') }
+  let!(:image3) { create(:image, title: 'Test Image 3') }
+  let!(:image4) { create(:image, title: 'Test Image 4') }
 
   before { sign_in user }
 
   describe 'GET /admin/images' do
     it 'renders and surfaces the uncurated draft count with a filter link' do
-      create(:image, :draft, row_order: 500)
+      create(:image, :draft)
 
       get '/admin/images'
 
@@ -33,7 +34,7 @@ RSpec.describe 'Admin::Images', type: :request do
     end
 
     it 'filters to uncurated drafts only' do
-      draft = create(:image, :draft, row_order: 500)
+      draft = create(:image, :draft)
 
       get '/admin/images', params: { filter: 'uncurated' }
 
@@ -43,23 +44,27 @@ RSpec.describe 'Admin::Images', type: :request do
   end
 
   describe 'GET /admin/images/arrange' do
-    it 'lists only published images for reordering' do
-      draft = create(:image, :draft, row_order: 500)
+    it 'lists only featured images for reordering' do
+      featured = create(:image, :featured, featured_rank: 0)
+      draft = create(:image, :draft)
 
       get '/admin/images/arrange'
 
       expect(response).to have_http_status(:success)
-      expect(response.body).to include("data-image-id='#{image1.id}'").or include("data-image-id=\"#{image1.id}\"")
-      # 下書きは並び替え画面に出さない（公開ギャラリーの鏡）
-      expect(response.body).not_to include("data-image-id='#{draft.id}'")
-      expect(response.body).not_to include("data-image-id=\"#{draft.id}\"")
+      expect(response.body)
+        .to include("data-image-id='#{featured.id}'").or include("data-image-id=\"#{featured.id}\"")
+      # 下書き・非 featured の公開画像は並び替え画面に出さない（featured のみの鏡）
+      [draft, image1].each do |image|
+        expect(response.body).not_to include("data-image-id='#{image.id}'")
+        expect(response.body).not_to include("data-image-id=\"#{image.id}\"")
+      end
     end
   end
 
   describe 'GET /admin/images publish status column' do
     it 'shows status badges without inline publish/unpublish buttons' do
-      create(:image, :draft, title: 'Curated Draft', taken_at: 1.day.ago, row_order: 500)
-      uncurated = create(:image, :draft, taken_at: nil, row_order: 600)
+      create(:image, :draft, title: 'Curated Draft', taken_at: 1.day.ago)
+      uncurated = create(:image, :draft, taken_at: nil)
 
       get '/admin/images'
 
@@ -89,10 +94,17 @@ RSpec.describe 'Admin::Images', type: :request do
 
       expect(Image.order(:id).last).to have_attributes(title: 'New Published', is_published: true)
     end
+
+    it 'features the new image when the featured checkbox is checked' do
+      post '/admin/images',
+           params: { image: { title: 'New Featured', file: file, is_featured: '1' } }
+
+      expect(Image.order(:id).last.featured_rank).to eq(0)
+    end
   end
 
   describe 'PATCH /admin/images/:id (publish via submit buttons)' do
-    let!(:draft) { create(:image, :draft, row_order: 500) }
+    let!(:draft) { create(:image, :draft) }
 
     it 'publishes with 公開する and stays on the card' do
       patch "/admin/images/#{draft.id}",
@@ -120,8 +132,34 @@ RSpec.describe 'Admin::Images', type: :request do
     end
   end
 
+  describe 'PATCH /admin/images/:id (featured toggle)' do
+    it 'features the image when the checkbox is checked' do
+      patch "/admin/images/#{image1.id}", params: { image: { title: image1.title, is_featured: '1' } }
+
+      expect(image1.reload.featured_rank).to eq(0)
+    end
+
+    it 'unfeatures the image and renormalizes the rest when unchecked' do
+      image1.feature!
+      image2.feature!
+
+      patch "/admin/images/#{image1.id}", params: { image: { title: image1.title, is_featured: '0' } }
+
+      expect(image1.reload.featured_rank).to be_nil
+      expect(image2.reload.featured_rank).to eq(0)
+    end
+
+    it 'leaves the featured state untouched when the field is not submitted' do
+      image1.feature!
+
+      patch "/admin/images/#{image1.id}", params: { image: { title: 'Renamed only' } }
+
+      expect(image1.reload.featured_rank).to eq(0)
+    end
+  end
+
   describe 'PATCH /admin/images/:id (card navigation)' do
-    it 'saves and moves to the next image in display order with 次へ' do
+    it 'saves and moves to the next image in id order with 次へ' do
       patch "/admin/images/#{image2.id}", params: { nav_next: '次へ →', image: { title: 'Renamed' } }
 
       expect(image2.reload.title).to eq('Renamed')
@@ -151,39 +189,30 @@ RSpec.describe 'Admin::Images', type: :request do
   end
 
   describe 'POST /admin/images/:id/insert_at' do
-    it 'should insert the image at the given position' do
-      expect(Image.rank(:row_order).pluck(:id)).to eq([image1.id, image2.id, image3.id, image4.id])
+    let!(:f1) { create(:image, :featured, title: 'F1', featured_rank: 0) }
+    let!(:f2) { create(:image, :featured, title: 'F2', featured_rank: 1) }
+    let!(:f3) { create(:image, :featured, title: 'F3', featured_rank: 2) }
 
-      post "/admin/images/#{image1.id}/insert_at", params: { position: 2 }
+    it 'moves the image to the given position within the featured list' do
+      post "/admin/images/#{f1.id}/insert_at", params: { position: 2 }
       expect(response).to have_http_status(:success)
 
-      expect(Image.rank(:row_order).pluck(:id)).to eq([image2.id, image3.id, image1.id, image4.id])
+      expect(Image.featured.pluck(:id)).to eq([f2.id, f3.id, f1.id])
     end
 
-    it 'translates a published-list index into a global position, stepping over an interleaved draft' do
-      # global順: image1(100) < draft(150) < image2(200) < image3(300) < image4(400)
-      draft = create(:image, :draft, taken_at: nil, row_order: 150)
-
-      # 公開リスト [image1, image2, image3, image4] の index 1 へ image4 を移動
-      post "/admin/images/#{image4.id}/insert_at", params: { position: 1 }
+    it 'moves the image to the front of the featured list' do
+      post "/admin/images/#{f3.id}/insert_at", params: { position: 0 }
       expect(response).to have_http_status(:success)
 
-      # draft は image1 の直後に留まり、image4 は image2 の直前へ入る
-      expect(Image.rank(:row_order).pluck(:id))
-        .to eq([image1.id, draft.id, image4.id, image2.id, image3.id])
+      expect(Image.featured.pluck(:id)).to eq([f3.id, f1.id, f2.id])
     end
 
-    it 'drops to the tail of the published list without overtaking a trailing draft' do
-      # 末尾の公開画像より後ろに滞留する下書き
-      draft = create(:image, :draft, taken_at: nil, row_order: 500)
-
-      # 公開リスト末尾（index 3）へ image1 を移動
-      post "/admin/images/#{image1.id}/insert_at", params: { position: 3 }
+    it 'does not touch images outside the featured set' do
+      post "/admin/images/#{f1.id}/insert_at", params: { position: 1 }
       expect(response).to have_http_status(:success)
 
-      # image1 は最後の公開画像 image4 の直後、末尾の draft の前に入る
-      expect(Image.rank(:row_order).pluck(:id))
-        .to eq([image2.id, image3.id, image4.id, image1.id, draft.id])
+      expect(image1.reload.featured_rank).to be_nil
+      expect(image2.reload.featured_rank).to be_nil
     end
   end
 
