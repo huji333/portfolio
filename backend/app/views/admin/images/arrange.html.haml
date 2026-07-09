@@ -2,7 +2,7 @@
   %h1.mb-0 並び替え
   = link_to '← 一覧へ戻る', admin_images_path, class: 'btn btn-outline-secondary'
 
-%p.text-muted.small 公開ギャラリーの表示順。ドラッグで即保存されます。
+%p.text-muted.small ギャラリー先頭に固定表示される featured 画像の表示順。ドラッグで即保存されます。
 
 - if @images.any?
   .table-responsive
@@ -21,4 +21,4 @@
             %td= render 'admin/images/image_preview', image: image
             %td= render 'admin/images/image_title', image: image
 - else
-  %p.text-muted 公開中の画像がまだありません。編纂して公開すると、ここに並びます。
+  %p.text-muted featured な画像がまだありません。編集画面で「おすすめ表示に含める」を有効にすると、ここに並びます。

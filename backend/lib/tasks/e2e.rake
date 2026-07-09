@@ -35,7 +35,6 @@ def seed_images(camera, lens, category)
       title: "Seed Image #{i + 1}",
       caption: "E2E test image #{i + 1}",
       taken_at: Time.zone.today - i.days,
-      row_order: i,
       is_published: true,
       camera: camera,
       lens: lens

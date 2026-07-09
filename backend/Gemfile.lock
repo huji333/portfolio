@@ -287,8 +287,6 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.4.2)
-    ranked-model (0.4.11)
-      activerecord (>= 5.2)
     rdoc (7.2.0)
       erb
       psych (>= 4.0.0)
@@ -421,7 +419,6 @@ DEPENDENCIES
   puma (>= 6.4)
   rack-cors
   rails (~> 8.1)
-  ranked-model
   rspec-rails
   rubocop
   rubocop-performance

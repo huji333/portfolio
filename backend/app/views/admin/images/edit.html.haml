@@ -1,7 +1,8 @@
 %h1 画像の情報を編集
 
 = render 'form', image: @image, cameras: @cameras, lenses: @lenses, categories: @categories,
-                 prev_image: @prev_image, next_image: @next_image, images_total: @images_total
+                 prev_image: @prev_image, next_image: @next_image, images_total: @images_total,
+                 image_position: @image_position
 
 = link_to '閲覧', admin_image_path(@image)
 \|

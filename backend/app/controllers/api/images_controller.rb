@@ -11,12 +11,25 @@ class Api::ImagesController < ApplicationController
 
     render json: {
       images: images.map { |image| image_json(image) },
-      next_cursor: has_more ? "#{images.last.row_order},#{images.last.id}" : nil,
+      next_cursor: has_more ? next_cursor(images.last) : nil,
       has_more: has_more
     }
   end
 
   private
+
+  # 最後の要素の種別に応じて次ページの cursor を組み立てる。
+  # featured なら featured セグメントの続き、時系列なら時系列セグメントの続き。
+  # taken_at はエポックミリ秒に丸める（DB は microsecond 精度）。round だと切り上げで
+  # 元の行の実精度より未来の境界になり得て、次ページの厳密不等号から自分自身が漏れて
+  # 再出現する。floor で必ず自分自身の実精度以下に丸め、境界の取りこぼしを防ぐ。
+  def next_cursor(image)
+    if image.featured_rank.present?
+      "f,#{image.featured_rank},#{image.id}"
+    else
+      "t,#{(image.taken_at.to_f * 1000).floor},#{image.id}"
+    end
+  end
 
   def category_ids_param
     case params[:categories]

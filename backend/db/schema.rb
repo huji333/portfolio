@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_08_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -80,17 +80,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_08_030000) do
     t.bigint "camera_id"
     t.string "caption"
     t.datetime "created_at", null: false
+    t.integer "featured_rank"
     t.boolean "is_published", default: false, null: false
     t.bigint "lens_id"
-    t.integer "row_order"
     t.datetime "taken_at"
     t.string "title"
     t.datetime "updated_at", null: false
     t.index ["camera_id"], name: "index_images_on_camera_id"
+    t.index ["featured_rank"], name: "index_images_on_featured_rank", where: "(featured_rank IS NOT NULL)"
     t.index ["is_published"], name: "index_images_on_is_published"
     t.index ["lens_id"], name: "index_images_on_lens_id"
-    t.index ["row_order"], name: "index_images_on_row_order"
-    t.index ["taken_at"], name: "index_images_on_taken_at"
+    t.index ["taken_at", "id"], name: "index_images_on_taken_at_and_id"
   end
 
   create_table "lenses", force: :cascade do |t|
