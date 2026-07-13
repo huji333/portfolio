@@ -2,10 +2,10 @@
 
 ## Project Structure
 
-- `backend/` — Rails 7.2 API + admin UI (Ruby 3.3.5)
-- `frontend/` — Next.js 15 + React 19 (TypeScript, Tailwind, Yarn 4)
+- `backend/` — Rails 8.1 API + admin UI (Ruby 3.3.5)
+- `frontend/` — Next.js 16 + React 19 (TypeScript, Tailwind, Yarn 4)
 - `docker-compose.yml` / `docker-compose.prod.yml` — 開発・本番環境
-- `.github/workflows/` — CI (`backend.yml`, `frontend.yml`)
+- `.github/workflows/` — CI (`backend.yml`, `frontend.yml`, `e2e.yml`)
 
 ## Commands
 
@@ -38,7 +38,7 @@ yarn tsc --noEmit            # 型チェック
 ## Testing
 
 - Backend: RSpec (`backend/spec/`)。ファクトリは `backend/spec/factories/`。
-- Frontend: テストフレームワーク未導入。
+- Frontend: Vitest + Testing Library (`frontend/src/**/*.test.{ts,tsx}`)。`yarn test` で実行。
 
 ## Commit & PR
 
