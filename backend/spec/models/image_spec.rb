@@ -74,9 +74,9 @@ RSpec.describe Image, type: :model do
       end
     end
 
-    context 'row_order' do
-      it 'should be valid with row_order' do
-        image.row_order = 1
+    context 'featured_rank' do
+      it 'should be valid with featured_rank' do
+        image.featured_rank = 1
         expect(image).to be_valid
       end
     end
@@ -203,15 +203,15 @@ RSpec.describe Image, type: :model do
   end
 
   describe '.for_gallery' do
-    let!(:img1) { create(:image, title: 'A', row_order: 0, is_published: true) }
-    let!(:img2) { create(:image, title: 'B', row_order: 1, is_published: true) }
-    let!(:img3) { create(:image, title: 'C', row_order: 2, is_published: true) }
-    let!(:img4) { create(:image, title: 'D', row_order: 3, is_published: true) }
-    let!(:unpublished) { create(:image, title: 'Hidden', row_order: 4, is_published: false) }
+    let!(:img1) { create(:image, title: 'A', taken_at: 4.days.ago, is_published: true) }
+    let!(:img2) { create(:image, title: 'B', taken_at: 3.days.ago, is_published: true) }
+    let!(:img3) { create(:image, title: 'C', taken_at: 2.days.ago, is_published: true) }
+    let!(:img4) { create(:image, title: 'D', taken_at: 1.day.ago, is_published: true) }
+    let!(:unpublished) { create(:image, title: 'Hidden', taken_at: 5.days.ago, is_published: false) }
 
-    it 'returns only published images ordered by row_order, id' do
+    it 'returns only published images ordered by taken_at desc, id desc when none are featured' do
       result = Image.for_gallery(limit: 10)
-      expect(result.map(&:title)).to eq(%w[A B C D])
+      expect(result.map(&:title)).to eq(%w[D C B A])
     end
 
     it 'excludes unpublished images' do
@@ -224,10 +224,10 @@ RSpec.describe Image, type: :model do
       expect(result.size).to eq(3)
     end
 
-    it 'returns records after cursor position' do
-      cursor = "#{img2.row_order},#{img2.id}"
+    it 'returns timeline records after cursor position' do
+      cursor = "t,#{(img3.taken_at.to_f * 1000).floor},#{img3.id}"
       result = Image.for_gallery(cursor: cursor, limit: 10)
-      expect(result.map(&:title)).to eq(%w[C D])
+      expect(result.map(&:title)).to eq(%w[B A])
     end
 
     it 'filters by category_ids' do
@@ -236,7 +236,7 @@ RSpec.describe Image, type: :model do
       img3.categories << cat
 
       result = Image.for_gallery(category_ids: [cat.id], limit: 10)
-      expect(result.map(&:title)).to eq(%w[A C])
+      expect(result.map(&:title)).to eq(%w[C A])
     end
 
     it 'combines cursor and category filter' do
@@ -244,9 +244,138 @@ RSpec.describe Image, type: :model do
       img1.categories << cat
       img3.categories << cat
 
-      cursor = "#{img1.row_order},#{img1.id}"
+      cursor = "t,#{(img3.taken_at.to_f * 1000).floor},#{img3.id}"
       result = Image.for_gallery(category_ids: [cat.id], cursor: cursor, limit: 10)
-      expect(result.map(&:title)).to eq(%w[C])
+      expect(result.map(&:title)).to eq(%w[A])
+    end
+
+    context 'with featured images' do
+      let!(:feat1) do
+        create(:image, :featured, title: 'F1', featured_rank: 0, taken_at: 10.days.ago, is_published: true)
+      end
+      let!(:feat2) do
+        create(:image, :featured, title: 'F2', featured_rank: 1, taken_at: 9.days.ago, is_published: true)
+      end
+
+      it 'pins featured images ahead of the timeline, ordered by featured_rank' do
+        result = Image.for_gallery(limit: 10)
+        expect(result.map(&:title)).to eq(%w[F1 F2 D C B A])
+      end
+
+      it 'does not duplicate featured images in the timeline segment' do
+        result = Image.for_gallery(limit: 10)
+        expect(result.map(&:title).count('F1')).to eq(1)
+        expect(result.map(&:title).count('F2')).to eq(1)
+      end
+
+      it 'paginates across the featured -> timeline boundary and round-trips the cursor' do
+        first = Image.for_gallery(limit: 2)
+        expect(first.size).to eq(3) # limit + 1 fetched for has_more detection
+        first_page = first.take(2)
+        expect(first_page.map(&:title)).to eq(%w[F1 F2])
+
+        last = first_page.last
+        cursor = "f,#{last.featured_rank},#{last.id}"
+
+        second = Image.for_gallery(cursor: cursor, limit: 2)
+        expect(second.size).to eq(3) # B, A still remain after this page
+        expect(second.take(2).map(&:title)).to eq(%w[D C])
+      end
+
+      it 'round-trips a cursor that lands mid-featured-segment' do
+        cursor = "f,#{feat1.featured_rank},#{feat1.id}"
+        result = Image.for_gallery(cursor: cursor, limit: 10)
+        expect(result.map(&:title)).to eq(%w[F2 D C B A])
+      end
+
+      it 'transitions from an exhausted featured cursor straight into the timeline' do
+        cursor = "f,#{feat2.featured_rank},#{feat2.id}"
+        result = Image.for_gallery(cursor: cursor, limit: 10)
+        expect(result.map(&:title)).to eq(%w[D C B A])
+      end
+
+      it 'combines featured pinning with category filtering' do
+        cat = create(:category, name: 'Landscape')
+        feat2.categories << cat
+        img3.categories << cat
+
+        result = Image.for_gallery(category_ids: [cat.id], limit: 10)
+        expect(result.map(&:title)).to eq(%w[F2 C])
+      end
+    end
+  end
+
+  describe 'featured curation' do
+    describe '#feature!' do
+      it 'appends to the end of the featured list' do
+        existing = create(:image, :featured, featured_rank: 0)
+        image = create(:image)
+
+        image.feature!
+
+        expect(image.reload.featured_rank).to eq(1)
+        expect(existing.reload.featured_rank).to eq(0)
+      end
+
+      it 'is a no-op when already featured' do
+        image = create(:image, :featured, featured_rank: 0)
+        other = create(:image, :featured, featured_rank: 1)
+
+        image.feature!
+
+        expect(image.reload.featured_rank).to eq(0)
+        expect(other.reload.featured_rank).to eq(1)
+      end
+    end
+
+    describe '#unfeature!' do
+      it 'clears the rank and renormalizes the rest to 0..N-1' do
+        a = create(:image, :featured, featured_rank: 0)
+        b = create(:image, :featured, featured_rank: 1)
+        c = create(:image, :featured, featured_rank: 2)
+
+        b.unfeature!
+
+        expect(b.reload.featured_rank).to be_nil
+        expect(a.reload.featured_rank).to eq(0)
+        expect(c.reload.featured_rank).to eq(1)
+      end
+
+      it 'is a no-op when not featured' do
+        image = create(:image)
+
+        expect { image.unfeature! }.not_to(change { image.reload.featured_rank })
+      end
+    end
+
+    describe '.reorder_featured!' do
+      it 'normalizes the given ids to 0..N-1 in the given order' do
+        a = create(:image, :featured, featured_rank: 0)
+        b = create(:image, :featured, featured_rank: 1)
+        c = create(:image, :featured, featured_rank: 2)
+
+        Image.reorder_featured!([c.id, a.id, b.id])
+
+        expect(c.reload.featured_rank).to eq(0)
+        expect(a.reload.featured_rank).to eq(1)
+        expect(b.reload.featured_rank).to eq(2)
+      end
+
+      it 'leaves images not included untouched' do
+        a = create(:image, :featured, featured_rank: 0)
+        b = create(:image, :featured, featured_rank: 1)
+
+        Image.reorder_featured!([a.id])
+
+        expect(a.reload.featured_rank).to eq(0)
+        expect(b.reload.featured_rank).to eq(1)
+      end
+
+      it 'fails loudly when an id is unknown' do
+        a = create(:image, :featured, featured_rank: 0)
+
+        expect { Image.reorder_featured!([a.id, 0]) }.to raise_error(ActiveRecord::RecordNotFound)
+      end
     end
   end
 end

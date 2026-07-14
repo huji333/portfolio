@@ -25,7 +25,7 @@
             .d-flex.justify-content-between.align-items-center.mb-3
               = render 'admin/images/status_badge', image: image
               - if local_assigns[:images_total]
-                %small.text-muted= "#{(image.row_order_rank || 0) + 1} / #{local_assigns[:images_total]} 枚目"
+                %small.text-muted= "#{local_assigns[:image_position]} / #{local_assigns[:images_total]} 枚目"
           .mb-3
             = form.label :title, 'タイトル', class: 'form-label fw-bold'
             = form.text_field :title, class: 'form-control', data: { exif_fill_target: "titleInput" }
@@ -36,9 +36,10 @@
             .col-md-6.mb-3
               = form.label :taken_at, '撮影日時', class: 'form-label fw-bold'
               = form.datetime_field :taken_at, class: 'form-control', data: { exif_fill_target: "takenAtInput" }
-            .col-md-6.mb-3
-              = form.label :row_order_position, '表示順（0始まり）', class: 'form-label fw-bold'
-              = form.number_field :row_order_position, class: 'form-control', value: (image.persisted? ? (image.row_order_rank || 0) : nil)
+            .col-md-6.mb-3.d-flex.align-items-end
+              .form-check
+                = form.check_box :is_featured, class: 'form-check-input'
+                = form.label :is_featured, 'おすすめ表示に含める（featured）', class: 'form-check-label'
           .row
             .col-md-6.mb-3
               = form.label :camera_id, 'カメラ', class: 'form-label fw-bold'

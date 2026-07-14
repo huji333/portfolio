@@ -1,8 +1,7 @@
 class Image < ApplicationRecord
-  include RankedModel
   include CdnAttachedFile
+  include ImageGalleryOrdering
 
-  ranks :row_order
   THUMBNAIL_LIMIT = [960, 960].freeze
   DISPLAY_LIMIT = [1920, 1920].freeze
 
@@ -26,7 +25,6 @@ class Image < ApplicationRecord
   scope :published, -> { where(is_published: true) }
   scope :draft, -> { where(is_published: false) }
   scope :uncurated, -> { draft.where(title: [nil, ""]) }
-  scope :ordered_for_gallery, -> { order(row_order: :asc, id: :asc) }
 
   validate :taken_at_is_in_the_past
 
@@ -50,22 +48,6 @@ class Image < ApplicationRecord
     save! if changed?
   end
 
-  # 並び替え画面は公開画像のみを表示するため、ドロップ位置は「公開リスト内の index」で
-  # 届く。これを全画像共有の row_order 空間での position に変換する。ドロップ位置の次に
-  # 来る公開画像の直前へ、末尾なら最後の公開画像の直後へ挿入する（末尾より後ろの下書きは
-  # 追い越さない）。全画像が公開のときは index と一致する。
-  def self.published_index_to_row_order_position(image, published_index)
-    others = where.not(id: image.id)
-    published = others.published.rank(:row_order).to_a
-    if (successor = published[published_index])
-      others.where(row_order: ...successor.row_order).count
-    elsif (last = published.last)
-      others.where(row_order: ..last.row_order).count
-    else
-      0
-    end
-  end
-
   # 一括メタデータ付与。nil の属性は変更せず、カテゴリは既存への追加（union）。
   # 部分成功を作らない：ID の欠落や 1 件の失敗で全体をロールバックする（fail-loud）。
   def self.bulk_assign!(ids, camera: nil, lens: nil, categories: [])
@@ -85,23 +67,6 @@ class Image < ApplicationRecord
     return all if category_ids.blank?
 
     where(id: ImageCategory.where(category_id: category_ids).select(:image_id))
-  end
-
-  def self.for_gallery(category_ids: nil, cursor: nil, limit: 20)
-    scope = published
-            .filter_by_categories(category_ids)
-            .with_attached_file
-            .includes(:camera, :lens)
-
-    if cursor.present?
-      parts = cursor.split(",")
-      if parts.size == 2 && parts.all? { |p| p.match?(/\A-?\d+\z/) }
-        row_order_val, id_val = parts.map(&:to_i)
-        scope = scope.where("(row_order, id) > (?, ?)", row_order_val, id_val)
-      end
-    end
-
-    scope.ordered_for_gallery.limit(limit + 1)
   end
 
   private

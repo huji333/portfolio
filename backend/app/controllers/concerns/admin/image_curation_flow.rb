@@ -14,11 +14,13 @@ module Admin::ImageCurationFlow
     nil
   end
 
-  # 表示順で隣り合う画像（編集カードの ←/→ の行き先と disabled 判定）
+  # id 順で隣り合う画像（編集カードの ←/→ の行き先と disabled 判定）。
+  # taken_at は下書きで欠けることがあるため id 順を採用する。
   def set_adjacent_images
     @images_total = Image.count
-    @prev_image = Image.rank(:row_order).where(row_order: ...@image.row_order).last
-    @next_image = Image.rank(:row_order).where(row_order: (@image.row_order + 1)..).first
+    @image_position = Image.where(id: ...@image.id).count + 1
+    @prev_image = Image.where(id: ...@image.id).order(id: :desc).first
+    @next_image = Image.where(id: (@image.id + 1)..).order(:id).first
   end
 
   def after_save_edit_path
