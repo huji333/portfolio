@@ -1,9 +1,15 @@
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :block_new_registration, only: %i[new create]
+  def new
+    render_not_found
+  end
+
+  def create
+    render_not_found
+  end
 
   private
 
-  def block_new_registration
+  def render_not_found
     render file: Rails.public_path.join('404.html'), status: :not_found, layout: false
   end
 end
