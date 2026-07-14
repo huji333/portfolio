@@ -55,9 +55,10 @@ def seed_project
 end
 
 def suppress_cdn_callbacks
+  # 添付後処理は本番では Solid Queue に退避される（cdn_attached_file 参照）。
+  # seed では job を回さず analyze_and_warm_variants で同期処理するため無効化する。
   [Image, Project].each do |klass|
-    klass.skip_callback(:commit, :after, :warm_variants)
-    klass.skip_callback(:commit, :after, :analyze_attached_file)
+    klass.skip_callback(:commit, :after, :enqueue_attached_file_processing)
   end
 end
 
