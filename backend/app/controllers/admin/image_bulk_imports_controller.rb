@@ -18,14 +18,19 @@ class Admin::ImageBulkImportsController < Admin::Base
     end
 
     @results = signed_ids.map { |signed_id| ingest_draft(signed_id, shared_attributes) }
-    failed = @results.count { |result| result[:image].nil? || !result[:image].persisted? }
+    failed = @results.count { |result| result[:status] == :failed }
+    duplicates = @results.count { |result| result[:status] == :duplicate }
+    created = @results.size - failed - duplicates
 
-    if failed.zero?
+    if failed.zero? && duplicates.zero?
       redirect_to admin_images_path(filter: "uncurated"),
-                  notice: "#{@results.size}枚を下書きとして取り込みました。EXIF・サムネイルはバックグラウンドで処理されます。" \
+                  notice: "#{created}枚を下書きとして取り込みました。EXIF・サムネイルはバックグラウンドで処理されます。" \
                           "1枚ずつタイトルを付けて公開してください。"
+    elsif failed.zero?
+      flash.now[:notice] = "#{created}枚を下書きとして取り込みました（#{duplicates}枚は登録済みのため重複としてスキップしました）。"
+      render :new, status: :ok
     else
-      flash.now[:alert] = "#{failed}枚の取り込みに失敗しました（#{@results.size - failed}枚は成功）。"
+      flash.now[:alert] = "#{failed}枚の取り込みに失敗しました（#{created}枚は成功、#{duplicates}枚は重複でスキップ）。"
       render :new, status: :unprocessable_content
     end
   end
@@ -48,12 +53,28 @@ class Admin::ImageBulkImportsController < Admin::Base
     }.compact
   end
 
+  # checksum + byte_size が既存の Image#file と一致すれば重複としてスキップする。
+  # direct upload は request 到達前に S3 アップロード済みなので、スキップ時・save 失敗時
+  # は新規 blob を purge_later して孤立させない（同一バッチ内の重複も、前の反復の
+  # image.save がここに来る前にコミット済みのため、この DB 照合だけで検出できる）。
   def ingest_draft(signed_id, shared_attributes)
     blob = ActiveStorage::Blob.find_signed!(signed_id)
+    filename = blob.filename.to_s
+
+    if (duplicate = Image.attached_duplicate_for(blob))
+      blob.purge_later
+      return { filename: filename, status: :duplicate, image: nil, duplicate_image_id: duplicate.id, errors: [] }
+    end
+
     image = Image.new(file: signed_id, is_published: false, **shared_attributes)
-    image.save
-    { filename: blob.filename.to_s, image: image, errors: image.errors.full_messages }
+    if image.save
+      { filename: filename, status: :created, image: image, duplicate_image_id: nil, errors: [] }
+    else
+      blob.purge_later
+      { filename: filename, status: :failed, image: nil, duplicate_image_id: nil, errors: image.errors.full_messages }
+    end
   rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
-    { filename: signed_id.to_s.truncate(24), image: nil, errors: ['アップロードが無効です（再アップロードしてください）'] }
+    { filename: signed_id.to_s.truncate(24), status: :failed, image: nil, duplicate_image_id: nil,
+      errors: ['アップロードが無効です（再アップロードしてください）'] }
   end
 end

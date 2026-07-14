@@ -63,6 +63,14 @@ class Image < ApplicationRecord
     images
   end
 
+  # checksum + byte_size で「file として添付済みの Image」を探す（一括取込の重複検出用）。
+  # direct upload は blob 行が S3 アップロード前に作られるため DB の unique index では
+  # 防げず、アプリ側でここに一本化して照合する。file_blob 経由なので variant 等の blob
+  # とは誤照合しない（has_one_attached が record_type/name を自動でスコープする）。
+  def self.attached_duplicate_for(blob)
+    joins(:file_blob).find_by(active_storage_blobs: { checksum: blob.checksum, byte_size: blob.byte_size })
+  end
+
   def self.filter_by_categories(category_ids)
     return all if category_ids.blank?
 
