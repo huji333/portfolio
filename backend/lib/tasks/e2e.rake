@@ -30,12 +30,15 @@ def seed_images(camera, lens, category)
 
   test_image_path = Rails.root.join('spec/fixtures/files/test_image.jpg')
 
+  # 並び替え画面（/admin/images/arrange）は featured のみ表示する（#273 の再設計）。
+  # arrange の e2e が Seed Image 1..3 を掴めるよう featured_rank を昇順で付与する。
   3.times do |i|
     image = Image.new(
       title: "Seed Image #{i + 1}",
       caption: "E2E test image #{i + 1}",
       taken_at: Time.zone.today - i.days,
       is_published: true,
+      featured_rank: i,
       camera: camera,
       lens: lens
     )
