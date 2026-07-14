@@ -16,7 +16,29 @@ updates:
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
 
+  - package-ecosystem: "npm"
+    directory: "/e2e"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
   - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # Dockerfile の FROM（ruby-slim / node-slim）の更新
+  - package-ecosystem: "docker"
+    directories:
+      - "/backend"
+      - "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  # docker-compose の image（postgres / cloudflared）の更新
+  - package-ecosystem: "docker-compose"
     directory: "/"
     schedule:
       interval: "weekly"
