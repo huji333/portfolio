@@ -7,6 +7,7 @@ services:
       - ./backend/.env.development
     volumes:
       - ./backend:/app
+    # e2e（Playwright）が localhost:3000 を直叩きするため互換用に公開を維持
     ports:
       - '3000:3000'
     environment:
@@ -31,6 +32,7 @@ services:
     # 依存を bump しても volume が stale 化して `command not found: next` を起こす。
     # 起動時 install で volume を自己修復するキャッシュにし、volume の手動削除を不要にする。
     command: sh -c "yarn install --immutable && yarn dev"
+    # e2e（Playwright）が localhost:3002 を直叩きするため互換用に公開を維持
     ports:
       - '3002:3002'
     environment:
