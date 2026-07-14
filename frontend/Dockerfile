@@ -1,6 +1,7 @@
 # syntax = docker/dockerfile:1
 
-ARG NODE_VERSION=22.11.0
+# Make sure NODE_VERSION matches .node-version
+ARG NODE_VERSION=22.23.1
 FROM node:${NODE_VERSION}-slim AS base
 
 WORKDIR /app
