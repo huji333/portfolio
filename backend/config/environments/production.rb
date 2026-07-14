@@ -18,7 +18,9 @@ Rails.application.configure do
 
   # Ensures that a master key has been made available in ENV["RAILS_MASTER_KEY"], config/master.key, or an environment
   # key such as config/credentials/production.key. This key is used to decrypt credentials (and other encrypted files).
-  config.require_master_key = true
+  # Docker の assets:precompile は master.key を持たず SECRET_KEY_BASE_DUMMY=1 で boot するため、
+  # そのビルド時のみ緩め、実行時（runtime）は従来どおり master key を必須にする。
+  config.require_master_key = ENV["SECRET_KEY_BASE_DUMMY"].blank?
 
   # Disable serving static files from `public/`, relying on NGINX/Apache to do so instead.
   # config.public_file_server.enabled = false
