@@ -23,18 +23,18 @@ module CdnAttachedFile
   # variants-before-save の順序保証はここに集約する（Image は EXIF 補完を差し込む）。
   def after_attached_file_processed; end
 
-  def file_url
-    return unless file.attached?
-
-    build_cdn_url(file.key) || active_storage_url_for(file)
-  end
-
   def thumbnail_variant = variant_for(thumbnail_limit)
 
   def thumbnail_url = variant_url(thumbnail_limit)
   def display_url = variant_url(display_limit)
 
   private
+
+  def file_url
+    return unless file.attached?
+
+    build_cdn_url(file.key) || active_storage_url_for(file)
+  end
 
   def variant_for(limit)
     return unless file.attached?
