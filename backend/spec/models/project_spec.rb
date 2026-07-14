@@ -51,10 +51,11 @@ RSpec.describe Project, type: :model do
     end
   end
 
+  # file_url は variant_url のフォールバック専用の private ヘルパーなので send で検証する。
   describe '#file_url' do
     context 'when file is not attached' do
       it 'returns nil' do
-        expect(project.file_url).to be_nil
+        expect(project.send(:file_url)).to be_nil
       end
     end
 
@@ -63,7 +64,7 @@ RSpec.describe Project, type: :model do
         file = double('ActiveStorage::Attached::One', attached?: true, key: 'projects/file-key')
         allow(project).to receive(:file).and_return(file)
 
-        expect(project.file_url).to eq("#{cdn_base_url}/projects/file-key")
+        expect(project.send(:file_url)).to eq("#{cdn_base_url}/projects/file-key")
       end
     end
   end
