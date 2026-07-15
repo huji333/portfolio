@@ -10,9 +10,17 @@ type FetchProjectsResult = {
   error: boolean;
 };
 
+// migration 未適用の DB では as_json が tags キー自体を省略するため、
+// レスポンス上は tags が存在しないケースを型として許容し、正規化する。
+type ProjectResponse = Omit<ProjectType, 'tags'> & { tags?: string[] };
+
 export async function fetchProjects({
   fetchInit,
 }: FetchProjectsOptions = {}): Promise<FetchProjectsResult> {
-  const result = await apiFetch<ProjectType[]>('/projects', 'projects', fetchInit);
-  return { projects: result.error ? [] : result.data, error: result.error };
+  const result = await apiFetch<ProjectResponse[]>('/projects', 'projects', fetchInit);
+  if (result.error) {
+    return { projects: [], error: true };
+  }
+  const projects = result.data.map((project) => ({ ...project, tags: project.tags ?? [] }));
+  return { projects, error: false };
 }
