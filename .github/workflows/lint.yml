@@ -1,0 +1,47 @@
+# Dockerfile / GitHub Actions workflow の lint
+# バージョンはローカル環境（brew）と揃えて pin する。更新時はフルスキャンを1回行うこと。
+
+name: Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/Dockerfile*'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/Dockerfile*'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run hadolint on all Dockerfiles
+        run: |
+          git ls-files -z '*Dockerfile*' | xargs -0 \
+            docker run --rm -v "$PWD:/repo" -w /repo \
+            --entrypoint /bin/hadolint hadolint/hadolint:v2.14.0
+
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run actionlint
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            rhysd/actionlint:1.7.12 -color

@@ -10,21 +10,29 @@ on:
     paths:
       - 'backend/**'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   RAILS_ENV: test
 
 jobs:
   rubocop:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Set up Ruby
+        # ruby-version 省略時は working-directory の .ruby-version を読む（SSOT）
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.5'
           bundler-cache: true
           working-directory: backend
 
@@ -48,6 +56,7 @@ jobs:
 
   rspec:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: rubocop
     env:
       PGHOST: 127.0.0.1
@@ -73,7 +82,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3.5'
           bundler-cache: true
           working-directory: backend
 

@@ -1,4 +1,4 @@
-ARG RUBY_VERSION=3.3.5
+ARG RUBY_VERSION=3.3.11
 FROM ruby:$RUBY_VERSION-slim
 
 WORKDIR /app
@@ -10,7 +10,7 @@ RUN apt-get update -qq && \
 
 ENV RAILS_ENV="development"
 
-COPY Gemfile Gemfile.lock ./
+COPY .ruby-version Gemfile Gemfile.lock ./
 
 RUN bundle install
 

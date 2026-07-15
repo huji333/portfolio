@@ -87,7 +87,8 @@ services:
     restart: unless-stopped
 
   tunnel:
-    image: cloudflare/cloudflared:latest
+    # 再現性のため pin（更新は dependabot の docker-compose ecosystem が回す）
+    image: cloudflare/cloudflared:2026.7.1
     command: tunnel run
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}

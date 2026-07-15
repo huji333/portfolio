@@ -4,3 +4,4 @@ Caddyfile
 .DS_Store
 .ruby-lsp/
 backups/
+.claude/
