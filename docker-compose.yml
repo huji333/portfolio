@@ -40,7 +40,7 @@ services:
     depends_on:
       - backend
   db:
-    image: postgres:16-bookworm
+    image: postgres:18-bookworm
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

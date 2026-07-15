@@ -70,7 +70,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: postgres:16-bookworm
+    image: postgres:18-bookworm
     environment:
       POSTGRES_USER: backend
       POSTGRES_PASSWORD: ${BACKEND_DATABASE_PASSWORD}
