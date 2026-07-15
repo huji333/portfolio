@@ -51,7 +51,7 @@ gem "image_processing", "~> 2.0"
 # image_processing 2.0 dropped its automatic ruby-vips dependency, so declare it explicitly
 gem "ruby-vips", "~> 2.2"
 
-gem "aws-sdk-s3", "~> 1.226"
+gem "aws-sdk-s3", "~> 1.227"
 
 # DB-backed Active Job backend (Rails 8 default)。再起動を跨いでジョブが消えない
 gem "solid_queue"
