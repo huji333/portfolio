@@ -141,6 +141,9 @@ export default function GalleryApp({
       {fetchError && (
         <p className="text-center text-sm text-red-600">読み込みに失敗しました。</p>
       )}
+      {!isLoadingImages && !fetchError && images.length === 0 && (
+        <p className="text-center text-sm text-foreground">表示できる写真がまだありません。</p>
+      )}
       <ImageGrid
         images={images}
         isLoading={isLoadingImages}
