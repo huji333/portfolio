@@ -1,7 +1,11 @@
 # ローカル Traefik（homelab/local/traefik）経由のルーティング層
-# - frontend: http://portfolio.localhost
-# - backend:  http://api.portfolio.localhost
-# 既存の ports 公開（localhost:3002 / :3000）はそのまま残る（e2e 等の互換用）
+# 接続規約（SSOT）: https://github.com/huji333/homelab/blob/main/local/traefik/README.md
+# - frontend: http://${DOMAIN:-portfolio.localhost}
+# - backend:  http://api.${DOMAIN:-portfolio.localhost}
+# staging へは DOMAIN=portfolio.apps.home.arpa に差し替えるだけで載る
+#
+# 本体 compose の host ports 公開（localhost:3000 / :3002）は規約 #5 の例外:
+# e2e（Playwright）が localhost を直叩きするため互換用に残している
 services:
   backend:
     networks:
@@ -9,22 +13,22 @@ services:
       - traefik
     labels:
       - traefik.enable=true
-      - traefik.http.routers.portfolio-api.rule=Host(`api.portfolio.localhost`)
+      - traefik.http.routers.portfolio-api.rule=Host(`api.${DOMAIN:-portfolio.localhost}`)
       - traefik.http.services.portfolio-api.loadbalancer.server.port=3000
     environment:
-      FRONTEND_ORIGIN: 'http://portfolio.localhost'
+      FRONTEND_ORIGIN: 'http://${DOMAIN:-portfolio.localhost}'
       # Rails HostAuthorization に Traefik 経由のホスト名を許可させる（development のみ有効な標準 env）
-      RAILS_DEVELOPMENT_HOSTS: 'api.portfolio.localhost'
+      RAILS_DEVELOPMENT_HOSTS: 'api.${DOMAIN:-portfolio.localhost}'
   frontend:
     networks:
       - default
       - traefik
     labels:
       - traefik.enable=true
-      - traefik.http.routers.portfolio.rule=Host(`portfolio.localhost`)
+      - traefik.http.routers.portfolio.rule=Host(`${DOMAIN:-portfolio.localhost}`)
       - traefik.http.services.portfolio.loadbalancer.server.port=3002
     environment:
-      NEXT_PUBLIC_API_BASE_URL: 'http://api.portfolio.localhost/api'
+      NEXT_PUBLIC_API_BASE_URL: 'http://api.${DOMAIN:-portfolio.localhost}/api'
 
 networks:
   traefik:
