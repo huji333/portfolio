@@ -17,9 +17,9 @@ class Admin::Base < ApplicationController
 
     message = 'You are not authorized to perform this action.'
     respond_to do |format|
-      format.html { render plain: message, status: :unauthorized }
-      format.json { render json: { error: message }, status: :unauthorized }
-      format.any  { head :unauthorized }
+      format.html { render plain: message, status: :forbidden }
+      format.json { render json: { error: message }, status: :forbidden }
+      format.any  { head :forbidden }
     end
   end
 end
