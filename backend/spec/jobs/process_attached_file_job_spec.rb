@@ -51,4 +51,39 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect { described_class.perform_now(image) }.to have_enqueued_job(described_class)
     end
   end
+
+  describe 'TRANSIENT_ERRORS retry configuration' do
+    it 'covers the expected S3 / network transient error classes' do
+      expect(described_class::TRANSIENT_ERRORS).to contain_exactly(
+        Aws::S3::Errors::ServiceUnavailable,
+        Aws::S3::Errors::InternalError,
+        Aws::S3::Errors::SlowDown,
+        Seahorse::Client::NetworkingError,
+        Errno::ECONNRESET,
+        Net::OpenTimeout,
+        Net::ReadTimeout
+      )
+    end
+
+    # TRANSIENT_ERRORS の一部（Errno::ECONNRESET）で実際に retry_on が起動することを
+    # 確認する代表ケース。上限到達後の再 raise は framework 保証なのでここでは検証しない。
+    it 'retries on a transient S3/network error (e.g. Errno::ECONNRESET)' do
+      image = create(:image)
+      allow(image).to receive(:process_attached_file!).and_raise(Errno::ECONNRESET)
+      clear_enqueued_jobs
+
+      expect { described_class.perform_now(image) }.to have_enqueued_job(described_class)
+    end
+
+    # 破損画像の vips デコード失敗など恒久的なエラーは retry_on の対象外のまま
+    # （fail-loud → failed executions に残る）ことを確認する。
+    it 'does not retry a non-transient StandardError and lets it propagate' do
+      image = create(:image)
+      allow(image).to receive(:process_attached_file!).and_raise(StandardError, 'corrupt image')
+      clear_enqueued_jobs
+
+      expect { described_class.perform_now(image) }.to raise_error(StandardError, 'corrupt image')
+      expect(enqueued_jobs).to be_empty
+    end
+  end
 end
