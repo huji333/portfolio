@@ -50,7 +50,13 @@ module CdnAttachedFile
 
     build_cdn_url(variant.key) || active_storage_url_for(variant)
   rescue StandardError, LoadError => e
-    Rails.logger.warn "variant_url fallback (#{log_reference}): #{e.class} #{e.message}"
+    # error 固定（warn からの意図的な格上げ）: 2026-06-18 の S3 アップロード失敗インシデントでは
+    # variant_generated? が DB のみを見るため silent fallback が唯一の手がかりだった。
+    # variant_key / blob_id を含めて grep・件数集計できるようにする（storage:verify_variants と対）。
+    Rails.logger.error(
+      "variant_url fallback (#{log_reference}): #{e.class} #{e.message} " \
+      "variant_key=#{variant&.key.inspect} blob_id=#{file.blob&.id.inspect}"
+    )
     file_url
   end
 
