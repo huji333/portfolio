@@ -17,6 +17,7 @@
 = form_with(url: admin_image_bulk_update_path, method: :patch, local: true,
   data: { controller: "bulk-edit", action: "keydown@document->bulk-edit#handleKeydown" }) do
   = hidden_field_tag :filter, params[:filter]
+  = hidden_field_tag :page, params[:page]
   .table-responsive
     %table.table.table-hover.align-middle
       %thead
@@ -30,6 +31,10 @@
       %tbody
         - @images.each do |image|
           = render 'image_row', image: image
+
+  - if @pagy.pages > 1
+    %nav.d-flex.justify-content-center{"aria-label": "ページ切り替え"}
+      != pagy_bootstrap_nav(@pagy)
 
   -# 選択中のみ表示される一括操作バー。空欄の項目は変更されない（クリアは単体編集で）。
   .card.position-sticky.bottom-0.mb-3.shadow.d-none{ data: { bulk_edit_target: "bar" } }
@@ -55,4 +60,4 @@
                   id: "bulk_category_#{category.id}", class: 'form-check-input'
                 = label_tag "bulk_category_#{category.id}", category.name, class: 'form-check-label'
         = submit_tag '選択した画像に適用', class: 'btn btn-primary btn-sm ms-auto',
-          data: { bulk_edit_target: "submit" }
+          data: { bulk_edit_target: "submit", turbo_confirm: '選択した画像に一括適用します。よろしいですか？' }

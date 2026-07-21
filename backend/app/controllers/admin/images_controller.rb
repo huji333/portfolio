@@ -1,14 +1,18 @@
 class Admin::ImagesController < Admin::Base
   include Admin::ImageCurationFlow
+  include Pagy::Backend
+
+  PER_PAGE = 50
 
   before_action :set_cameras_and_lenses_and_categories, only: %i[index new edit create update]
   before_action :set_image, only: %i[show edit update destroy insert_at]
   before_action :set_adjacent_images, only: %i[edit update]
 
   def index
-    @images = Image.order(:id).with_attached_file
+    scope = Image.order(:id).with_attached_file
+    scope = scope.uncurated if params[:filter] == "uncurated"
     @uncurated_count = Image.uncurated.count
-    @images = @images.uncurated if params[:filter] == "uncurated"
+    @pagy, @images = pagy(scope, limit: PER_PAGE)
   end
 
   # 並び替え専用画面。featured のみを表示する（ギャラリー先頭に pin される集合）。

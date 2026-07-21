@@ -41,6 +41,26 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(response).to have_http_status(:success)
       expect(response.body).to include("data-image-id='#{draft.id}'").or include("data-image-id=\"#{draft.id}\"")
     end
+
+    it 'paginates the list and preserves the filter in page links' do
+      stub_const('Admin::ImagesController::PER_PAGE', 2)
+
+      get '/admin/images', params: { page: 2 }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("select_image_#{image3.id}")
+      expect(response.body).not_to include("select_image_#{image1.id}")
+      expect(response.body).to include('pagination')
+    end
+
+    it 'rounds an out-of-range page down to the last page instead of erroring' do
+      stub_const('Admin::ImagesController::PER_PAGE', 2)
+
+      get '/admin/images', params: { page: 99 }
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("select_image_#{image4.id}")
+    end
   end
 
   describe 'GET /admin/images/arrange' do
