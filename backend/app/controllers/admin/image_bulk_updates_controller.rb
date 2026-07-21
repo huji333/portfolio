@@ -8,13 +8,23 @@ class Admin::ImageBulkUpdatesController < Admin::Base
     camera = Camera.find(params[:camera_id]) if params[:camera_id].present?
     lens = Lens.find(params[:lens_id]) if params[:lens_id].present?
     categories = Category.where(id: Array(params[:category_ids]).compact_blank).to_a
-    return redirect_to_images(alert: '適用する項目が選択されていません。') if camera.nil? && lens.nil? && categories.empty?
+    taken_at_base = parse_taken_at_base
+    return redirect_to_images(alert: '適用する項目が選択されていません。') if nothing_to_apply?(camera, lens, categories, taken_at_base)
 
-    images = Image.bulk_assign!(image_ids, camera: camera, lens: lens, categories: categories)
+    images = Image.bulk_assign!(image_ids, camera: camera, lens: lens, categories: categories,
+                                           taken_at_base: taken_at_base)
     redirect_to_images(notice: "#{images.size}枚に一括適用しました。")
   end
 
   private
+
+  def parse_taken_at_base
+    Time.zone.parse(params[:taken_at]) if params[:taken_at].presence
+  end
+
+  def nothing_to_apply?(camera, lens, categories, taken_at_base)
+    camera.nil? && lens.nil? && categories.empty? && taken_at_base.nil?
+  end
 
   # 一括操作の戻り先。filter と page を引き継いで「絞ってから一括付与」のフローを維持する。
   def redirect_to_images(**flash_options)

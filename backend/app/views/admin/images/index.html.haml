@@ -51,6 +51,9 @@
           = label_tag :lens_id, 'レンズ', class: 'col-form-label col-form-label-sm text-nowrap'
           = select_tag :lens_id, options_from_collection_for_select(@lenses, :id, :name),
             include_blank: '変更しない', class: 'form-select form-select-sm'
+        .d-flex.align-items-center.gap-1
+          = label_tag :taken_at, '撮影日時', class: 'col-form-label col-form-label-sm text-nowrap'
+          = datetime_field_tag :taken_at, nil, class: 'form-control form-control-sm'
         - if @categories.any?
           .d-flex.align-items-center.gap-2
             %span.col-form-label.col-form-label-sm.text-nowrap カテゴリ追加

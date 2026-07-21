@@ -378,4 +378,38 @@ RSpec.describe Image, type: :model do
       end
     end
   end
+
+  describe '.bulk_assign!' do
+    it 'offsets taken_at by 1 minute per image in id order when taken_at_base is given' do
+      a = create(:image)
+      b = create(:image)
+      c = create(:image)
+      base = Time.zone.parse('2024-01-01 10:00:00')
+
+      Image.bulk_assign!([a.id, b.id, c.id], taken_at_base: base)
+
+      ordered = [a, b, c].sort_by(&:id)
+      ordered.each_with_index do |image, index|
+        expect(image.reload.taken_at).to eq(base + index.minutes)
+      end
+    end
+
+    it 'does not change taken_at when taken_at_base is nil' do
+      image = create(:image, taken_at: 1.day.ago.change(usec: 0))
+      original_taken_at = image.taken_at
+
+      Image.bulk_assign!([image.id])
+
+      expect(image.reload.taken_at).to eq(original_taken_at)
+    end
+
+    it 'overwrites an existing taken_at when taken_at_base is given' do
+      image = create(:image, taken_at: 10.days.ago.change(usec: 0))
+      base = Time.zone.parse('2024-01-01 10:00:00')
+
+      Image.bulk_assign!([image.id], taken_at_base: base)
+
+      expect(image.reload.taken_at).to eq(base)
+    end
+  end
 end

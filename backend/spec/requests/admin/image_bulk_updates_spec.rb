@@ -82,5 +82,27 @@ RSpec.describe 'Admin::ImageBulkUpdates', type: :request do
 
       expect(response).to have_http_status(:not_found)
     end
+
+    it 'assigns taken_at with a 1-minute offset per image in id order, with no camera/lens selected' do
+      patch '/admin/image_bulk_update',
+            params: { image_ids: [image1.id, image2.id], taken_at: '2024-01-01T10:00' }
+
+      expect(response).to redirect_to(admin_images_path)
+      expect(flash[:notice]).to include('2枚')
+
+      ordered = [image1, image2].sort_by(&:id)
+      base = Time.zone.parse('2024-01-01T10:00')
+      ordered.each_with_index do |image, index|
+        expect(image.reload.taken_at).to eq(base + index.minutes)
+      end
+    end
+
+    it 'leaves taken_at untouched when the field is blank' do
+      original_taken_at = image1.taken_at
+
+      patch '/admin/image_bulk_update', params: { image_ids: [image1.id], camera_id: camera.id, taken_at: '' }
+
+      expect(image1.reload.taken_at).to eq(original_taken_at)
+    end
   end
 end
