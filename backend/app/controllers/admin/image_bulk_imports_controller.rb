@@ -1,6 +1,17 @@
 class Admin::ImageBulkImportsController < Admin::Base
   before_action :set_form_options
 
+  # Cloudflare Tunnel の無料プランには 1 リクエスト 100MB のハード上限があるため、
+  # それを超えないよう十分な余裕を持たせてアプリ側の上限をここに定義する。
+  MAX_FILE_SIZE = 50.megabytes
+
+  # vips が扱えるラスター形式のみ許可する。宣言された content_type と実バイト
+  # （マジックバイト）の両方がこの一覧に含まれる場合のみ画像として受理し、
+  # 偽装された Content-Type（実体は画像でないファイルが image/jpeg を名乗る等）を弾く。
+  ACCEPTED_CONTENT_TYPES = %w[
+    image/jpeg image/png image/webp image/heic image/heif image/tiff image/gif image/avif
+  ].freeze
+
   def new
     @results = nil
   end
@@ -61,6 +72,11 @@ class Admin::ImageBulkImportsController < Admin::Base
     blob = ActiveStorage::Blob.find_signed!(signed_id)
     filename = blob.filename.to_s
 
+    if (reason = blob_rejection_reason(blob))
+      blob.purge_later
+      return { filename: filename, status: :failed, image: nil, duplicate_image_id: nil, errors: [reason] }
+    end
+
     if (duplicate = Image.attached_duplicate_for(blob))
       blob.purge_later
       return { filename: filename, status: :duplicate, image: nil, duplicate_image_id: duplicate.id, errors: [] }
@@ -76,5 +92,24 @@ class Admin::ImageBulkImportsController < Admin::Base
   rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
     { filename: signed_id.to_s.truncate(24), status: :failed, image: nil, duplicate_image_id: nil,
       errors: ['アップロードが無効です（再アップロードしてください）'] }
+  end
+
+  # サイズは direct upload 時点でメタデータとして分かっているので blob.byte_size を見るだけで済む。
+  # 形式判定はサイズ超過より後回しにし、明らかに大きすぎるファイルでは byte range 取得すら行わない。
+  # 先頭 4KB だけを ranged GET で取得して Marcel にマジックバイト判定させる（S3 からのフルダウンロードは避ける）。
+  def blob_rejection_reason(blob)
+    return 'サイズ上限50MBを超えています' if blob.byte_size > MAX_FILE_SIZE
+
+    # declared_type は渡さない: Marcel は「マジックバイトで判定できない場合」に
+    # declared_type へフォールバックしてしまい、それでは偽装された Content-Type を
+    # そのまま信用することになる。ここではバイト由来の判定だけを独立して見る。
+    header = blob.download_chunk(0...(4.kilobytes))
+    detected_content_type = Marcel::MimeType.for(StringIO.new(header))
+
+    if ACCEPTED_CONTENT_TYPES.include?(blob.content_type) && ACCEPTED_CONTENT_TYPES.include?(detected_content_type)
+      return nil
+    end
+
+    '画像ではありません'
   end
 end

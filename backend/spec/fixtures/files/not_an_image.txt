@@ -1,0 +1,1 @@
+this is not an image, just plain text bytes for the spoofed content-type spec.
