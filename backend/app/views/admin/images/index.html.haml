@@ -14,7 +14,8 @@
       = "未編集の下書き #{@uncurated_count} 枚を表示。"
       = link_to '未編集のみ表示', admin_images_path(filter: "uncurated")
 
-= form_with(url: admin_image_bulk_update_path, method: :patch, local: true, data: { controller: "bulk-edit" }) do
+= form_with(url: admin_image_bulk_update_path, method: :patch, local: true,
+  data: { controller: "bulk-edit", action: "keydown@document->bulk-edit#handleKeydown" }) do
   = hidden_field_tag :filter, params[:filter]
   .table-responsive
     %table.table.table-hover.align-middle
