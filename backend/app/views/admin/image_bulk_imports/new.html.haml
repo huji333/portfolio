@@ -19,6 +19,7 @@
   .mb-3
     = form.label :files, '画像ファイル（複数選択可）', class: 'col-form-label fw-bold'
     = form.file_field :files, multiple: true, direct_upload: true, accept: 'image/*', class: 'form-control', data: { direct_upload_target: "input" }
+    %small.text-muted.d-block.mt-1 対応形式: JPEG / PNG / WebP / HEIC・HEIF / TIFF / GIF / AVIF、1ファイルあたり50MBまで。それ以外は取り込みに失敗します。
   .progress.d-none.mb-3{ data: { direct_upload_target: "progress" } }
     .progress-bar.progress-bar-striped.progress-bar-animated.admin-progress-bar{ role: "progressbar", "aria-valuenow": "0", "aria-valuemin": "0", "aria-valuemax": "100" }
   .alert.alert-danger.d-none.mb-3{ data: { direct_upload_target: "error" } }

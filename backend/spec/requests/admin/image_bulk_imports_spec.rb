@@ -16,6 +16,15 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
     )
   end
 
+  # マジックバイト検査を通らない非画像ファイルを、宣言 content_type だけ image/jpeg と偽って送る
+  def upload_spoofed_non_image_blob
+    ActiveStorage::Blob.create_and_upload!(
+      io: Rails.root.join('spec/fixtures/files/not_an_image.txt').open,
+      filename: 'not_an_image.txt',
+      content_type: 'image/jpeg'
+    )
+  end
+
   describe 'GET /admin/image_bulk_import/new' do
     it 'renders the bulk import form' do
       get '/admin/image_bulk_import/new'
@@ -122,6 +131,46 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
 
         perform_enqueued_jobs
         expect(ActiveStorage::Blob.exists?(second_blob.id)).to be(false)
+      end
+    end
+
+    describe 'サーバサイドのファイル検証' do
+      it 'rejects a non-image file whose content type is spoofed as image/jpeg, purging the blob' do
+        blob = upload_spoofed_non_image_blob
+
+        expect do
+          post '/admin/image_bulk_import', params: { bulk: { files: [blob.signed_id] } }
+        end.not_to change(Image, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('画像ではありません')
+
+        perform_enqueued_jobs
+        expect(ActiveStorage::Blob.exists?(blob.id)).to be(false)
+      end
+
+      it 'rejects a file over the 50MB limit, purging the blob' do
+        blob = upload_fixture_blob
+        allow_any_instance_of(ActiveStorage::Blob)
+          .to receive(:byte_size).and_return(Admin::ImageBulkImportsController::MAX_FILE_SIZE + 1)
+
+        expect do
+          post '/admin/image_bulk_import', params: { bulk: { files: [blob.signed_id] } }
+        end.not_to change(Image, :count)
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(response.body).to include('サイズ上限50MBを超えています')
+
+        perform_enqueued_jobs
+        expect(ActiveStorage::Blob.exists?(blob.id)).to be(false)
+      end
+
+      it 'still ingests a valid image under the limit with the correct content type' do
+        expect do
+          post '/admin/image_bulk_import', params: { bulk: { files: [upload_fixture_blob.signed_id] } }
+        end.to change(Image, :count).by(1)
+
+        expect(response).to redirect_to(admin_images_path(filter: 'uncurated'))
       end
     end
 
