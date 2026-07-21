@@ -31,3 +31,8 @@
 .admin-progress-bar {
   width: 0;
 }
+
+/* ナビの「ジョブ」失敗件数バッジ（Solid Queue failed executions）。 */
+.admin-job-badge {
+  margin-left: 4px;
+}

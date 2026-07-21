@@ -35,6 +35,11 @@
               %a.nav-link{:href => "/admin/categories"} カテゴリ
             %li.nav-item
               %a.nav-link{:href => "/admin/projects"} プロジェクト
+            - if failed_job_count.positive?
+              %li.nav-item
+                %a.nav-link{:href => "/admin/jobs"}
+                  ジョブ
+                  %span.badge.bg-danger.admin-job-badge= failed_job_count
     .container.mt-3
       - if flash.notice
         .alert.alert-info= flash.notice
