@@ -16,8 +16,8 @@ class Admin::ImageBulkUpdatesController < Admin::Base
 
   private
 
-  # 一括操作の戻り先。filter を引き継いで「絞ってから一括付与」のフローを維持する。
+  # 一括操作の戻り先。filter と page を引き継いで「絞ってから一括付与」のフローを維持する。
   def redirect_to_images(**flash_options)
-    redirect_to admin_images_path(filter: params[:filter].presence), **flash_options
+    redirect_to admin_images_path(filter: params[:filter].presence, page: params[:page].presence), **flash_options
   end
 end

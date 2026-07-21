@@ -1,4 +1,5 @@
-%tr.cursor-pointer{"data-image-id": image.id}
+%tr.cursor-pointer{"data-image-id": image.id,
+  data: { bulk_edit_target: "row", edit_url: edit_admin_image_path(image) } }
   %td
     = check_box_tag 'image_ids[]', image.id, false,
       id: "select_image_#{image.id}", class: 'form-check-input', "aria-label": "選択",

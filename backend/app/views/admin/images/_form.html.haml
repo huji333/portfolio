@@ -1,4 +1,4 @@
-= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-fill direct-upload" }) do |form|
+= form_with(model: image, url: image.new_record? ? admin_images_path : admin_image_path(image), local: true, multipart: true, data: { controller: "exif-fill direct-upload edit-nav", action: "keydown@document->edit-nav#handleKeydown" }) do |form|
   - if image.errors.any?
     .alert.alert-danger
       %ul.mb-0
@@ -60,7 +60,8 @@
         .card-footer.mt-auto
           .d-flex.justify-content-between.align-items-center.gap-2
             - if image.persisted?
-              = form.submit '← 前へ', name: 'nav_prev', class: 'btn btn-outline-secondary', disabled: local_assigns[:prev_image].nil?
+              = form.submit '← 前へ', name: 'nav_prev', class: 'btn btn-outline-secondary', disabled: local_assigns[:prev_image].nil?,
+                data: { edit_nav_target: "prev" }
             .d-flex.gap-2.mx-auto
               = form.submit '保存', class: 'btn btn-primary'
               - if image.is_published?
@@ -68,6 +69,7 @@
               - else
                 = form.submit '公開する', name: 'commit_publish', class: 'btn btn-success'
             - if image.persisted?
-              = form.submit '次へ →', name: 'nav_next', class: 'btn btn-outline-secondary', disabled: local_assigns[:next_image].nil?
+              = form.submit '次へ →', name: 'nav_next', class: 'btn btn-outline-secondary', disabled: local_assigns[:next_image].nil?,
+                data: { edit_nav_target: "next" }
           - unless image.is_published?
             %small.text-muted.d-block.text-center.mt-1 公開にはタイトルと撮影日時が必要です
