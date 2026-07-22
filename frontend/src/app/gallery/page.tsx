@@ -4,12 +4,14 @@ import GalleryApp from './_components/GalleryApp';
 import { fetchCategories } from '@/hooks/categoryApi';
 import { fetchImages } from '@/hooks/imageApi';
 
+const description = '藤井駆陸が撮影した写真作品のギャラリー。フィールドワークの記録から日常のスナップまで、カテゴリ別に閲覧できます。';
+
 export const metadata: Metadata = {
   title: 'Gallery',
-  description: '藤井駆陸が撮影した写真作品のギャラリー。フィールドワークの記録から日常のスナップまで、カテゴリ別に閲覧できます。',
+  description,
   openGraph: {
     title: 'Gallery | Kakemu Fujii',
-    description: '藤井駆陸が撮影した写真作品のギャラリー。フィールドワークの記録から日常のスナップまで、カテゴリ別に閲覧できます。',
+    description,
   },
 };
 

@@ -22,6 +22,11 @@ class Camera < ApplicationRecord
 
   # EXIF 自動生成のまま表示名を整えていない機材を「未整備」とする。
   # 手動作成（make/model が blank）は整備済み扱い。
+  scope :uncurated, -> {
+    where.not(make: [nil, ""]).where.not(model: [nil, ""])
+         .where("manufacturer = make AND name = model")
+  }
+
   def uncurated?
     make.present? && model.present? && manufacturer == make && name == model
   end

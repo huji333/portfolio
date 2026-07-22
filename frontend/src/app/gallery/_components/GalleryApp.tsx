@@ -81,19 +81,22 @@ export default function GalleryApp({
     if (isLoadingMore || !hasMore || !nextCursor) return;
 
     setIsLoadingMore(true);
-    const result = await fetchImages({
-      categoryIds: selectedCategoryIds,
-      cursor: nextCursor,
-    });
-    if (!result.error) {
-      setImages((prev) => [...prev, ...result.images]);
-      setNextCursor(result.nextCursor);
-      setHasMore(result.hasMore);
-      setFetchError(false);
-    } else {
-      setFetchError(true);
+    try {
+      const result = await fetchImages({
+        categoryIds: selectedCategoryIds,
+        cursor: nextCursor,
+      });
+      if (!result.error) {
+        setImages((prev) => [...prev, ...result.images]);
+        setNextCursor(result.nextCursor);
+        setHasMore(result.hasMore);
+        setFetchError(false);
+      } else {
+        setFetchError(true);
+      }
+    } finally {
+      setIsLoadingMore(false);
     }
-    setIsLoadingMore(false);
   }, [isLoadingMore, hasMore, nextCursor, selectedCategoryIds]);
 
   const handleCategoryToggle = useCallback((id: number) => {
