@@ -14,7 +14,7 @@ class Lens < ApplicationRecord
 
   # EXIF 自動生成のまま表示名を整えていない機材を「未整備」とする。
   # 手動作成（exif_name が blank）は整備済み扱い。
-  scope :uncurated, -> {
+  scope :uncurated, lambda {
     where.not(exif_name: [nil, ""]).where("name = exif_name")
   }
 
