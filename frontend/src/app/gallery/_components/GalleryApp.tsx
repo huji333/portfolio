@@ -40,8 +40,11 @@ export default function GalleryApp({
 
   const isInteractionDisabledRef = useRef(isInteractionDisabled);
   const imagesLengthRef = useRef(images.length);
-  isInteractionDisabledRef.current = isInteractionDisabled;
-  imagesLengthRef.current = images.length;
+
+  useEffect(() => {
+    isInteractionDisabledRef.current = isInteractionDisabled;
+    imagesLengthRef.current = images.length;
+  });
 
   // カテゴリ変更時: 1ページ目をロード
   useEffect(() => {

@@ -5,11 +5,12 @@ class Admin::ImageBulkUpdatesController < Admin::Base
     image_ids = Array(params[:image_ids]).compact_blank
     return redirect_to_images(alert: '画像が選択されていません。') if image_ids.empty?
 
-    camera = Camera.find_by(id: params[:camera_id]) if params[:camera_id].present?
-    return redirect_to_images(alert: '指定されたカメラが見つかりません。') if params[:camera_id].present? && camera.nil?
+    camera = find_gear(Camera, params[:camera_id])
+    return redirect_to_images(alert: '指定されたカメラが見つかりません。') if stale_id?(params[:camera_id], camera)
 
-    lens = Lens.find_by(id: params[:lens_id]) if params[:lens_id].present?
-    return redirect_to_images(alert: '指定されたレンズが見つかりません。') if params[:lens_id].present? && lens.nil?
+    lens = find_gear(Lens, params[:lens_id])
+    return redirect_to_images(alert: '指定されたレンズが見つかりません。') if stale_id?(params[:lens_id], lens)
+
     categories = Category.where(id: Array(params[:category_ids]).compact_blank).to_a
     taken_at_base = parse_taken_at_base
     return redirect_to_images(alert: '適用する項目が選択されていません。') if nothing_to_apply?(camera, lens, categories, taken_at_base)
@@ -27,6 +28,14 @@ class Admin::ImageBulkUpdatesController < Admin::Base
 
   def nothing_to_apply?(camera, lens, categories, taken_at_base)
     camera.nil? && lens.nil? && categories.empty? && taken_at_base.nil?
+  end
+
+  def find_gear(klass, id)
+    klass.find_by(id: id) if id.present?
+  end
+
+  def stale_id?(id, record)
+    id.present? && record.nil?
   end
 
   # 一括操作の戻り先。filter と page を引き継いで「絞ってから一括付与」のフローを維持する。
