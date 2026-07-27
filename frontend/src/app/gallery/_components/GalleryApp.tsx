@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { fetchImages } from '@/hooks/imageApi';
+import { fetchImages } from '@/utils/imageApi';
 import type { CategoryType, ImageType } from '@/utils/types';
 import ImageFilter from './ImageFilter';
 import ImageGrid from './ImageGrid';
@@ -40,11 +40,8 @@ export default function GalleryApp({
 
   const isInteractionDisabledRef = useRef(isInteractionDisabled);
   const imagesLengthRef = useRef(images.length);
-
-  useEffect(() => {
-    isInteractionDisabledRef.current = isInteractionDisabled;
-    imagesLengthRef.current = images.length;
-  });
+  isInteractionDisabledRef.current = isInteractionDisabled;
+  imagesLengthRef.current = images.length;
 
   // カテゴリ変更時: 1ページ目をロード
   useEffect(() => {
@@ -93,6 +90,9 @@ export default function GalleryApp({
         setFetchError(false);
       } else {
         setFetchError(true);
+        // エラー時に hasMore を落とさないと IntersectionObserver が
+        // viewport 進入のたびに失敗した endpoint へ無限リトライする
+        setHasMore(false);
       }
     } finally {
       setIsLoadingMore(false);

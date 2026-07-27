@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '../_components/SiteHeader';
 import GalleryApp from './_components/GalleryApp';
-import { fetchCategories } from '@/hooks/categoryApi';
-import { fetchImages } from '@/hooks/imageApi';
+import { fetchCategories } from '@/utils/categoryApi';
+import { fetchImages } from '@/utils/imageApi';
 
 const description = '藤井駆陸が撮影した写真作品のギャラリー。フィールドワークの記録から日常のスナップまで、カテゴリ別に閲覧できます。';
 

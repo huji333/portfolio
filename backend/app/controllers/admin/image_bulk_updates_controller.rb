@@ -5,8 +5,11 @@ class Admin::ImageBulkUpdatesController < Admin::Base
     image_ids = Array(params[:image_ids]).compact_blank
     return redirect_to_images(alert: '画像が選択されていません。') if image_ids.empty?
 
-    camera = Camera.find(params[:camera_id]) if params[:camera_id].present?
-    lens = Lens.find(params[:lens_id]) if params[:lens_id].present?
+    camera = Camera.find_by(id: params[:camera_id]) if params[:camera_id].present?
+    return redirect_to_images(alert: '指定されたカメラが見つかりません。') if params[:camera_id].present? && camera.nil?
+
+    lens = Lens.find_by(id: params[:lens_id]) if params[:lens_id].present?
+    return redirect_to_images(alert: '指定されたレンズが見つかりません。') if params[:lens_id].present? && lens.nil?
     categories = Category.where(id: Array(params[:category_ids]).compact_blank).to_a
     taken_at_base = parse_taken_at_base
     return redirect_to_images(alert: '適用する項目が選択されていません。') if nothing_to_apply?(camera, lens, categories, taken_at_base)

@@ -1,4 +1,4 @@
-import { fetchProjects } from '@/hooks/projectApi';
+import { fetchProjects } from '@/utils/projectApi';
 import ProjectCard from './ProjectCard';
 
 export default async function ProjectApp() {

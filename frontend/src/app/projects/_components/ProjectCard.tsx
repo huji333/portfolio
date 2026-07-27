@@ -79,7 +79,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     </>
   );
 
-  if (project.link) {
+  const isSafeLink =
+    project.link?.startsWith('https://') || project.link?.startsWith('http://');
+
+  if (project.link && isSafeLink) {
     return (
       <a
         href={project.link}

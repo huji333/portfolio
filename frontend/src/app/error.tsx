@@ -21,6 +21,7 @@ export default function Error({
         ページの読み込み中に問題が発生しました。再試行しても解決しない場合はしばらく経ってからアクセスしてください。
       </p>
       <button
+        type="button"
         onClick={reset}
         className="rounded-xl border border-accent-light/60 bg-background px-6 py-2.5 text-sm font-medium transition hover:border-accent hover:shadow-md"
       >

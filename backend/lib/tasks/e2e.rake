@@ -1,6 +1,8 @@
 namespace :e2e do
   desc 'Seed data for Playwright e2e tests (run after db:test:prepare)'
   task seed: :environment do
+    raise 'e2e:seed must not run in production' if Rails.env.production?
+
     seed_users
     camera, lens = seed_camera_and_lens
     category = Category.create!(name: 'E2E Test Category')
