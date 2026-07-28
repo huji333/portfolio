@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import ImageGrid from '@/app/gallery/_components/ImageGrid';
-import { fetchImages } from '@/hooks/imageApi';
+import { fetchImages } from '@/utils/imageApi';
 
 export default async function GallerySection() {
   const { images: previewImages, error } = await fetchImages({ limit: 9, fetchInit: { next: { revalidate: 120 } } });

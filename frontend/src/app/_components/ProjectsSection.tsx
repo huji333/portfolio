@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import ProjectCard from '../projects/_components/ProjectCard';
-import { fetchProjects } from '@/hooks/projectApi';
+import { fetchProjects } from '@/utils/projectApi';
 
 export default async function ProjectsSection() {
   const { projects, error } = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
