@@ -70,7 +70,7 @@ class Admin::ImagesController < Admin::Base
   # 全体を 0..N-1 へ正規化する。
   def insert_at
     ids = Image.featured.where.not(id: @image.id).pluck(:id)
-    ids.insert(insert_params.to_i, @image.id)
+    ids.insert(insert_params.to_i.clamp(0, ids.size), @image.id)
     Image.reorder_featured!(ids)
     head :ok
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotFound => e

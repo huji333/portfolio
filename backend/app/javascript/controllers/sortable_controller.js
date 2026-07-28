@@ -50,8 +50,9 @@ export default class extends Controller {
   }
 
   #showError() {
+    document.querySelectorAll('.sortable-error-flash').forEach((el) => el.remove())
     const flashDiv = document.createElement('div')
-    flashDiv.className = 'alert alert-danger'
+    flashDiv.className = 'alert alert-danger sortable-error-flash'
     flashDiv.textContent = '並び替えに失敗しました'
     const container = document.querySelector('.container')
     if (container) {

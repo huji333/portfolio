@@ -11,7 +11,7 @@ class Project < ApplicationRecord
 
   # Admin form submits tags as a comma-separated string.
   def tags=(value)
-    value = value.split(",").map(&:strip).reject(&:empty?) if value.is_a?(String)
+    value = value.split(",").map(&:strip).reject(&:empty?).uniq if value.is_a?(String)
     super(value || [])
   end
 end
