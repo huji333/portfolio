@@ -50,13 +50,17 @@ class Image < ApplicationRecord
 
   # 一括メタデータ付与。nil の属性は変更せず、カテゴリは既存への追加（union）。
   # 部分成功を作らない：ID の欠落や 1 件の失敗で全体をロールバックする（fail-loud）。
-  def self.bulk_assign!(ids, camera: nil, lens: nil, categories: [])
+  # taken_at_base 指定時は id 昇順（≒取り込み順≒コマ順）で 1 分ずつオフセットして付与する。
+  # 公開ページの表示順が taken_at DESC のため、同一時刻を複数枚に入れるとロール内の並びが不定になる。
+  def self.bulk_assign!(ids, camera: nil, lens: nil, categories: [], taken_at_base: nil)
     images = where(id: ids).to_a
     raise ActiveRecord::RecordNotFound, 'Some images not found' if images.size != ids.uniq.size
 
     transaction do
-      images.each do |image|
-        image.update!({ camera: camera, lens: lens }.compact)
+      images.sort_by(&:id).each_with_index do |image, index|
+        attrs = { camera: camera, lens: lens }.compact
+        attrs[:taken_at] = taken_at_base + index.minutes if taken_at_base
+        image.update!(attrs)
         categories.each { |category| image.image_categories.find_or_create_by!(category: category) }
       end
     end
