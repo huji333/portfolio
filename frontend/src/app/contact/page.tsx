@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import SiteHeader from '../_components/SiteHeader';
 
+const description = '藤井駆陸への連絡先・お問い合わせ。制作依頼やご質問はこちらから。';
+
 export const metadata: Metadata = {
   title: 'Contact',
-  description: '藤井駆陸への連絡先・お問い合わせ。制作依頼やご質問はこちらから。',
+  description,
   openGraph: {
     title: 'Contact | Kakemu Fujii',
-    description: '藤井駆陸への連絡先・お問い合わせ。制作依頼やご質問はこちらから。',
+    description,
   },
 };
 

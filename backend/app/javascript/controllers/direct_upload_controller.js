@@ -51,6 +51,7 @@ export default class extends Controller {
 
   updateProgressBar(percent) {
     const bar = this.progressTarget.querySelector(".progress-bar")
+    if (!bar) return
     const rounded = Math.round(percent)
     bar.style.width = `${rounded}%`
     bar.setAttribute("aria-valuenow", rounded)
