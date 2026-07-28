@@ -1,6 +1,6 @@
 class Admin::ImagesController < Admin::Base
   include Admin::ImageCurationFlow
-  include Pagy::Method
+  include Admin::ClampedPagination
 
   PER_PAGE = 50
 
@@ -12,7 +12,7 @@ class Admin::ImagesController < Admin::Base
     scope = Image.order(:id).with_attached_file
     scope = scope.uncurated if params[:filter] == "uncurated"
     @uncurated_count = Image.uncurated.count
-    @pagy, @images = paginate_clamped(scope)
+    @pagy, @images = pagy_clamped(scope, limit: PER_PAGE)
   end
 
   # 並び替え専用画面。featured のみを表示する（ギャラリー先頭に pin される集合）。
@@ -97,15 +97,6 @@ class Admin::ImagesController < Admin::Base
   end
 
   private
-
-  # ページ数を超えた page param（一括操作でページ数が減った直後など）は最終ページに丸める。
-  # pagy 43 で :overflow オプションが廃止され、範囲外は既定で空ページになったため、
-  # :raise_range_error で検出して最終ページを引き直す。
-  def paginate_clamped(scope)
-    pagy(scope, limit: PER_PAGE, raise_range_error: true)
-  rescue Pagy::RangeError => e
-    pagy(scope, limit: PER_PAGE, page: e.pagy.last)
-  end
 
   def set_cameras_and_lenses_and_categories
     @cameras = Camera.order(:manufacturer, :name)
