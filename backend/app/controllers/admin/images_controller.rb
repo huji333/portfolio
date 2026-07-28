@@ -1,6 +1,6 @@
 class Admin::ImagesController < Admin::Base
   include Admin::ImageCurationFlow
-  include Pagy::Backend
+  include Admin::ClampedPagination
 
   PER_PAGE = 50
 
@@ -12,7 +12,7 @@ class Admin::ImagesController < Admin::Base
     scope = Image.order(:id).with_attached_file
     scope = scope.uncurated if params[:filter] == "uncurated"
     @uncurated_count = Image.uncurated.count
-    @pagy, @images = pagy(scope, limit: PER_PAGE)
+    @pagy, @images = pagy_clamped(scope, limit: PER_PAGE)
   end
 
   # 並び替え専用画面。featured のみを表示する（ギャラリー先頭に pin される集合）。
