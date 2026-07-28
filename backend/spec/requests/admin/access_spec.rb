@@ -6,17 +6,17 @@ RSpec.describe 'Admin access control', type: :request do
   describe 'GET /admin as a guest user' do
     before { sign_in create(:user, role: 'guest') }
 
-    it 'returns 401 with the unauthorized message for HTML requests' do
+    it 'returns 403 with the unauthorized message for HTML requests' do
       get '/admin'
 
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:forbidden)
       expect(response.body).to include('You are not authorized to perform this action.')
     end
 
-    it 'returns 401 JSON for JSON requests' do
+    it 'returns 403 JSON for JSON requests' do
       get '/admin', headers: { 'Accept' => 'application/json' }
 
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:forbidden)
       expect(response.parsed_body['error']).to eq('You are not authorized to perform this action.')
     end
   end

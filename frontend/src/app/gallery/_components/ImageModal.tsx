@@ -1,6 +1,6 @@
 'use client';
 
-import { type SyntheticEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import type { ImageType } from '@/utils/types';
@@ -114,9 +114,8 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
 
   const [imgErrorKey, setImgErrorKey] = useState<number | null>(null);
   const handleImgError = useCallback(
-    (e: SyntheticEvent<HTMLImageElement>) => {
+    () => {
       setImgErrorKey(image?.id ?? null);
-      (e.target as HTMLImageElement).style.display = 'none';
     },
     [image?.id],
   );
@@ -195,18 +194,19 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       >
         {/* Image container */}
         <div className="flex-1 min-h-0 p-2 flex items-center justify-center overflow-auto">
-          <Image
-            src={image.file}
-            alt={image.title}
-            width={displayWidth}
-            height={displayHeight}
-            sizes="(min-width: 1024px) 60vw, 90vw"
-            className="h-auto max-h-[70vh] w-auto object-contain"
-            priority={false}
-            onError={handleImgError}
-          />
-          {imgError && (
+          {imgError ? (
             <p className="text-sm text-red-500">画像の読み込みに失敗しました</p>
+          ) : (
+            <Image
+              src={image.file}
+              alt={image.title}
+              width={displayWidth}
+              height={displayHeight}
+              sizes="(min-width: 1024px) 60vw, 90vw"
+              className="h-auto max-h-[70vh] w-auto object-contain"
+              priority={false}
+              onError={handleImgError}
+            />
           )}
         </div>
 

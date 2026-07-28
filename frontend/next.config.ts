@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
-import type { RemotePattern } from 'next/dist/shared/lib/image-config';
+
+type RemotePattern = NonNullable<NonNullable<NextConfig['images']>['remotePatterns']>[number];
 
 const remotePatterns: RemotePattern[] = [
   {

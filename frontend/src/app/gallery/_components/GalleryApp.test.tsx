@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import GalleryApp from './GalleryApp';
-import { ImageType } from '@/utils/types';
+import type { ImageType } from '@/utils/types';
 
 const image: ImageType = {
   id: 1,

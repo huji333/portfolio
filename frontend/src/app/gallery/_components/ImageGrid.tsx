@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, type KeyboardEvent, type SyntheticEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import type { ImageType } from '@/utils/types';
 import Loading from '@/ui/Loading';
@@ -13,17 +13,20 @@ const GridImage = memo(function GridImage({ src, fallbackSrc, alt, width, height
   height: number;
 }) {
   const [currentSrc, setCurrentSrc] = useState(src);
+  const [isHidden, setIsHidden] = useState(false);
 
   const handleError = useCallback(
-    (e: SyntheticEvent<HTMLImageElement>) => {
+    () => {
       if (currentSrc !== fallbackSrc) {
         setCurrentSrc(fallbackSrc);
       } else {
-        (e.target as HTMLImageElement).style.display = 'none';
+        setIsHidden(true);
       }
     },
     [currentSrc, fallbackSrc],
   );
+
+  if (isHidden) return null;
 
   return (
     <Image

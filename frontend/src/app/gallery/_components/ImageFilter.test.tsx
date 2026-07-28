@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ImageFilter from './ImageFilter';
-import { CategoryType } from '@/utils/types';
+import type { CategoryType } from '@/utils/types';
 
 const categories: CategoryType[] = [
   { id: 1, name: 'Landscape' },

@@ -60,7 +60,7 @@ describe('fetchImages', () => {
   });
 
   it('returns empty result on error', async () => {
-    mockApiFetch.mockResolvedValue({ data: emptyPaginated, error: true });
+    mockApiFetch.mockResolvedValue({ data: null, error: true });
 
     const result = await fetchImages();
     expect(result).toEqual({
