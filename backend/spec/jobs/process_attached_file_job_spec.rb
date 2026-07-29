@@ -63,6 +63,23 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect(image.taken_at).to be_present
     end
 
+    # analyze・variant×2・EXIF で計4回ダウンロードしていた経路の回帰テスト（#276）。
+    # storage service への download 呼び出し回数で S3 GET を計測する。
+    it 'downloads the original blob from storage only once per job (regression: #276)' do
+      image = create(:image, :draft)
+      service = ActiveStorage::Blob.service
+      allow(service).to receive(:download).and_call_original
+
+      perform_enqueued_jobs(only: described_class)
+
+      image.reload
+      expect(service).to have_received(:download).with(image.file.blob.key).once
+      # ダウンロード共有後も全工程が成立していること（analyze / variant / EXIF）
+      expect(image.file).to be_analyzed
+      expect(image.thumbnail_variant.image).to be_attached
+      expect(image.camera).to be_present
+    end
+
     it 'processes records without EXIF support (Project)' do
       project = build(:project)
       project.file = Rack::Test::UploadedFile.new(

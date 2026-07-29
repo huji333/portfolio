@@ -14,9 +14,11 @@ module CdnAttachedFile
   def process_attached_file!
     return unless file.attached?
 
-    file.analyze unless file.analyzed?
-    variant_limits.each { |limit| ensure_variant_processed(variant_for(limit)) }
-    after_attached_file_processed
+    with_single_blob_download(file.blob) do
+      file.analyze unless file.analyzed?
+      variant_limits.each { |limit| ensure_variant_processed(variant_for(limit)) }
+      after_attached_file_processed
+    end
   end
 
   # variant 生成後・同一ジョブ内で呼ばれるモデル固有の後処理フック（デフォルト no-op）。
@@ -37,9 +39,7 @@ module CdnAttachedFile
   end
 
   def variant_for(limit)
-    return unless file.attached?
-
-    file.variant(resize_to_limit: limit)
+    file.variant(resize_to_limit: limit) if file.attached?
   end
 
   def variant_url(limit)
@@ -71,8 +71,7 @@ module CdnAttachedFile
     # variant-record lookup 自体を走らせない。attachment_changes はこの after_commit の
     # 時点ではまだ残っている（ActiveStorage 側の upload/clear は has_one_attached の
     # 定義位置の都合で後に実行される）。
-    return unless attachment_changes.key?("file")
-    return unless attached_file_needs_processing?
+    return unless attachment_changes.key?("file") && attached_file_needs_processing?
 
     ProcessAttachedFileJob.perform_later(self)
   end
@@ -82,8 +81,24 @@ module CdnAttachedFile
   def attached_file_needs_processing?
     return false unless file.attached?
 
-    !file.analyzed? ||
-      variant_limits.any? { |limit| !variant_generated?(variant_for(limit)) }
+    !file.analyzed? || variant_limits.any? { |limit| !variant_generated?(variant_for(limit)) }
+  end
+
+  # analyze・variant 生成・EXIF 抽出（ExifExtractor.from_blob）はいずれも blob.open で
+  # 各自ダウンロードするため、1ジョブで同一 blob を S3 から約4回取得していた（#276）。
+  # ここで1回だけダウンロードし（checksum 検証込み）、この blob インスタンスに限り
+  # open をキャッシュ済み tempfile の払い出しに差し替えて共有する。処理は同一ジョブ内で
+  # 逐次実行なので tempfile の共有は rewind だけで安全。
+  def with_single_blob_download(blob)
+    blob.open do |tempfile|
+      blob.define_singleton_method(:open) do |**, &reader|
+        reader.call(tempfile.tap(&:rewind))
+      end
+      yield
+    ensure
+      # tempfile は外側の open 終了で unlink されるため、差し替えたままにしない
+      blob.singleton_class.remove_method(:open)
+    end
   end
 
   def log_reference = "#{self.class.name.underscore} #{id}"
