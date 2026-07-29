@@ -14,6 +14,40 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
 
       expect { image.reload.update!(title: 'renamed') }.not_to have_enqueued_job(described_class)
     end
+
+    # 処理待ちのままでも、添付が変わらない update（キュレーション編集）で
+    # 重複ジョブを積まない（#277）。
+    it 'does not enqueue a duplicate job on a file-unchanged update while still unprocessed' do
+      image = create(:image)
+      clear_enqueued_jobs
+
+      expect { image.reload.update!(title: 'renamed') }.not_to have_enqueued_job(described_class)
+    end
+
+    it 'does not look up variant records on a file-unchanged update (regression: #277)' do
+      image = create(:image)
+      perform_enqueued_jobs
+      reloaded = Image.find(image.id)
+
+      queries = sql_queries_matching(/active_storage_variant_records/) do
+        reloaded.update!(title: 'renamed')
+      end
+
+      expect(queries).to be_empty
+    end
+
+    it 'enqueues again when the file itself is replaced' do
+      image = create(:image)
+      perform_enqueued_jobs
+      clear_enqueued_jobs
+
+      expect do
+        image.reload.file.attach(
+          io: Rails.root.join('spec/fixtures/files/test_image.jpg').open,
+          filename: 'replaced.jpg', content_type: 'image/jpeg'
+        )
+      end.to have_enqueued_job(described_class)
+    end
   end
 
   describe '#perform' do

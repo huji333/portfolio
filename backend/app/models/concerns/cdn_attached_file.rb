@@ -67,13 +67,18 @@ module CdnAttachedFile
   def variant_limits = [thumbnail_limit, display_limit]
 
   def enqueue_attached_file_processing
+    # 添付が変わっていない save（タイトル編集・bulk_assign!・ジョブ内の EXIF save! 等）では
+    # variant-record lookup 自体を走らせない。attachment_changes はこの after_commit の
+    # 時点ではまだ残っている（ActiveStorage 側の upload/clear は has_one_attached の
+    # 定義位置の都合で後に実行される）。
+    return unless attachment_changes.key?("file")
     return unless attached_file_needs_processing?
 
     ProcessAttachedFileJob.perform_later(self)
   end
 
-  # 導出で判定する（処理状態カラムは持たない）。analyze 済み・variant 生成済みなら
-  # 保存しても再エンキューされず、ジョブ内の save で連鎖が止まる。
+  # 導出で判定する（処理状態カラムは持たない）。添付が変わった保存だけがここに来るので、
+  # 既存 blob の再添付（signed_id 経由の重複添付など）で処理済みなら再エンキューしない。
   def attached_file_needs_processing?
     return false unless file.attached?
 

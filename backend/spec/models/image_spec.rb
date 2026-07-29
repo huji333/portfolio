@@ -380,6 +380,8 @@ RSpec.describe Image, type: :model do
   end
 
   describe '.bulk_assign!' do
+    include ActiveJob::TestHelper
+
     it 'offsets taken_at by 1 minute per image in id order when taken_at_base is given' do
       a = create(:image)
       b = create(:image)
@@ -410,6 +412,21 @@ RSpec.describe Image, type: :model do
       Image.bulk_assign!([image.id], taken_at_base: base)
 
       expect(image.reload.taken_at).to eq(base)
+    end
+
+    # 添付は変わらないので、画像数に比例した variant-record lookup（N+1）を発行しない
+    # （クエリ数ゼロで固定する回帰テスト。#277）。処理済み（analyzed）でないと
+    # 旧実装でも analyzed? で短絡して再現しないため、先にジョブを流す。
+    it 'does not run per-image variant-record lookups (regression: #277)' do
+      images = create_list(:image, 3)
+      perform_enqueued_jobs
+      base = Time.zone.parse('2024-01-01 10:00:00')
+
+      queries = sql_queries_matching(/active_storage_variant_records/) do
+        Image.bulk_assign!(images.map(&:id), taken_at_base: base)
+      end
+
+      expect(queries).to be_empty
     end
   end
 end
