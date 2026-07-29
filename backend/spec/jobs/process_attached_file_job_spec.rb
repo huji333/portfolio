@@ -36,6 +36,12 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect(queries).to be_empty
     end
 
+    # 本ジョブが analyze まで担うため、ActiveStorage 標準の AnalyzeJob は
+    # 二重処理としてまるごと抑止している（initializer 参照。#276）。
+    it 'does not enqueue the builtin ActiveStorage::AnalyzeJob' do
+      expect { create(:image) }.not_to have_enqueued_job(ActiveStorage::AnalyzeJob)
+    end
+
     it 'enqueues again when the file itself is replaced' do
       image = create(:image)
       perform_enqueued_jobs
@@ -63,14 +69,15 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect(image.taken_at).to be_present
     end
 
-    # analyze・variant×2・EXIF で計4回ダウンロードしていた経路の回帰テスト（#276）。
-    # storage service への download 呼び出し回数で S3 GET を計測する。
-    it 'downloads the original blob from storage only once per job (regression: #276)' do
+    # analyze・variant×2・EXIF の計4回 + 標準 AnalyzeJob の1回をダウンロードしていた
+    # 経路の回帰テスト（#276）。storage service への download 呼び出し回数で
+    # S3 GET を計測する（enqueue された全ジョブを流して取込1件分の合計を見る）。
+    it 'downloads the original blob from storage only once per ingest (regression: #276)' do
       image = create(:image, :draft)
       service = ActiveStorage::Blob.service
       allow(service).to receive(:download).and_call_original
 
-      perform_enqueued_jobs(only: described_class)
+      perform_enqueued_jobs
 
       image.reload
       expect(service).to have_received(:download).with(image.file.blob.key).once
