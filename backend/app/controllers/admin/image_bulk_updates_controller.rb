@@ -23,10 +23,14 @@ class Admin::ImageBulkUpdatesController < Admin::Base
 
   private
 
+  # Time.zone.parse は完全に解釈不能な文字列では nil を返し、
+  # 範囲外の値（2020-13-01 など）では ArgumentError を発生させる。
+  # どちらも :invalid として扱い、呼び出し側でアラートを返す。
   def parse_taken_at_base
     return nil if params[:taken_at].blank?
 
-    Time.zone.parse(params[:taken_at])
+    result = Time.zone.parse(params[:taken_at])
+    result.nil? ? :invalid : result
   rescue ArgumentError
     :invalid
   end
