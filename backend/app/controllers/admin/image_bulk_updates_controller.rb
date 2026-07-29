@@ -13,6 +13,7 @@ class Admin::ImageBulkUpdatesController < Admin::Base
 
     categories = Category.where(id: Array(params[:category_ids]).compact_blank).to_a
     taken_at_base = parse_taken_at_base
+    return redirect_to_images(alert: '日時の形式が正しくありません。') if taken_at_base == :invalid
     return redirect_to_images(alert: '適用する項目が選択されていません。') if nothing_to_apply?(camera, lens, categories, taken_at_base)
 
     images = Image.bulk_assign!(image_ids, camera: camera, lens: lens, categories: categories,
@@ -23,7 +24,11 @@ class Admin::ImageBulkUpdatesController < Admin::Base
   private
 
   def parse_taken_at_base
-    Time.zone.parse(params[:taken_at]) if params[:taken_at].presence
+    return nil if params[:taken_at].blank?
+
+    Time.zone.parse(params[:taken_at])
+  rescue ArgumentError
+    :invalid
   end
 
   def nothing_to_apply?(camera, lens, categories, taken_at_base)
