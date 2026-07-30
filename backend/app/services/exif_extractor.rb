@@ -13,8 +13,10 @@ class ExifExtractor
     offset_time_original: "exif-ifd2-OffsetTimeOriginal"
   }.freeze
 
+  # blob.download ではなく blob.open を使う: ProcessAttachedFileJob 内では
+  # ダウンロード済み tempfile が共有され、S3 GET が増えない（CdnAttachedFile#276）。
   def self.from_blob(blob)
-    new(blob.download).call
+    blob.open { |file| new(file.read).call }
   rescue StandardError => e
     Rails.logger.warn "ExifExtractor.from_blob failed: #{e.class} #{e.message}"
     EMPTY

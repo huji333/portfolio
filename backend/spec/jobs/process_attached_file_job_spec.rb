@@ -14,6 +14,46 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
 
       expect { image.reload.update!(title: 'renamed') }.not_to have_enqueued_job(described_class)
     end
+
+    # 処理待ちのままでも、添付が変わらない update（キュレーション編集）で
+    # 重複ジョブを積まない（#277）。
+    it 'does not enqueue a duplicate job on a file-unchanged update while still unprocessed' do
+      image = create(:image)
+      clear_enqueued_jobs
+
+      expect { image.reload.update!(title: 'renamed') }.not_to have_enqueued_job(described_class)
+    end
+
+    it 'does not look up variant records on a file-unchanged update (regression: #277)' do
+      image = create(:image)
+      perform_enqueued_jobs
+      reloaded = Image.find(image.id)
+
+      queries = sql_queries_matching(/active_storage_variant_records/) do
+        reloaded.update!(title: 'renamed')
+      end
+
+      expect(queries).to be_empty
+    end
+
+    # 本ジョブが analyze まで担うため、ActiveStorage 標準の AnalyzeJob は
+    # 二重処理としてまるごと抑止している（initializer 参照。#276）。
+    it 'does not enqueue the builtin ActiveStorage::AnalyzeJob' do
+      expect { create(:image) }.not_to have_enqueued_job(ActiveStorage::AnalyzeJob)
+    end
+
+    it 'enqueues again when the file itself is replaced' do
+      image = create(:image)
+      perform_enqueued_jobs
+      clear_enqueued_jobs
+
+      expect do
+        image.reload.file.attach(
+          io: Rails.root.join('spec/fixtures/files/test_image.jpg').open,
+          filename: 'replaced.jpg', content_type: 'image/jpeg'
+        )
+      end.to have_enqueued_job(described_class)
+    end
   end
 
   describe '#perform' do
@@ -27,6 +67,24 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect(image.thumbnail_variant.image).to be_attached
       expect(image.camera).to have_attributes(make: 'SONY', model: 'ILCE-7CM2')
       expect(image.taken_at).to be_present
+    end
+
+    # analyze・variant×2・EXIF の計4回 + 標準 AnalyzeJob の1回をダウンロードしていた
+    # 経路の回帰テスト（#276）。storage service への download 呼び出し回数で
+    # S3 GET を計測する（enqueue された全ジョブを流して取込1件分の合計を見る）。
+    it 'downloads the original blob from storage only once per ingest (regression: #276)' do
+      image = create(:image, :draft)
+      service = ActiveStorage::Blob.service
+      allow(service).to receive(:download).and_call_original
+
+      perform_enqueued_jobs
+
+      image.reload
+      expect(service).to have_received(:download).with(image.file.blob.key).once
+      # ダウンロード共有後も全工程が成立していること（analyze / variant / EXIF）
+      expect(image.file).to be_analyzed
+      expect(image.thumbnail_variant.image).to be_attached
+      expect(image.camera).to be_present
     end
 
     it 'processes records without EXIF support (Project)' do
