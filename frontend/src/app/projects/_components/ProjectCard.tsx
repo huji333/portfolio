@@ -1,6 +1,6 @@
 'use client';
 
-import { type SyntheticEvent, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Image from 'next/image';
 import type { ProjectType } from '@/utils/types';
 
@@ -14,12 +14,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
 
   const handleError = useCallback(
-    (e: SyntheticEvent<HTMLImageElement>) => {
+    () => {
       if (imageSrc === project.thumbnail && project.file) {
         setImageSrc(project.file);
       } else {
         setImgFailed(true);
-        (e.target as HTMLImageElement).style.display = 'none';
       }
     },
     [imageSrc, project.thumbnail, project.file],
@@ -80,9 +79,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   );
 
   const isSafeLink =
-    project.link?.startsWith('https://') || project.link?.startsWith('http://');
+    project.link.startsWith('https://') || project.link.startsWith('http://');
 
-  if (project.link && isSafeLink) {
+  if (isSafeLink) {
     return (
       <a
         href={project.link}

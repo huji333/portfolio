@@ -25,7 +25,7 @@ export type CategoryType = {
 export type ProjectType = {
   id: number;
   title: string;
-  link: string | null;
+  link: string;
   description: string | null;
   tags: string[];
   file: string | null;

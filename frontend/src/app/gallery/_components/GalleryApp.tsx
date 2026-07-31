@@ -32,7 +32,7 @@ export default function GalleryApp({
   const initialLoadRef = useRef(true);
 
   const [focusedImageIndex, setFocusedImageIndex] = useState<number | null>(null);
-  const focusedImage = focusedImageIndex !== null ? images[focusedImageIndex] : null;
+  const focusedImage = focusedImageIndex !== null ? (images[focusedImageIndex] ?? null) : null;
 
   const hasPrevious = focusedImageIndex !== null && focusedImageIndex > 0;
   const hasNext = focusedImageIndex !== null && focusedImageIndex < images.length - 1;
