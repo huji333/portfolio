@@ -14,7 +14,7 @@ export default async function GallerySection() {
           </h2>
           <Link
             href="/gallery"
-            className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-blue-600"
+            className="inline-flex items-center gap-2 text-sm font-medium text-foreground transition hover:text-accent"
           >
             Show More
             <span aria-hidden>→</span>

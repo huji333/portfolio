@@ -4,7 +4,6 @@
     %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
     %meta{:charset => "utf-8"}/
     %meta{:content => "width=device-width, initial-scale=1", :name => "viewport"}/
-    %meta{:content => "width=device-width,initial-scale=1", :name => "viewport"}/
     = csrf_meta_tags
     = csp_meta_tag
     = javascript_importmap_tags
@@ -22,19 +21,19 @@
   %body
     %nav.navbar.navbar-expand-lg.navbar-light.bg-light
       .container
-        %a.navbar-brand{:href => "/admin"} ダッシュボード
+        = link_to 'ダッシュボード', admin_root_path, class: 'navbar-brand'
         %button.navbar-toggler{"aria-controls" => "navbarNav", "aria-expanded" => "false", "aria-label" => "Toggle navigation", "data-bs-target" => "#navbarNav", "data-bs-toggle" => "collapse", :type => "button"}
           %span.navbar-toggler-icon
         #navbarNav.collapse.navbar-collapse
           %ul.navbar-nav
             %li.nav-item
-              %a.nav-link{:href => "/admin/images"} 画像
+              = link_to '画像', admin_images_path, class: 'nav-link'
             %li.nav-item
-              %a.nav-link{:href => "/admin/gear"} 機材
+              = link_to '機材', admin_gear_path, class: 'nav-link'
             %li.nav-item
-              %a.nav-link{:href => "/admin/categories"} カテゴリ
+              = link_to 'カテゴリ', admin_categories_path, class: 'nav-link'
             %li.nav-item
-              %a.nav-link{:href => "/admin/projects"} プロジェクト
+              = link_to 'プロジェクト', admin_projects_path, class: 'nav-link'
             - if failed_job_count.positive?
               %li.nav-item
                 %a.nav-link{:href => "/admin/jobs"}
