@@ -104,5 +104,16 @@ RSpec.describe 'Admin::ImageBulkUpdates', type: :request do
 
       expect(image1.reload.taken_at).to eq(original_taken_at)
     end
+
+    it 'rejects an invalid taken_at string with an alert' do
+      original_taken_at = image1.taken_at
+
+      patch '/admin/image_bulk_update',
+            params: { image_ids: [image1.id], taken_at: 'not-a-date' }
+
+      expect(response).to redirect_to(admin_images_path)
+      expect(flash[:alert]).to include('日時の形式')
+      expect(image1.reload.taken_at).to eq(original_taken_at)
+    end
   end
 end
