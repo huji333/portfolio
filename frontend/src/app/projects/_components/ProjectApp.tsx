@@ -1,8 +1,8 @@
-import { fetchProjects } from '@/utils/projectApi';
+import { fetchProjects, PROJECT_REVALIDATE_SECONDS } from '@/utils/projectApi';
 import ProjectCard from './ProjectCard';
 
 export default async function ProjectApp() {
-  const { projects, error } = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
+  const { projects, error } = await fetchProjects({ fetchInit: { next: { revalidate: PROJECT_REVALIDATE_SECONDS } } });
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-20">
