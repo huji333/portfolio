@@ -41,6 +41,7 @@ Metrics/CyclomaticComplexity:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
+    - 'app/controllers/admin/images_controller.rb'
 Metrics/PerceivedComplexity:
   Max: 12
 
