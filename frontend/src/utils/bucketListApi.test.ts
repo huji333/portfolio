@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchTodoItems, setTodoItemLike } from './todoApi';
+import { fetchBucketListItems, setBucketListItemLike } from './bucketListApi';
 
 vi.mock('@/utils/api', () => ({
   apiFetch: vi.fn(),
@@ -21,24 +21,24 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('fetchTodoItems', () => {
+describe('fetchBucketListItems', () => {
   it('requests without device_uuid when none is given', async () => {
     mockApiFetch.mockResolvedValue({ data: [baseItem], error: false });
 
-    const result = await fetchTodoItems();
+    const result = await fetchBucketListItems();
 
-    expect(mockApiFetch).toHaveBeenCalledWith('/todo_items', 'todo items', undefined);
+    expect(mockApiFetch).toHaveBeenCalledWith('/bucket_list_items', 'bucket list items', undefined);
     expect(result).toEqual({ items: [baseItem], error: false });
   });
 
   it('appends the encoded device_uuid to the query', async () => {
     mockApiFetch.mockResolvedValue({ data: [], error: false });
 
-    await fetchTodoItems({ deviceUuid: 'abc/123' });
+    await fetchBucketListItems({ deviceUuid: 'abc/123' });
 
     expect(mockApiFetch).toHaveBeenCalledWith(
-      '/todo_items?device_uuid=abc%2F123',
-      'todo items',
+      '/bucket_list_items?device_uuid=abc%2F123',
+      'bucket list items',
       undefined,
     );
   });
@@ -46,39 +46,47 @@ describe('fetchTodoItems', () => {
   it('returns empty items on error', async () => {
     mockApiFetch.mockResolvedValue({ data: null, error: true });
 
-    const result = await fetchTodoItems();
+    const result = await fetchBucketListItems();
     expect(result).toEqual({ items: [], error: true });
   });
 });
 
-describe('setTodoItemLike', () => {
+describe('setBucketListItemLike', () => {
   it('POSTs when liking and returns the updated item', async () => {
     const updated = { ...baseItem, likes_count: 1, liked: true };
     mockApiFetch.mockResolvedValue({ data: updated, error: false });
 
-    const result = await setTodoItemLike(1, 'device-1', true);
+    const result = await setBucketListItemLike(1, 'device-1', true);
 
-    expect(mockApiFetch).toHaveBeenCalledWith('/todo_items/1/like?device_uuid=device-1', 'todo like', {
-      method: 'POST',
-    });
+    expect(mockApiFetch).toHaveBeenCalledWith(
+      '/bucket_list_items/1/like?device_uuid=device-1',
+      'bucket list like',
+      {
+        method: 'POST',
+      },
+    );
     expect(result).toEqual({ data: updated, error: false });
   });
 
   it('DELETEs when unliking', async () => {
     mockApiFetch.mockResolvedValue({ data: baseItem, error: false });
 
-    const result = await setTodoItemLike(1, 'device-1', false);
+    const result = await setBucketListItemLike(1, 'device-1', false);
 
-    expect(mockApiFetch).toHaveBeenCalledWith('/todo_items/1/like?device_uuid=device-1', 'todo like', {
-      method: 'DELETE',
-    });
+    expect(mockApiFetch).toHaveBeenCalledWith(
+      '/bucket_list_items/1/like?device_uuid=device-1',
+      'bucket list like',
+      {
+        method: 'DELETE',
+      },
+    );
     expect(result).toEqual({ data: baseItem, error: false });
   });
 
   it('passes the error result through', async () => {
     mockApiFetch.mockResolvedValue({ data: null, error: true });
 
-    const result = await setTodoItemLike(1, 'device-1', true);
+    const result = await setBucketListItemLike(1, 'device-1', true);
     expect(result).toEqual({ data: null, error: true });
   });
 });

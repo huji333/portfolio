@@ -22,7 +22,7 @@ Rails.application.routes.draw do
     resources :lenses, except: %i[index show]
     resources :categories
     resources :projects
-    resources :todo_items do
+    resources :bucket_list_items do
       post :insert_at, on: :member
     end
   end
@@ -32,8 +32,8 @@ Rails.application.routes.draw do
     resources :images, only: %i[index]
     resources :categories, only: %i[index]
     resources :projects, only: %i[index]
-    resources :todo_items, only: %i[index] do
-      resource :like, only: %i[create destroy], controller: 'todo_likes'
+    resources :bucket_list_items, only: %i[index] do
+      resource :like, only: %i[create destroy], controller: 'bucket_list_likes'
     end
   end
 end

@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { fetchTodoItems, setTodoItemLike } from '@/utils/todoApi';
-import type { TodoItemType } from '@/utils/types';
+import { fetchBucketListItems, setBucketListItemLike } from '@/utils/bucketListApi';
+import type { BucketListItemType } from '@/utils/types';
 
-const DEVICE_UUID_STORAGE_KEY = 'todo-device-uuid';
+const DEVICE_UUID_STORAGE_KEY = 'bucket-list-device-uuid';
 
 // module レベルで memoize し、localStorage が使えない環境（プライベートモード等）
 // でもセッション内は同じ UUID を返す
@@ -71,19 +71,19 @@ function DoneCheckbox({ done }: { done: boolean }) {
   );
 }
 
-type TodoAppProps = {
-  initialItems: TodoItemType[];
+type BucketListAppProps = {
+  initialItems: BucketListItemType[];
   initialFetchError: boolean;
 };
 
-export default function TodoApp({ initialItems, initialFetchError }: TodoAppProps) {
-  const [items, setItems] = useState<TodoItemType[]>(initialItems);
+export default function BucketListApp({ initialItems, initialFetchError }: BucketListAppProps) {
+  const [items, setItems] = useState<BucketListItemType[]>(initialItems);
   const [fetchError, setFetchError] = useState(initialFetchError);
 
   // マウント後に device_uuid 付きで取り直し、liked フラグを反映する
   useEffect(() => {
     let cancelled = false;
-    fetchTodoItems({ deviceUuid: getDeviceUuid() }).then((result) => {
+    fetchBucketListItems({ deviceUuid: getDeviceUuid() }).then((result) => {
       if (cancelled || result.error) return;
       setItems(result.items);
       setFetchError(false);
@@ -93,7 +93,7 @@ export default function TodoApp({ initialItems, initialFetchError }: TodoAppProp
     };
   }, []);
 
-  const toggleLike = useCallback(async (item: TodoItemType) => {
+  const toggleLike = useCallback(async (item: BucketListItemType) => {
     const nextLiked = !item.liked;
 
     // optimistic update。失敗したらタップ前のスナップショット（item）に戻す
@@ -105,7 +105,7 @@ export default function TodoApp({ initialItems, initialFetchError }: TodoAppProp
       ),
     );
 
-    const result = await setTodoItemLike(item.id, getDeviceUuid(), nextLiked);
+    const result = await setBucketListItemLike(item.id, getDeviceUuid(), nextLiked);
     const next = result.error ? item : result.data;
     setItems((prev) => prev.map((i) => (i.id === item.id ? next : i)));
   }, []);
