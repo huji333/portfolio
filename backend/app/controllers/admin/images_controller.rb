@@ -92,7 +92,10 @@ class Admin::ImagesController < Admin::Base
       camera: camera && { id: camera.id, label: camera.display_label },
       lens: lens && { id: lens.id, label: lens.name }
     }
-  rescue ActiveSupport::MessageVerifier::InvalidSignature, ActiveRecord::RecordNotFound
+  rescue ActiveSupport::MessageVerifier::InvalidSignature,
+         ActiveRecord::RecordNotFound,
+         ActiveRecord::RecordNotUnique,
+         ActiveRecord::RecordInvalid
     render json: { taken_at: nil, camera: nil, lens: nil }
   end
 

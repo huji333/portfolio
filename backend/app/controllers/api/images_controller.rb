@@ -26,7 +26,7 @@ class Api::ImagesController < ApplicationController
   def next_cursor(image)
     if image.featured_rank.present?
       "f,#{image.featured_rank},#{image.id}"
-    else
+    elsif image.taken_at
       "t,#{(image.taken_at.to_f * 1000).floor},#{image.id}"
     end
   end

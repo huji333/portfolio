@@ -2,6 +2,7 @@ class Lens < ApplicationRecord
   has_many :images, dependent: :restrict_with_error
 
   validates :name, presence: true
+  validates :exif_name, uniqueness: true, allow_blank: true
 
   # Resolve (and auto-create) a Lens from the raw EXIF LensModel string. The raw
   # value is the natural key; display name defaults to it and is edited later in
@@ -9,7 +10,7 @@ class Lens < ApplicationRecord
   def self.resolve_from_exif(exif_name)
     return nil if exif_name.blank?
 
-    find_or_create_by!(exif_name: exif_name) { |lens| lens.name = exif_name }
+    create_or_find_by!(exif_name: exif_name) { |lens| lens.name = exif_name }
   end
 
   # EXIF 自動生成のまま表示名を整えていない機材を「未整備」とする。
