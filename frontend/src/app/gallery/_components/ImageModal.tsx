@@ -9,7 +9,7 @@ import { useIsClient } from '@/hooks/useIsClient';
 const FOCUSABLE_SELECTORS =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-type Props = {
+type ImageModalProps = {
   image: ImageType | null;
   onClose: () => void;
   onNext: () => void;
@@ -18,7 +18,7 @@ type Props = {
   hasPrevious: boolean;
 };
 
-export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext, hasPrevious }: Props) {
+export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext, hasPrevious }: ImageModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -204,7 +204,6 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
               height={displayHeight}
               sizes="(min-width: 1024px) 60vw, 90vw"
               className="h-auto max-h-[70vh] w-auto object-contain"
-              priority={false}
               onError={handleImgError}
             />
           )}

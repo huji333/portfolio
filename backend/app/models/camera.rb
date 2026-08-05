@@ -10,7 +10,7 @@ class Camera < ApplicationRecord
   def self.resolve_from_exif(make:, model:)
     return nil if make.blank? || model.blank?
 
-    find_or_create_by!(make: make, model: model) do |camera|
+    create_or_find_by!(make: make, model: model) do |camera|
       camera.manufacturer = make
       camera.name = model
     end
