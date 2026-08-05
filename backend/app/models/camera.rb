@@ -3,7 +3,6 @@ class Camera < ApplicationRecord
 
   validates :name, presence: true
   validates :manufacturer, presence: true
-  validates :make, uniqueness: { scope: :model, allow_blank: true }
 
   # Resolve (and auto-create) a Camera from raw EXIF Make/Model. The raw values are
   # the natural key; display name/manufacturer default to the raw values and are

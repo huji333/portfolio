@@ -2,7 +2,6 @@ class Lens < ApplicationRecord
   has_many :images, dependent: :restrict_with_error
 
   validates :name, presence: true
-  validates :exif_name, uniqueness: true, allow_blank: true
 
   # Resolve (and auto-create) a Lens from the raw EXIF LensModel string. The raw
   # value is the natural key; display name defaults to it and is edited later in
