@@ -47,3 +47,5 @@ Metrics/PerceivedComplexity:
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
+    # 宣言的 DSL で行数が複雑さを意味しないため（routes は今後も伸びる）
+    - 'config/routes.rb'
