@@ -22,7 +22,7 @@ export type CategoryType = {
   name: string;
 };
 
-export type TodoItemType = {
+export type BucketListItemType = {
   id: number;
   title: string;
   note: string | null;

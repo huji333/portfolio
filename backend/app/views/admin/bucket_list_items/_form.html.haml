@@ -1,8 +1,8 @@
-= form_with(model: todo_item, url: todo_item.new_record? ? admin_todo_items_path : admin_todo_item_path(todo_item), local: true) do |form|
-  - if todo_item.errors.any?
+= form_with(model: bucket_list_item, url: bucket_list_item.new_record? ? admin_bucket_list_items_path : admin_bucket_list_item_path(bucket_list_item), local: true) do |form|
+  - if bucket_list_item.errors.any?
     .alert.alert-danger
       %ul
-        - todo_item.errors.full_messages.each do |message|
+        - bucket_list_item.errors.full_messages.each do |message|
           %li= message
   .row.mb-3
     .col-md-3.col-form-label.fw-bold title

@@ -53,6 +53,9 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: process.env.TURBOPACK_FS_CACHE !== '0',
   },
+  async redirects() {
+    return [{ source: '/todo', destination: '/bucket-list', permanent: true }];
+  },
 };
 
 export default nextConfig;

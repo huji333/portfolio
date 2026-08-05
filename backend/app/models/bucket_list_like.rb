@@ -1,5 +1,5 @@
-class TodoLike < ApplicationRecord
-  belongs_to :todo_item, counter_cache: :likes_count
+class BucketListLike < ApplicationRecord
+  belongs_to :bucket_list_item, counter_cache: :likes_count
 
   # device_uuid はフロント生成の識別子。形式は強制しないが、公開エンドポイント
   # なので長さだけ制限する。重複防止は DB の unique index が担う

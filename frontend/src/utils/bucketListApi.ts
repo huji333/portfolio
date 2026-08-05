@@ -1,22 +1,22 @@
 import { apiFetch, type ApiRequestInit, type ApiResult } from '@/utils/api';
-import type { TodoItemType } from '@/utils/types';
+import type { BucketListItemType } from '@/utils/types';
 
-type FetchTodoItemsOptions = {
+type FetchBucketListItemsOptions = {
   deviceUuid?: string;
   fetchInit?: ApiRequestInit;
 };
 
-type FetchTodoItemsResult = {
-  items: TodoItemType[];
+type FetchBucketListItemsResult = {
+  items: BucketListItemType[];
   error: boolean;
 };
 
-export async function fetchTodoItems({
+export async function fetchBucketListItems({
   deviceUuid,
   fetchInit,
-}: FetchTodoItemsOptions = {}): Promise<FetchTodoItemsResult> {
+}: FetchBucketListItemsOptions = {}): Promise<FetchBucketListItemsResult> {
   const query = deviceUuid ? `?device_uuid=${encodeURIComponent(deviceUuid)}` : '';
-  const result = await apiFetch<TodoItemType[]>(`/todo_items${query}`, 'todo items', fetchInit);
+  const result = await apiFetch<BucketListItemType[]>(`/bucket_list_items${query}`, 'bucket list items', fetchInit);
   if (result.error) {
     return { items: [], error: true };
   }
@@ -25,13 +25,13 @@ export async function fetchTodoItems({
 
 // device_uuid は body ではなく query で送る（Rails 側で DELETE の body パースに
 // 依存しないようにし、POST/DELETE を対称にする）。成功時は更新後のアイテム全体が返る
-export async function setTodoItemLike(
+export async function setBucketListItemLike(
   id: number,
   deviceUuid: string,
   liked: boolean,
-): Promise<ApiResult<TodoItemType>> {
+): Promise<ApiResult<BucketListItemType>> {
   const query = `?device_uuid=${encodeURIComponent(deviceUuid)}`;
-  return apiFetch<TodoItemType>(`/todo_items/${id}/like${query}`, 'todo like', {
+  return apiFetch<BucketListItemType>(`/bucket_list_items/${id}/like${query}`, 'bucket list like', {
     method: liked ? 'POST' : 'DELETE',
   });
 }
