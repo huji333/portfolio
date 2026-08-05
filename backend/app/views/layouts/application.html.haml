@@ -34,6 +34,8 @@
               = link_to 'カテゴリ', admin_categories_path, class: 'nav-link'
             %li.nav-item
               = link_to 'プロジェクト', admin_projects_path, class: 'nav-link'
+            %li.nav-item
+              = link_to 'やりたいこと', admin_todo_items_path, class: 'nav-link'
             - if failed_job_count.positive?
               %li.nav-item
                 %a.nav-link{:href => "/admin/jobs"}

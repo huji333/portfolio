@@ -71,12 +71,10 @@ RSpec.describe 'Admin::Images', type: :request do
       get '/admin/images/arrange'
 
       expect(response).to have_http_status(:success)
-      expect(response.body)
-        .to include("data-image-id='#{featured.id}'").or include("data-image-id=\"#{featured.id}\"")
+      expect(response.body).to match(/data-sortable-id=['"]#{featured.id}['"]/)
       # 下書き・非 featured の公開画像は並び替え画面に出さない（featured のみの鏡）
       [draft, image1].each do |image|
-        expect(response.body).not_to include("data-image-id='#{image.id}'")
-        expect(response.body).not_to include("data-image-id=\"#{image.id}\"")
+        expect(response.body).not_to match(/data-sortable-id=['"]#{image.id}['"]/)
       end
     end
   end
