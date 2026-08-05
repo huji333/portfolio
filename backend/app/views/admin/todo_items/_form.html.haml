@@ -1,0 +1,25 @@
+= form_with(model: todo_item, url: todo_item.new_record? ? admin_todo_items_path : admin_todo_item_path(todo_item), local: true) do |form|
+  - if todo_item.errors.any?
+    .alert.alert-danger
+      %ul
+        - todo_item.errors.full_messages.each do |message|
+          %li= message
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold title
+    .col-md-9= form.text_field :title, class: 'form-control'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold note
+    .col-md-9
+      = form.text_area :note, rows: 3, class: 'form-control'
+      %small.text-muted 補足があれば（公開ページにも表示される）
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold done
+    .col-md-9.d-flex.align-items-center
+      = form.check_box :done, class: 'form-check-input'
+  .row.mb-3
+    .col-md-3.col-form-label.fw-bold published
+    .col-md-9.d-flex.align-items-center
+      = form.check_box :published, class: 'form-check-input'
+  .row
+    .col
+      = form.submit '保存', class: 'btn btn-primary d-block w-100'

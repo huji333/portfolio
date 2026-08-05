@@ -22,6 +22,15 @@ export type CategoryType = {
   name: string;
 };
 
+export type TodoItemType = {
+  id: number;
+  title: string;
+  note: string | null;
+  done: boolean;
+  likes_count: number;
+  liked: boolean;
+};
+
 export type ProjectType = {
   id: number;
   title: string;

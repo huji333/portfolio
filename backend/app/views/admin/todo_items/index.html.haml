@@ -1,0 +1,32 @@
+%h1 やりたいことリスト
+
+%p.text-muted.small 達成チェックは即保存。行はドラッグで並び替えでき、即保存されます。
+
+.table-responsive
+  %table.table.table-striped{ data: { controller: 'sortable', sortable_url_value: insert_at_admin_todo_item_path(':id') } }
+    %thead
+      %tr
+        %th 達成
+        %th
+        %th タイトル
+        %th メモ
+        %th 公開
+        %th いいね
+        %th 編集
+        %th 削除
+    %tbody{ data: { "sortable-target": "list" } }
+      - @todo_items.each do |item|
+        %tr{ "data-sortable-id": item.id }
+          %td
+            = form_with(model: item, url: admin_todo_item_path(item), method: :patch, data: { controller: 'auto-submit' }) do |form|
+              = form.check_box :done, class: 'form-check-input', data: { action: 'change->auto-submit#submit' }
+          %td.handle.cursor-grab.user-select-none
+            %span.material-symbols-outlined.text-muted drag_indicator
+          %td{ class: item.done ? 'text-muted' : nil }= item.title
+          %td= item.note.present? ? truncate(item.note, length: 40) : 'ー'
+          %td= item.published ? '公開' : '非公開'
+          %td= item.likes_count
+          %td= link_to '編集', edit_admin_todo_item_path(item), class: 'btn btn-secondary btn-sm'
+          %td= button_to '削除', admin_todo_item_path(item), method: :delete, data: { turbo_confirm: '本当に削除しますか？' }, class: 'btn btn-danger btn-sm'
+
+= link_to '新規作成', new_admin_todo_item_path, class: 'btn btn-primary mt-3'

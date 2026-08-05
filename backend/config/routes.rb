@@ -22,6 +22,9 @@ Rails.application.routes.draw do
     resources :lenses, except: %i[index show]
     resources :categories
     resources :projects
+    resources :todo_items do
+      post :insert_at, on: :member
+    end
   end
   # ジョブダッシュボード（認証は Admin::Base 経由、config/application.rb 参照）
   mount MissionControl::Jobs::Engine, at: "/admin/jobs"
@@ -29,5 +32,8 @@ Rails.application.routes.draw do
     resources :images, only: %i[index]
     resources :categories, only: %i[index]
     resources :projects, only: %i[index]
+    resources :todo_items, only: %i[index] do
+      resource :like, only: %i[create destroy], controller: 'todo_likes'
+    end
   end
 end

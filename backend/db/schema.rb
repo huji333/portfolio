@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_05_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -239,6 +239,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_020000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "todo_items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "done", default: false, null: false
+    t.integer "likes_count", default: 0, null: false
+    t.text "note"
+    t.integer "position", default: 0, null: false
+    t.boolean "published", default: true, null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "todo_likes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "device_uuid", null: false
+    t.bigint "todo_item_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["todo_item_id", "device_uuid"], name: "index_todo_likes_on_todo_item_id_and_device_uuid", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -265,4 +284,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_020000) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "todo_likes", "todo_items"
 end
