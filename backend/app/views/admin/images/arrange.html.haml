@@ -6,7 +6,7 @@
 
 - if @images.any?
   .table-responsive
-    %table.table.table-hover{ data: { controller: 'sortable' } }
+    %table.table.table-hover{ data: { controller: 'sortable', sortable_url_value: insert_at_admin_image_path(':id') } }
       %thead
         %tr
           %th 表示順
@@ -14,7 +14,7 @@
           %th タイトル
       %tbody{ data: { "sortable-target": "list" } }
         - @images.each_with_index do |image, index|
-          %tr{"data-image-id": image.id}
+          %tr{"data-sortable-id": image.id}
             %td.handle.cursor-grab.user-select-none
               %span.material-symbols-outlined.text-muted.me-1 drag_indicator
               %span.order-number= index + 1

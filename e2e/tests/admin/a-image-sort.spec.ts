@@ -5,16 +5,16 @@ test.describe('Image Sort', () => {
     await page.goto('/admin/images/arrange');
 
     // Verify seed images exist
-    await expect(page.locator('tr[data-image-id]', { hasText: 'Seed Image 1' })).toBeVisible();
-    await expect(page.locator('tr[data-image-id]', { hasText: 'Seed Image 2' })).toBeVisible();
-    await expect(page.locator('tr[data-image-id]', { hasText: 'Seed Image 3' })).toBeVisible();
+    await expect(page.locator('tr[data-sortable-id]', { hasText: 'Seed Image 1' })).toBeVisible();
+    await expect(page.locator('tr[data-sortable-id]', { hasText: 'Seed Image 2' })).toBeVisible();
+    await expect(page.locator('tr[data-sortable-id]', { hasText: 'Seed Image 3' })).toBeVisible();
 
     // Verify drag handles exist
     await expect(page.locator('.handle').first()).toBeVisible();
 
     // Get the drag handle of Seed Image 3 and the target row (Seed Image 1)
-    const sourceRow = page.locator('tr[data-image-id]', { hasText: 'Seed Image 3' });
-    const targetRow = page.locator('tr[data-image-id]', { hasText: 'Seed Image 1' });
+    const sourceRow = page.locator('tr[data-sortable-id]', { hasText: 'Seed Image 3' });
+    const targetRow = page.locator('tr[data-sortable-id]', { hasText: 'Seed Image 1' });
     const handle = sourceRow.locator('.handle');
 
     // Use explicit mouse operations for more reliable drag and drop

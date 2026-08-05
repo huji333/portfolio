@@ -2,9 +2,15 @@ import { Controller } from '@hotwired/stimulus'
 
 /**
  * Sortable.js を利用してリストの並び替えを実装する
+ *
+ * 使う側の view で以下を指定する:
+ * - data-sortable-url-value: `:id` プレースホルダ入りの insert_at パス
+ *   （例: insert_at_admin_todo_item_path(':id')）
+ * - 各行に data-sortable-id
  */
 export default class extends Controller {
   static targets = ['list']
+  static values = { url: String }
 
   connect() {
     this._orderBeforeDrag = []
@@ -15,6 +21,7 @@ export default class extends Controller {
       // pointer ベースのフォールバックに固定して挙動を一貫させる（E2E も安定する）。
       forceFallback: true,
       ghostClass: 'sortable-ghost',
+      dataIdAttr: 'data-sortable-id',
       onStart: () => { this._orderBeforeDrag = this.sortable.toArray() },
       onEnd: this.onSortEnd.bind(this)
     })
@@ -29,7 +36,7 @@ export default class extends Controller {
    */
   async onSortEnd(evt) {
     const { item, newIndex } = evt
-    const itemId = item.dataset.imageId
+    const itemId = item.dataset.sortableId
     const savedOrder = this._orderBeforeDrag
 
     try {
@@ -61,7 +68,7 @@ export default class extends Controller {
   }
 
   async #updatePosition(itemId, position) {
-    const response = await fetch(`/admin/images/${itemId}/insert_at`, {
+    const response = await fetch(this.urlValue.replace(':id', itemId), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
