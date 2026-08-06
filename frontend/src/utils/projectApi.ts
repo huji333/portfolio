@@ -1,6 +1,8 @@
 import { apiFetch, type ApiRequestInit } from '@/utils/api';
 import type { ProjectType } from '@/utils/types';
 
+export const PROJECT_REVALIDATE_SECONDS = 300;
+
 type FetchProjectsOptions = {
   fetchInit?: ApiRequestInit;
 };

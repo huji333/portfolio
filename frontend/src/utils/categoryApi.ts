@@ -1,6 +1,8 @@
 import { apiFetch, type ApiRequestInit } from '@/utils/api';
 import type { CategoryType } from '@/utils/types';
 
+export const CATEGORY_REVALIDATE_SECONDS = 300;
+
 type FetchCategoriesOptions = {
   fetchInit?: ApiRequestInit;
 };

@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import ImageGrid from '@/app/gallery/_components/ImageGrid';
-import { fetchImages } from '@/utils/imageApi';
+import { fetchImages, IMAGE_REVALIDATE_SECONDS } from '@/utils/imageApi';
 
 export default async function GallerySection() {
-  const { images: previewImages, error } = await fetchImages({ limit: 9, fetchInit: { next: { revalidate: 120 } } });
+  const { images: previewImages, error } = await fetchImages({ limit: 9, fetchInit: { next: { revalidate: IMAGE_REVALIDATE_SECONDS } } });
 
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="gallery-heading">

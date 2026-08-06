@@ -1,6 +1,8 @@
 import { apiFetch, type ApiRequestInit } from '@/utils/api';
 import type { PaginatedImages } from '@/utils/types';
 
+export const IMAGE_REVALIDATE_SECONDS = 120;
+
 type FetchImagesOptions = {
   categoryIds?: number[];
   cursor?: string | null;

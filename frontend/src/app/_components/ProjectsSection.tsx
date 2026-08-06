@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import ProjectCard from '../projects/_components/ProjectCard';
-import { fetchProjects } from '@/utils/projectApi';
+import { fetchProjects, PROJECT_REVALIDATE_SECONDS } from '@/utils/projectApi';
 
 export default async function ProjectsSection() {
-  const { projects, error } = await fetchProjects({ fetchInit: { next: { revalidate: 300 } } });
+  const { projects, error } = await fetchProjects({ fetchInit: { next: { revalidate: PROJECT_REVALIDATE_SECONDS } } });
   return (
     <section className="bg-background px-6 py-20 md:py-24 snap-ignore" aria-labelledby="projects-heading">
       <div className="mx-auto w-full max-w-5xl">

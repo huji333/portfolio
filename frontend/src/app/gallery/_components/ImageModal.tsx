@@ -223,17 +223,20 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
           <div className="flex flex-wrap gap-4 text-xs text-gray-500">
             {image.camera_name && <span>Camera: {image.camera_name}</span>}
             {image.lens_name && <span>Lens: {image.lens_name}</span>}
-            {image.taken_at && (
-              <span>
-                {new Date(image.taken_at).toLocaleString('ja-JP', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-            )}
+            {image.taken_at && (() => {
+              const d = new Date(image.taken_at);
+              return !isNaN(d.getTime()) ? (
+                <span>
+                  {d.toLocaleString('ja-JP', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              ) : null;
+            })()}
           </div>
         </div>
       </div>
