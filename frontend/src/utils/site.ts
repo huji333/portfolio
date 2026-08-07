@@ -10,9 +10,14 @@ export function getSiteUrl(): string {
 
 export const SITE = {
   name: 'Kakemu Fujii',
-  /** 京大で昆虫の研究をしながら web 開発と写真をやっている、が伝わる説明 */
+  /** 日本語表記。「藤井駆陸」と「kakemu」どちらの名前検索でも拾えるよう title に併記する */
+  nameJa: '藤井駆陸',
+  /**
+   * 名前を先頭に置く。Google のモバイル SERP は全角 50 字前後で切られるため、
+   * 後ろに置くと最有力の流入経路である名前検索で名前が表示されないまま切れる。
+   */
   description:
-    '京都大学で昆虫が葉につける食痕を研究する傍ら、web 開発と写真撮影をしている藤井駆陸のポートフォリオ。プロジェクトと写真作品をまとめています。',
+    '藤井駆陸（Kakemu Fujii）のポートフォリオ。web 開発のプロジェクトと写真作品をまとめています。',
   locale: 'ja_JP',
   /** JSON-LD Person / OGP profile に使う SNS プロフィール URL */
   socialLinks: [
