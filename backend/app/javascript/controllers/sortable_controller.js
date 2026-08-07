@@ -5,7 +5,7 @@ import { Controller } from '@hotwired/stimulus'
  *
  * 使う側の view で以下を指定する:
  * - data-sortable-url-value: `:id` プレースホルダ入りの insert_at パス
- *   （例: insert_at_admin_todo_item_path(':id')）
+ *   （例: insert_at_admin_bucket_list_item_path(':id')）
  * - 各行に data-sortable-id
  */
 export default class extends Controller {
