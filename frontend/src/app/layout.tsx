@@ -11,10 +11,13 @@ const geistSans = localFont({
 
 const siteUrl = getSiteUrl();
 
+/** og:site_name が SITE.name なので、og:title は別の文字列にしないとカードの 2 行が重複する */
+const ogTitle = `${SITE.nameJa}のポートフォリオ`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: SITE.name,
+    default: `${SITE.nameJa} | ${SITE.name}`,
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
@@ -22,7 +25,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: SITE.name,
+    title: ogTitle,
     description: SITE.description,
     url: siteUrl,
     siteName: SITE.name,
@@ -39,21 +42,23 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: SITE.name,
+    title: ogTitle,
     description: SITE.description,
     creator: "@k4kemu",
-    images: ["/og-image.jpg"],
+    images: [{ url: "/og-image.jpg", alt: SITE.name }],
   },
 };
 
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: SITE.name,
+  name: SITE.nameJa,
+  alternateName: SITE.name,
   url: siteUrl,
   image: `${siteUrl}/icon_kakemu.jpg`,
-  jobTitle: "Researcher / Web Developer / Photographer",
+  jobTitle: ["Researcher", "Web Developer", "Photographer"],
   description: SITE.description,
+  // 表示上の説明からは研究の話を外したが、エンティティとしての強さは JSON-LD 側で維持する
   affiliation: {
     "@type": "CollegeOrUniversity",
     name: "Kyoto University",
