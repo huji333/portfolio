@@ -204,7 +204,6 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
               height={displayHeight}
               sizes="(min-width: 1024px) 60vw, 90vw"
               className="h-auto max-h-[70vh] w-auto object-contain"
-              priority={false}
               onError={handleImgError}
             />
           )}

@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 import Header from '@/ui/Header';
 import { HEADER_STYLE_PRESETS } from '@/ui/headerStyles';
 
-type SiteHeaderMode = 'auto' | 'solid' | 'light';
-type HeaderVariant = 'light' | 'solid';
+type SiteHeaderMode = 'auto' | keyof typeof HEADER_STYLE_PRESETS;
+type HeaderVariant = keyof typeof HEADER_STYLE_PRESETS;
 
 type SiteHeaderProps = {
   mode?: SiteHeaderMode;

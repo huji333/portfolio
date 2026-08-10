@@ -83,11 +83,13 @@ export default function BucketListApp({ initialItems, initialFetchError }: Bucke
   // マウント後に device_uuid 付きで取り直し、liked フラグを反映する
   useEffect(() => {
     let cancelled = false;
-    fetchBucketListItems({ deviceUuid: getDeviceUuid() }).then((result) => {
-      if (cancelled || result.error) return;
-      setItems(result.items);
-      setFetchError(false);
-    });
+    fetchBucketListItems({ deviceUuid: getDeviceUuid() })
+      .then((result) => {
+        if (cancelled || result.error) return;
+        setItems(result.items);
+        setFetchError(false);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };

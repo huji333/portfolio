@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CategoryCheckbox from './CategoryCheckbox';
-import { CategoryType } from '@/utils/types';
+import type { CategoryType } from '@/utils/types';
 
 const category: CategoryType = {
   id: 1,
