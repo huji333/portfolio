@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ヨーロッパ 2026 8/28 → 9/24 行程</title>
+<meta name="description" content="ロンドンから北イタリア・ドロミテ・オーストリアまで、2026年8月28日〜9月24日のヨーロッパ行程。地図と日程、走ってみて効いてくるメモ。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ヨーロッパ 2026 8/28 → 9/24 行程">
+<meta property="og:description" content="ロンドン → マルセイユ → パリ ／ アルザス・スイス ／ 北イタリア ／ ドロミテ・オーストリア">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+  :root{
+    --bg:#faf9f7; --panel:#fff; --ink:#1c1b19; --ink2:#5f5a52; --ink3:#8b857b;
+    --line:#e3dfd8; --accent:#a8452c;
+    --warn:#8a5a00; --warn-bg:#fdf5e6;
+    --p1:#5d7396; --p2:#c2542f; --p3:#6f5a91; --p4:#3f7d5c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#151412; --panel:#1e1d1a; --ink:#efece6; --ink2:#a8a298; --ink3:#7d776d;
+      --line:#332f2a; --accent:#e69073;
+      --warn:#e0b062; --warn-bg:#2a2318;
+      --p1:#93a8ca; --p2:#e88a5f; --p3:#a992c8; --p4:#6fb890;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:0 16px 80px}
+  header{padding:28px 0 16px;border-bottom:1px solid var(--line)}
+  h1{font-size:1.42rem;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{color:var(--ink2);font-size:.87rem;margin:0}
+
+  .tabs{position:sticky;top:0;z-index:1000;background:var(--bg);display:flex;gap:6px;
+    padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:24px}
+  .tab{flex:1;padding:10px 6px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink2);border-radius:6px;font-size:.87rem;font-weight:600;cursor:pointer;font-family:inherit}
+  .tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .view[hidden]{display:none}
+
+  h2{font-size:1.05rem;margin:36px 0 10px;font-weight:700}
+  h2:first-child{margin-top:6px}
+  h3{font-size:.93rem;margin:22px 0 6px}
+  p{margin:0 0 12px;font-size:.89rem}
+  .lead{color:var(--ink2)}
+
+  /* 地図はラッパ側で位置を持つ。オーバーレイの基準にもなる */
+  .mapbox{position:relative;margin:12px 0 6px}
+  .map{height:420px;border:1px solid var(--line);border-radius:4px;
+    background:var(--panel);z-index:1}
+  .map.sm{height:320px}
+  /* タッチ端末では地図が縦スクロールを奪うので、タップするまで pan を無効にする */
+  .lock{position:absolute;inset:0;z-index:2;display:none;align-items:flex-end;
+    justify-content:center;padding-bottom:14px;border-radius:4px;cursor:pointer;
+    background:transparent;-webkit-tap-highlight-color:transparent}
+  .lock.on{display:flex}
+  .lock span{background:var(--panel);color:var(--ink2);border:1px solid var(--line);
+    border-radius:999px;padding:5px 13px;font-size:.78rem;box-shadow:0 1px 4px rgba(0,0,0,.14)}
+  .cap{font-size:.77rem;color:var(--ink3);margin:0 0 20px;line-height:1.6}
+  .legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin:0 0 6px;font-size:.78rem}
+  .legend span{display:flex;align-items:center;gap:5px;color:var(--ink2)}
+  .legend i{width:18px;height:3px;border-radius:2px;display:block}
+  .leaflet-container{font:inherit;font-size:.8rem;background:var(--panel)}
+
+  table{width:100%;border-collapse:collapse;font-size:.84rem;margin:6px 0 20px}
+  th,td{text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink3);font-weight:600;font-size:.75rem;letter-spacing:.03em}
+  tbody tr:last-child td{border-bottom:none}
+  td a{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor}
+  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tw{overflow-x:auto}
+  /* 項目名／内容の2列表。1列目が細く潰れて1文字ずつ折り返すのを防ぐ */
+  .kv{table-layout:fixed}
+  .kv td:first-child,.kv th:first-child{width:8.5em;padding-right:14px}
+  @media(max-width:520px){ .kv td:first-child,.kv th:first-child{width:6.5em} }
+
+  .warn{background:var(--warn-bg);color:var(--warn);padding:11px 13px;border-radius:4px;
+    font-size:.84rem;line-height:1.62;margin:0 0 18px}
+  .warn b{color:inherit}
+
+  .phase{font-size:.74rem;font-weight:700;letter-spacing:.06em;color:var(--ink3);
+    margin:34px 0 0;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  /* 区切り線は「日の間」に引く。:first-of-type は .warn/.tw も div なので当たらない */
+  .day{padding:16px 0 6px}
+  .day + .day{border-top:1px solid var(--line)}
+  .day-h{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:6px}
+  .date{font-weight:700;font-size:1rem}
+  .dow{color:var(--ink3);font-size:.82rem}
+  .route{color:var(--ink2);font-size:.85rem;width:100%;margin-top:-4px}
+  /* 同上。.note が後ろに来る日では :last-of-type が leg に当たらない */
+  .leg{display:flex;gap:14px;padding:7px 0}
+  .leg + .leg{border-top:1px dashed var(--line)}
+  .t{flex:0 0 78px;font-variant-numeric:tabular-nums;font-weight:600;font-size:.83rem;
+    color:var(--ink2);padding-top:1px}
+  .c{flex:1;min-width:0;font-size:.88rem}
+  .meta{display:block;color:var(--ink2);font-size:.79rem;margin-top:2px}
+  .stay{display:block;margin-top:10px;font-size:.82rem;color:var(--accent);font-weight:600}
+  .note{margin:11px 0 0;font-size:.82rem;line-height:1.62;color:var(--ink2);
+    padding-left:12px;border-left:2px solid var(--line)}
+  .note b{color:var(--ink)}
+  .note.w{border-left-color:var(--warn);color:var(--warn)}
+  .note.w b{color:inherit}
+
+  ol.chk{list-style:decimal;padding-left:22px;margin:0 0 20px;font-size:.88rem}
+  ol.chk li{margin-bottom:9px}
+  ol.chk small{display:block;color:var(--ink2);font-size:.79rem;margin-top:1px}
+  ol.chk li.crit b{color:var(--warn)}
+
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:.75rem;color:var(--ink3)}
+  footer p{font-size:inherit}
+  footer a{color:inherit}
+  @media(max-width:520px){ .t{flex:0 0 62px;font-size:.78rem} h1{font-size:1.2rem}
+    .map{height:340px} .map.sm{height:280px} .tab{font-size:.8rem} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ヨーロッパ 8/28 → 9/24</h1>
+  <p class="sub">ロンドン → マルセイユ → パリ ／ 単独でアルザス・スイス ／ 合流して北イタリア ／ レンタカーでドロミテ・オーストリア</p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true"  aria-controls="map" id="tab-map" tabindex="0">マップ</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="ops" id="tab-ops" tabindex="-1">日程</button>
+  <button class="tab" role="tab" aria-selected="false" aria-controls="bk"  id="tab-bk"  tabindex="-1">メモ</button>
+</div>
+
+<!-- ══════════ マップ ══════════ -->
+<section class="view" id="map" role="tabpanel" aria-labelledby="tab-map">
+
+  <h2>全体</h2>
+  <div class="legend">
+    <span><i style="background:var(--p1)"></i>8/28–9/10 英・仏</span>
+    <span><i style="background:var(--p2)"></i>9/11–9/14 単独</span>
+    <span><i style="background:var(--p3)"></i>9/14–9/17 合流・北伊</span>
+    <span><i style="background:var(--p4)"></i>9/18–9/24 レンタカー</span>
+  </div>
+  <div class="mapbox"><div id="m1" class="map"></div></div>
+  <p class="cap">線は駅と駅／地点と地点をつないだ経路の概略。破線は空路と日帰り往復。マーカーをタップすると内容が出ます。</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>期間</th><th>区間</th><th>移動</th></tr></thead>
+    <tbody>
+      <tr><td class="num"><b>8/28–9/4</b></td><td>ロンドン（＋オックスフォード）</td><td>8/28 14:00 着 ／ 9/4 空路でマルセイユへ</td></tr>
+      <tr><td class="num"><b>9/4–9/6</b></td><td>マルセイユ</td><td>9/4 16:00 着・2泊</td></tr>
+      <tr><td class="num"><b>9/6–9/7</b></td><td>リヨン</td><td>1泊。TGV 約1時間40分</td></tr>
+      <tr><td class="num"><b>9/7–9/11</b></td><td>パリ</td><td>4泊。TGV 約2時間</td></tr>
+      <tr><td class="num"><b>9/11–9/14</b></td><td>ストラスブール → コルマール → ルツェルン</td><td>TGV 1時間46分＋TER・SBB。コルマール1泊・ルツェルン2泊</td></tr>
+      <tr><td class="num"><b>9/14–9/17</b></td><td>ボローニャ → ベネチア → ミラノ</td><td>9/14 夕方 合流。EC＋Frecciarossa</td></tr>
+      <tr><td class="num"><b>9/18–9/24</b></td><td>ドロミテ → オーストリア → ミラノ</td><td>MXP 発着レンタカー</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>コルマール（9/11 夕 – 9/12 朝）</h2>
+  <div class="mapbox"><div id="m2" class="map sm"></div></div>
+  <p class="cap">駅から旧市街の中心まで徒歩15分ほど。旧市街自体は端から端まで10分程度で、どこをどう歩いても一周してしまう規模です。</p>
+  <p class="lead">順路は決めなくていい場所です。設計しておく価値があるのは<b>入る時間帯</b>だけ。日中は観光客で埋まり、朝と夜だけ空きます。9/11 は 20時前後の日没からブルーアワー（20:40頃まで）、9/12 は 7:00–8:30。土曜なので9時を過ぎると一気に混みます。</p>
+
+  <h2>ブリューニク線（9/13）</h2>
+  <div class="mapbox"><div id="m3" class="map"></div></div>
+  <p class="cap">ルツェルン=インターラーケン・エクスプレスは毎時運行。今回はブリエンツで折り返し、インターラーケンまでは行きません。荷物はルツェルンの宿に置いたまま。</p>
+
+  <h2>レンタカー区間（9/18 – 9/24）</h2>
+  <div class="mapbox"><div id="m4" class="map"></div></div>
+  <p class="cap">実線が宿から宿への移動、破線が日帰りの往復（9/19 のミズリーナと氷河、9/22 のミッテンヴァルト）。所要は無停車の実走目安で、休憩・撮影・渋滞は含みません。</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>日</th><th>区間</th><th class="num">距離／実走</th><th>通行料</th></tr></thead>
+    <tbody>
+      <tr><td class="num">9/18</td><td>MXP → カステルロット</td><td class="num">約390km／4h15</td><td>伊アウトストラーダ</td></tr>
+      <tr><td class="num">9/19</td><td>カステルロット → ミズリーナ → 氷河 → コルティナ</td><td class="num">約200km／4〜5h</td><td>トレ・チーメ有料道路（行くなら）</td></tr>
+      <tr><td class="num">9/20</td><td>コルティナ → ツェル・アム・ゼー</td><td class="num">約250km／3h30</td><td>フェルバータウエルン €13</td></tr>
+      <tr><td class="num">9/21</td><td>ツェル・アム・ゼー → ハルシュタット → ザルツブルク</td><td class="num">約185km／3h15</td><td>ハルシュタット駐車 €6〜10</td></tr>
+      <tr><td class="num">9/22</td><td>ザルツブルク → ツィール（＋ミッテンヴァルト往復）</td><td class="num">約200km／2h15 ＋70km</td><td>独アウトバーン経由は無料</td></tr>
+      <tr><td class="num">9/23</td><td>ツィール → ブレンナー → ヴェローナ → マルペンサ</td><td class="num"><b>約600km／6h15</b></td><td>ブレンナー €10.50 ＋ 伊</td></tr>
+      <tr><td class="num">9/24</td><td>マルペンサ 07:00 返却 → 昼の便で NRT</td><td class="num">—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+</section>
+
+<!-- ══════════ 日程 ══════════ -->
+<section class="view" id="ops" role="tabpanel" aria-labelledby="tab-ops" hidden>
+
+  <div class="warn"><b>時刻はすべて目安です。</b>鉄道の実列車は SNCF Connect / SBB / Trenitalia で、ドライブの所要は無停車の実走目安として見てください。</div>
+
+  <p class="phase">前半 ── 英・仏</p>
+
+  <div class="day">
+    <div class="day-h"><span class="date">8/28</span><span class="dow">金</span><span class="route">ロンドン 14:00 着</span></div>
+    <div class="leg"><div class="t">14:00</div><div class="c"><b>ロンドン着</b><span class="meta">9/4 まで滞在。オックスフォードは日帰り圏（パディントンから約1時間）</span></div></div>
+    <span class="stay">泊：ロンドン（8/28〜9/3 の7泊）</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/4</span><span class="dow">金</span><span class="route">ロンドン → マルセイユ（空路）</span></div>
+    <div class="leg"><div class="t">16:00</div><div class="c"><b>マルセイユ着</b><span class="meta">空港から市内まで市内バスで約25〜30分</span></div></div>
+    <span class="stay">泊：マルセイユ（9/4・9/5 の2泊）</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/6</span><span class="dow">日</span><span class="route">マルセイユ → リヨン</span></div>
+    <div class="leg"><div class="t">—</div><div class="c"><b>Marseille St-Charles → Lyon Part-Dieu</b><span class="meta">TGV 約1時間40分・頻発</span></div></div>
+    <div class="note">日曜。リヨンも商店は休みが多い。旧市街（ヴュー・リヨン）とフルヴィエールの丘は動きます。</div>
+    <span class="stay">泊：リヨン（1泊）</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/7</span><span class="dow">月</span><span class="route">リヨン → パリ</span></div>
+    <div class="leg"><div class="t">—</div><div class="c"><b>Lyon Part-Dieu → Paris Gare de Lyon</b><span class="meta">TGV 約2時間・頻発</span></div></div>
+    <span class="stay">泊：パリ（9/7〜9/10 の4泊）</span>
+  </div>
+
+  <p class="phase">単独区間 ── アルザス・スイス</p>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/11</span><span class="dow">金</span><span class="route">パリ → ストラスブール → コルマール</span></div>
+    <div class="leg"><div class="t">08:00頃</div><div class="c"><b>Paris Gare de l'Est 発</b><span class="meta">TGV INOUI・1時間46分。1日19本あり時刻の自由度が高い</span></div></div>
+    <div class="leg"><div class="t">09:50頃</div><div class="c"><b>Strasbourg 着</b><span class="meta">駅のロッカーに荷物を預ける</span></div></div>
+    <div class="leg"><div class="t">午前〜午後</div><div class="c"><b>ストラスブール</b><span class="meta">大聖堂（天文時計）／プティット・フランス。半日でちょうど回りきる規模</span></div></div>
+    <div class="leg"><div class="t">17:30頃</div><div class="c"><b>Strasbourg → Colmar</b><span class="meta">TER 約30分・頻発・予約不要</span></div></div>
+    <div class="leg"><div class="t">20:00〜<br>20:40</div><div class="c"><b>コルマール旧市街（日没後）</b><span class="meta">夕食を先に済ませておく</span></div></div>
+    <div class="note w"><b>工事回避：</b>パリ〜バーゼルの TGV Lyria 直通は 2026/8/17〜10/29 の工事で運休・迂回・約1時間増の対象。この LGV Est（ストラスブール線）経由はその区間を踏まない。</div>
+    <span class="stay">泊：コルマール</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/12</span><span class="dow">土</span><span class="route">コルマール → バーゼル → ルツェルン</span></div>
+    <div class="leg"><div class="t">07:00〜<br>08:30</div><div class="c"><b>コルマール旧市街（早朝）</b><span class="meta">無人で歩けるのはこの時間帯だけ</span></div></div>
+    <div class="leg"><div class="t">10:30頃</div><div class="c"><b>Colmar → Basel SBB</b><span class="meta">約1時間。Mulhouse 乗換の便あり</span></div></div>
+    <div class="leg"><div class="t">11:45頃</div><div class="c"><b>Basel SBB → Luzern</b><span class="meta">約1時間</span></div></div>
+    <div class="leg"><div class="t">12:45頃</div><div class="c"><b>ルツェルン着・チェックイン（2連泊の1泊目）</b><span class="meta">カペル橋／ムーゼック城壁／湖畔／ローゼンガルト・コレクション</span></div></div>
+    <div class="note">翌 9/13 は<b>日曜で商店が全休</b>。買い出しがあるならこの日に。</div>
+    <span class="stay">泊：ルツェルン ①（12日の晩）</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/13</span><span class="dow">日</span><span class="route">ブリューニク線 途中下車 ── 荷物は宿に置いたまま</span></div>
+    <div class="leg"><div class="t">08:06</div><div class="c"><b>Luzern 発 ─ ルツェルン=インターラーケン・エクスプレス</b><span class="meta">全車パノラマ窓。<b>進行方向右側</b>に座る（マイリンゲンで機関車が前後入れ替わるので、どちら向きでも右が正解）。毎時運行・CHF 34・座席指定は任意 CHF 12〜16</span></div></div>
+    <div class="leg"><div class="t">08:51</div><div class="c"><b>Lungern 下車</b> ── ルンゲルン湖・60分<span class="meta">拡張案：ひと駅手前の Kaiserstuhl で降り、湖畔6km・約1時間30分を歩いて Lungern へ</span></div></div>
+    <div class="leg"><div class="t">09:51</div><div class="c"><b>Lungern → Brienz</b><span class="meta">途中でブリューニク峠 1001m をラック式で越える</span></div></div>
+    <div class="leg"><div class="t">10:36頃</div><div class="c"><b>Brienz 着</b><span class="meta">駅・船着場・ロートホルン鉄道の乗り場は隣接。登山鉄道の発車まで50分ほどあるので、切符の確保と湖畔を先に</span></div></div>
+    <div class="leg"><div class="t">11:30頃</div><div class="c"><b>ブリエンツ・ロートホルン鉄道</b>（蒸気ラック式・1892年）<span class="meta">片道27〜31分 → Rothorn Kulm 2244m。山頂で1時間</span></div></div>
+    <div class="leg"><div class="t">13:30頃</div><div class="c"><b>Brienz 帰着</b> ── 昼食・湖畔・木彫りの町</div></div>
+    <div class="leg"><div class="t">15:36頃</div><div class="c"><b>Brienz → Luzern</b><span class="meta">約1時間30分。同じ線を夕方の光でもう一度</span></div></div>
+    <div class="note w"><b>蒸気とは限らない。</b>ロートホルン鉄道は日によってディーゼル運転になり、運行期間も年で動きます（おおむね6月〜10月中旬）。蒸気に乗りたいなら当年の運行日程を先に見ておくこと。</div>
+    <div class="note"><b>雨天代替：</b>ブリエンツ湖の遊覧船＋木彫り博物館＋バレンベルク野外博物館。完全に崩れたらルツェルン→チューリッヒ（45分）でクンストハウス／Pavillon Le Corbusier／チューリッヒ・ヴェスト。</div>
+    <span class="stay">泊：ルツェルン ②（13日の晩）</span>
+  </div>
+
+  <p class="phase">合流 ── 北イタリア</p>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/14</span><span class="dow">月</span><span class="route">ルツェルン → ミラノ → ボローニャ ＋（フェラーリ）＋ 合流</span></div>
+    <div class="note"><b>フェラーリは stretch goal。</b>08:30〜09:00 発でも間に合います。始発近くで叩き起きる必要はありません。</div>
+    <div class="tw">
+    <table style="margin-top:12px">
+      <thead><tr><th>ルツェルン発</th><th>ボローニャ着</th><th>フェラーリ</th><th>得るもの</th></tr></thead>
+      <tbody>
+        <tr><td class="num">06:45</td><td class="num">11:45頃</td><td>◎ 余裕（13:15〜15:30）</td><td>なし。単に早起き</td></tr>
+        <tr><td class="num"><b>08:30〜09:00</b><br><span style="color:var(--accent);font-size:.78rem">推奨</span></td><td class="num">13:50頃</td><td>○ 成立（15:15〜17:15）</td><td><b>ルツェルンの朝</b>。夜明けの湖とカペル橋</td></tr>
+        <tr><td class="num">11:00</td><td class="num">15:45頃</td><td>△ 駆け足（17:00〜18:15）</td><td>朝をまるごと</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="leg"><div class="t">08:30頃</div><div class="c"><b>Luzern → Arth-Goldau</b><span class="meta">約30分</span></div></div>
+    <div class="leg"><div class="t">09:05頃</div><div class="c"><b>Arth-Goldau → Milano Centrale</b>（EC・ゴッタルド経由）<span class="meta">約2時間35分。チューリッヒ〜ミラノ EC は1日14本あり Arth-Goldau 停車。ルツェルン発の直通 EC も1日1本</span></div></div>
+    <div class="leg"><div class="t">12:30頃</div><div class="c"><b>Milano → Bologna Centrale</b><span class="meta">Frecciarossa / Italo 約1時間05分・要予約</span></div></div>
+    <div class="leg"><div class="t">13:50頃</div><div class="c"><b>ボローニャ着 ── 宿に荷物を預ける</b></div></div>
+    <div class="leg"><div class="t">14:30頃</div><div class="c"><b>Bologna → Modena</b><span class="meta">Regionale 26〜31分・毎時1〜2本・€4以下・予約不要</span></div></div>
+    <div class="leg"><div class="t">15:15</div><div class="c"><b>エンツォ・フェラーリ博物館（モデナ）</b><span class="meta">9〜10月 09:30–19:00／最終入場 18:15／月曜も開館。モデナ駅から徒歩圏</span></div></div>
+    <div class="leg"><div class="t">夜</div><div class="c"><b>同行者と合流／ボローニャで夕食</b><span class="meta">ここから 9/24 まで5人行動</span></div></div>
+    <div class="note w"><b>撤退ライン：</b>ボローニャ到着が16:00を過ぎたらモデナは切って、そのまま合流。判断はミラノ到着時点で下せます。</div>
+    <span class="stay">泊：ボローニャ</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/15</span><span class="dow">火</span><span class="route">ボローニャ → ベネチア（単独先行）</span></div>
+    <div class="leg"><div class="t">06:30〜<br>07:00台</div><div class="c"><b>Bologna Centrale 発</b><span class="meta">Frecciarossa / Italo 約1時間30分</span></div></div>
+    <div class="leg"><div class="t">08:00〜<br>08:30</div><div class="c"><b>Venezia S. Lucia 着</b><span class="meta">宿または駅の荷物預けへ。ビエンナーレを朝から。会場は 10:00／11:00 開場</span></div></div>
+    <div class="note">グループと同じ電車で動かない。これがビエンナーレ初日を丸ごと確保する方法。</div>
+    <span class="stay">泊：ベネチア</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/16</span><span class="dow">水</span><span class="route">ベネチア ── ビエンナーレ2日目</span></div>
+    <span class="stay">泊：ベネチア</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/17</span><span class="dow">木</span><span class="route">ベネチア → ミラノ</span></div>
+    <div class="leg"><div class="t">—</div><div class="c"><b>Venezia → Milano</b><span class="meta">Frecciarossa 約2時間30分</span></div></div>
+    <div class="note w"><b>翌朝 07:00 に MXP でレンタカー受取。</b>ミラノ中心部からマルペンサは列車で約50分。始発の Malpensa Express は 05:25 前後なので、5人分の荷物を持って動くなら<b>マルペンサ周辺に泊まる方が確実</b>。</div>
+    <span class="stay">泊：ミラノ</span>
+  </div>
+
+  <p class="phase">レンタカー ── ドロミテ・オーストリア</p>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/18</span><span class="dow">金</span><span class="route">MXP 07:00 受取 → カステルロット</span></div>
+    <div class="leg"><div class="t">07:00</div><div class="c"><b>マルペンサ空港でレンタカー受取</b><span class="meta">運転者2名（いずれも25歳未満＝若年運転者料金の対象）。走行距離無制限／追加運転者1名／非EV</span></div></div>
+    <div class="leg"><div class="t">約4h15</div><div class="c"><b>MXP → ベルガモ → ブレシア → ヴェローナ → ボルツァーノ → カステルロット</b><span class="meta">約390km。ほぼ全区間アウトストラーダ</span></div></div>
+    <div class="note">初日から長距離。受取手続きに30〜60分見ておくこと。到着は午後になる想定で、アルペ・ディ・シウジは翌朝以降に回す方が安全。</div>
+    <span class="stay">泊：カステルロット</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/19</span><span class="dow">土</span><span class="route">ミズリーナ（午前）→ 氷河（午後）→ コルティナ</span></div>
+    <div class="leg"><div class="t">午前</div><div class="c"><b>カステルロット → ミズリーナ湖</b><span class="meta">約2時間（ブレッサノーネ → ヴァル・プステリア → ドッビアーコ経由）</span></div></div>
+    <div class="leg"><div class="t">午後</div><div class="c"><b>ミズリーナ → コルティナ → 氷河（マルモラーダ方面）</b><span class="meta">コルティナからファルツァーレゴ峠経由で約1時間15分</span></div></div>
+    <div class="leg"><div class="t">夕</div><div class="c"><b>コルティナへ戻る</b><span class="meta">約1時間15分</span></div></div>
+    <div class="note w"><b>この旅で一番きつい日。</b>ミズリーナはコルティナの<b>北東</b>、マルモラーダは<b>南西</b>で、方角が真逆です。峠道を1日で往復することになり、実走4〜5時間。<b>どちらかを削るか、氷河を9/20の朝に回す</b>方が現実的。ミズリーナからトレ・チーメへ上がる道は別料金の有料道路なので、行くなら当年の料金と開通状況を確認。</div>
+    <span class="stay">泊：コルティナ</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/20</span><span class="dow">日</span><span class="route">コルティナ → ツェル・アム・ゼー</span></div>
+    <div class="leg"><div class="t">約3h30</div><div class="c"><b>コルティナ → ドッビアーコ → リエンツ → フェルバータウエルン → ツェル・アム・ゼー</b><span class="meta">約250km。フェルバータウエルン・トンネル €13（片道）</span></div></div>
+    <div class="note"><b>選択肢：</b>リエンツからハイリゲンブルート経由で<b>グロースグロックナー高山道路</b>を走る手があります。乗用車 €46.50、9月は 6:00–19:30（最終入場18:45）、2026年は11/2まで開通。所要は＋1時間30分ほど増えますが、この旅で唯一の本格的な山岳道路になります。</div>
+    <div class="note">旅のちょうど中盤。洗濯をするなら 9/21 ザルツブルクか 9/22 ツィールで。</div>
+    <span class="stay">泊：ツェル・アム・ゼー</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/21</span><span class="dow">月</span><span class="route">ハルシュタット終日 → ザルツブルク</span></div>
+    <div class="leg"><div class="t">〜08:30</div><div class="c"><b>ツェル・アム・ゼー → ハルシュタット</b><span class="meta">約110km・1時間50分。<b>8:30 までに着くこと</b></span></div></div>
+    <div class="leg"><div class="t">日中</div><div class="c"><b>ハルシュタット散策</b></div></div>
+    <div class="leg"><div class="t">夕</div><div class="c"><b>ハルシュタット → ザルツブルク</b><span class="meta">約75km・1時間20分</span></div></div>
+    <div class="note w"><b>駐車が全て。</b>P1 は €10・100台のみで <b>8:30 には満車</b>。P2 は €8・300台で無料シャトル15分間隔、平日10:30／週末9:30に満車。P3 は €6・2.5km。<b>村の中心部は非居住者車両進入禁止で、自動取締り・違反 €150</b>。早朝着なら P1、9時以降なら最初から P2 を狙う。</div>
+    <span class="stay">泊：ザルツブルク</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/22</span><span class="dow">火</span><span class="route">ザルツブルク → ツィール（＋ミッテンヴァルト）</span></div>
+    <div class="leg"><div class="t">約2h15</div><div class="c"><b>ザルツブルク → ローゼンハイム → クーフシュタイン → インスブルック → ツィール</b><span class="meta">約200km。ドイツ領を通過（独アウトバーンは乗用車無料）</span></div></div>
+    <div class="leg"><div class="t">＋往復</div><div class="c"><b>ツィール → ゼーフェルト → ミッテンヴァルト</b><span class="meta">約35km・40分（片道）。日帰りで往復</span></div></div>
+    <div class="note">当初「9/22 ミッテンヴァルト泊」で話していましたが、<b>拠点はツィール（Zirl）</b>です。ミッテンヴァルトはツィールから40分なので、日帰りで往復する形になります。</div>
+    <span class="stay">泊：ツィール（Zirl）</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/23</span><span class="dow">水</span><span class="route">ツィール → ミラノ（ロングドライブ）</span></div>
+    <div class="leg"><div class="t">約6h15</div><div class="c"><b>ツィール → インスブルック → ブレンナー峠 → ボルツァーノ → ヴェローナ → ブレシア → マルペンサ</b><span class="meta">約600km。ブレンナー A13 €10.50（片道）＋イタリア側のアウトストラーダ料金</span></div></div>
+    <div class="note w"><b>泊まる場所はマルペンサ周辺に。</b>翌 9/24 07:00 に MXP 返却なので、<b>ミラノ中心部ではなく空港周辺</b>（Somma Lombardo / Ferno / Case Nuove）が正解です。ミラノ市内は Area B / Area C の車両規制があり、レンタカーで入ると面倒。空港周辺なら返却まで車で10分。</div>
+    <div class="note">休憩・給油・食事を入れると実質8時間の日になります。運転者2名で交代前提。出発は朝早い方がいい。</div>
+    <span class="stay">泊：マルペンサ周辺</span>
+  </div>
+
+  <div class="day">
+    <div class="day-h"><span class="date">9/24</span><span class="dow">木</span><span class="route">MXP 07:00 返却 → 昼の便で NRT</span></div>
+    <div class="leg"><div class="t">07:00</div><div class="c"><b>マルペンサでレンタカー返却</b><span class="meta">燃料満タン返却の条件を確認。空港周辺のガソリンスタンドで前夜に入れておくと朝が楽</span></div></div>
+    <div class="leg"><div class="t">昼</div><div class="c"><b>NRT 行きの便</b></div></div>
+  </div>
+
+  <p class="cap">通行料・駐車・鉄道の予約など、車と列車まわりの話は「メモ」タブにまとめています。</p>
+
+</section>
+
+<!-- ══════════ 宿・予約 ══════════ -->
+<section class="view" id="bk" role="tabpanel" aria-labelledby="tab-bk" hidden>
+  <h2>車で走るときのメモ</h2>
+  <p class="lead">9/18〜9/24 のレンタカー区間はイタリア・オーストリア・ドイツの3か国をまたぎます。通行料の仕組みが国ごとに違うので、そこだけ。</p>
+  <div class="tw">
+  <table class="kv">
+    <thead><tr><th>項目</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td><b>オーストリア ヴィニェット</b></td><td>高速道路に入る前に必須。10日券で €12 前後。<b>デジタルを ASFINAG の直販で買うと18日のクーリングオフ期間があり、すぐには有効にならない</b>のが罠。直前ならリセラー（ÖAMTC / ADAC 等）か、国境手前のガソリンスタンドでステッカーを買う</td></tr>
+      <tr><td><b>別料金の区間</b></td><td>ブレンナー、フェルバータウエルン、タウエルン、アールベルクの各トンネル・峠は<b>ヴィニェットとは別建て</b>で片道 €10〜14 ほど。今回通るのはフェルバータウエルン（9/20）とブレンナー（9/23）</td></tr>
+      <tr><td><b>グロースグロックナー高山道路</b></td><td>乗用車 €46.50、9月は 6:00–19:30。開通は11月上旬まで。9/20 にリエンツから振れば走れる、この旅で唯一の本格的な山岳道路</td></tr>
+      <tr><td><b>ハルシュタットの駐車</b></td><td>P1 €10（100台・8:30に満車）／P2 €8（300台・無料シャトル15分間隔）／P3 €6（2.5km）。<b>村の中心部は非居住者の車両進入禁止で自動取締り</b>。ここは早く着いた者勝ち</td></tr>
+      <tr><td><b>イタリアの ZTL</b></td><td>ミラノは Area B / Area C の車両規制。レンタカーで中心部に入ると面倒なので、9/23 は空港周辺に泊まって近づかないのが安全</td></tr>
+      <tr><td><b>ドイツ</b></td><td>乗用車のアウトバーンは通行料なし。9/22 のザルツブルク→ツィールと、同日のミッテンヴァルト往復で通過する</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>鉄道まわり</h2>
+
+  <h3>スイスの鉄道パスはたぶん要らない</h3>
+  <p class="lead">スイス滞在は実質2.5日で、長距離乗車は「バーゼル→ルツェルン」「ブリューニク線の往復」「ルツェルン→国境」の3本だけ。都度買う方が安く付きます。効いてくるのはむしろ<b>ハーフフェアカード</b>で、ブリエンツ・ロートホルン鉄道が半額になるのが大きい。</p>
+
+  <h3>予約が要る列車・要らない列車</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>区間</th><th>列車</th><th>予約</th></tr></thead>
+    <tbody>
+      <tr><td>マルセイユ → リヨン → パリ</td><td>TGV</td><td><b>要</b>。頻発だが週末は埋まる</td></tr>
+      <tr><td>パリ → ストラスブール</td><td>TGV INOUI</td><td><b>要</b>。1日19本。早いほど安い</td></tr>
+      <tr><td>ストラスブール → コルマール → バーゼル → ルツェルン</td><td>TER / SBB</td><td>不要</td></tr>
+      <tr><td>ブリューニク線</td><td>ルツェルン=インターラーケン・エクスプレス</td><td>座席指定は任意</td></tr>
+      <tr><td>ルツェルン → ミラノ</td><td>EC（ゴッタルド経由）</td><td>推奨</td></tr>
+      <tr><td>ミラノ・ボローニャ・ベネチア間</td><td>Frecciarossa / Italo</td><td><b>要</b>。早割で値段が大きく変わる</td></tr>
+      <tr><td>ボローニャ → モデナ</td><td>Regionale</td><td>不要・€4以下</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>この旅で効いてくる小ネタ</h2>
+  <ol class="chk">
+    <li><b>コルマールは順路より時間帯</b><small>旧市街は端から端まで徒歩10分。どう歩いても一周してしまうので、決めるべきは「いつ入るか」だけ。日中は観光客で埋まり、空くのは日没後と朝8時半まで。</small></li>
+    <li><b>ブリューニク線は進行方向の右側</b><small>マイリンゲンで機関車が前後に付け替わるので、行きも帰りも右が正解になる。</small></li>
+    <li><b>スイスの日曜は商店が全休</b><small>9/13 が日曜なので、買い出しがあるなら 9/12 のうちに。</small></li>
+    <li><b>ベネチアはグループと同じ電車で動かない</b><small>9/15 に一本早く出るだけで、ビエンナーレの初日が丸ごと手に入る。</small></li>
+    <li><b>ドロミテの峠道は距離より時間で見る</b><small>9/19 の 200km は実走4〜5時間。平地の感覚で計画すると必ず溢れる。</small></li>
+    <li><b>マルペンサ返却の前夜は空港周辺に</b><small>ミラノ中心部からだと始発の Malpensa Express が 05:25 前後。荷物を持って動く朝としては厳しい。</small></li>
+  </ol>
+</section>
+
+<footer>
+  <p>2026年の個人的な旅程メモです。時刻・運賃・営業時間は2026年8月時点の公開情報にもとづく目安で、各社の公式が正です。ドライブの所要は無停車の実走目安。地図タイルは <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>。</p>
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+(function(){
+  var css=getComputedStyle(document.documentElement);
+  function c(n){return css.getPropertyValue(n).trim();}
+  var TILE='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ATTR='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+  function dot(m,p,color,label,size){
+    L.circleMarker(p,{radius:size||6,color:'#fff',weight:2,fillColor:color,fillOpacity:1})
+      .addTo(m).bindPopup(label);
+  }
+  function line(m,pts,color,w,dash){
+    L.polyline(pts,{color:color,weight:w||4,opacity:.85,dashArray:dash}).addTo(m);
+  }
+
+  var LON=[51.5074,-0.1278], OXF=[51.7520,-1.2577], MRS=[43.2965,5.3698],
+      LYO=[45.7640,4.8357], PAR=[48.8566,2.3522], STR=[48.5850,7.7340],
+      COL=[48.0793,7.3585], BAS=[47.5476,7.5895], LUZ=[47.0502,8.3103],
+      LUN=[46.7870,8.1590], BRZ=[46.7547,8.0345], AG=[47.0490,8.5450],
+      BELL=[46.1950,9.0260], LUGA=[46.0050,8.9470], COMO=[45.8080,9.0830],
+      MIL=[45.4864,9.2049], MXP=[45.6306,8.7281], MOD=[44.6497,10.9285],
+      BOL=[44.5057,11.3430], FER=[44.8360,11.5980], PAD=[45.4170,11.8770],
+      VEN=[45.4410,12.3211], BGM=[45.6950,9.6700], BRS=[45.5400,10.2200],
+      VER=[45.4384,10.9916], TRT=[46.0700,11.1200], BZ=[46.4980,11.3550],
+      CAS=[46.5680,11.5590], BRX=[46.7150,11.6570], BRU=[46.7960,11.9360],
+      DOB=[46.7300,12.2200], MIS=[46.5820,12.2540], CTN=[46.5405,12.1357],
+      FAL=[46.5190,12.0090], CAP=[46.4400,11.9800], MRM=[46.4200,11.8720],
+      LNZ=[46.8300,12.7700], MTR=[47.0000,12.5400], MTS=[47.2800,12.4800],
+      ZAS=[47.3230,12.7980], BIS=[47.4200,13.2200], EBN=[47.4000,13.4400],
+      GOS=[47.5800,13.5300], HAL=[47.5620,13.6490], BIS2=[47.7100,13.6200],
+      MON=[47.8600,13.3500], SAL=[47.8095,13.0550], RHL=[47.7300,12.8800],
+      ROS=[47.8600,12.1300], KUF=[47.5800,12.1700], INN=[47.2692,11.4041],
+      ZRL=[47.2760,11.2380], SEE=[47.3300,11.1900], MIT=[47.4430,11.2620],
+      BRE=[47.0000,11.5100];
+
+  /* ---- 1. overview ---- */
+  var m1=L.map('m1',{scrollWheelZoom:false});
+  L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m1);
+  line(m1,[LON,OXF],c('--p1'),3,'5 6');
+  line(m1,[LON,MRS],c('--p1'),3,'9 8');
+  line(m1,[MRS,LYO,PAR],c('--p1'));
+  line(m1,[PAR,STR,COL,BAS,LUZ],c('--p2'));
+  line(m1,[LUZ,LUN,BRZ],c('--p2'),3,'6 7');
+  line(m1,[BRZ,LUN,LUZ],c('--p2'),3,'6 7');
+  line(m1,[LUZ,AG,BELL,LUGA,COMO,MIL,VER,MOD,BOL],c('--p3'));
+  line(m1,[BOL,FER,PAD,VEN],c('--p3'));
+  line(m1,[VEN,PAD,VER,BRS,MIL],c('--p3'),3,'4 5');
+  line(m1,[MIL,MXP,BGM,BRS,VER,TRT,BZ,CAS,BRX,BRU,DOB,MIS,CTN,LNZ,MTR,MTS,ZAS,BIS,EBN,GOS,HAL,BIS2,MON,SAL,RHL,ROS,KUF,INN,ZRL],c('--p4'));
+  line(m1,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],c('--p4'),3,'7 6');
+
+  dot(m1,LON,c('--p1'),'<b>ロンドン</b><br>8/28 14:00 着 ／ 7泊',9);
+  dot(m1,OXF,c('--p1'),'<b>オックスフォード</b><br>ロンドンから日帰り圏',5);
+  dot(m1,MRS,c('--p1'),'<b>マルセイユ</b><br>9/4 16:00 着 ／ 2泊',8);
+  dot(m1,LYO,c('--p1'),'<b>リヨン</b><br>9/6 1泊',7);
+  dot(m1,PAR,c('--p1'),'<b>パリ</b><br>9/7〜9/10 の4泊 ／ 9/11 朝発',9);
+  dot(m1,STR,c('--p2'),'<b>ストラスブール</b><br>9/11 半日',6);
+  dot(m1,COL,c('--p2'),'<b>コルマール</b><br>9/11 泊。夕景＋翌早朝',8);
+  dot(m1,LUZ,c('--p2'),'<b>ルツェルン</b><br>9/12・9/13 の2連泊',9);
+  dot(m1,BRZ,c('--p2'),'<b>ブリエンツ</b><br>9/13 ロートホルン蒸気登山鉄道',6);
+  dot(m1,MOD,c('--p3'),'<b>モデナ</b><br>9/14 フェラーリ（stretch goal）',5);
+  dot(m1,BOL,c('--p3'),'<b>ボローニャ</b><br>9/14 夕方 合流・泊',8);
+  dot(m1,VEN,c('--p3'),'<b>ベネチア</b><br>9/15・9/16 ビエンナーレ',9);
+  dot(m1,MIL,c('--p3'),'<b>ミラノ</b><br>9/17 泊',7);
+  dot(m1,MXP,c('--p4'),'<b>マルペンサ空港</b><br>9/18 07:00 レンタカー受取<br>9/24 07:00 返却・昼の便で NRT',8);
+  dot(m1,CAS,c('--p4'),'<b>カステルロット</b><br>9/18 泊',7);
+  dot(m1,CTN,c('--p4'),'<b>コルティナ</b><br>9/19 泊',7);
+  dot(m1,ZAS,c('--p4'),'<b>ツェル・アム・ゼー</b><br>9/20 泊',7);
+  dot(m1,HAL,c('--p4'),'<b>ハルシュタット</b><br>9/21 終日',7);
+  dot(m1,SAL,c('--p4'),'<b>ザルツブルク</b><br>9/21 泊',7);
+  dot(m1,ZRL,c('--p4'),'<b>ツィール</b><br>9/22 泊（ミッテンヴァルトは日帰り）',7);
+  m1.fitBounds([[42.9,-1.6],[52.2,14.0]],{padding:[10,10]});
+
+  /* ---- 2. Colmar ---- */
+  var m2=L.map('m2',{scrollWheelZoom:false}).setView([48.0768,7.3540],15);
+  L.tileLayer(TILE,{attribution:ATTR,maxZoom:19}).addTo(m2);
+  line(m2,[[48.0725,7.3452],[48.0745,7.3505],[48.0768,7.3585]],c('--accent'),4,'8 7');
+  dot(m2,[48.0725,7.3452],c('--ink2'),'<b>コルマール駅</b><br>旧市街まで徒歩15分',7);
+  dot(m2,[48.0768,7.3585],c('--accent'),'<b>旧市街の中心</b><br>コイフュス（旧税関）／グラン・リュ',8);
+  dot(m2,[48.0750,7.3600],c('--accent'),'<b>プティット・ヴニーズ</b><br>運河沿い。早朝と日没後だけ空く',8);
+  dot(m2,[48.0800,7.3565],c('--ink3'),'<b>ウンターリンデン美術館</b><br>9:00開館',6);
+  dot(m2,[48.0812,7.3612],c('--ink3'),'<b>シャン・ド・マルス公園</b>',6);
+
+  /* ---- 3. Brünig ---- */
+  var m3=L.map('m3',{scrollWheelZoom:false});
+  L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m3);
+  var SARN=[46.8960,8.2460],GISW=[46.8340,8.1870],KAIS=[46.8180,8.1720],
+      BRUN=[46.7580,8.1470],MEIR=[46.7270,8.1860],ROTH=[46.7870,8.0470],INTO=[46.6900,7.8690];
+  line(m3,[LUZ,SARN,GISW,KAIS,LUN,BRUN,MEIR,BRZ],c('--p2'),5);
+  line(m3,[BRZ,INTO],c('--ink3'),3,'4 7');
+  line(m3,[BRZ,ROTH],c('--accent'),4,'7 5');
+  dot(m3,LUZ,c('--accent'),'<b>ルツェルン</b><br>08:06 発',9);
+  dot(m3,SARN,c('--p2'),'<b>ザルネン</b><br>ロッカーあり',5);
+  dot(m3,GISW,c('--p2'),'<b>ギスヴィル</b>',5);
+  dot(m3,KAIS,c('--p2'),'<b>カイザーシュトゥール</b><br>拡張案：ここで降りて湖畔6km・1時間半歩く',5);
+  dot(m3,LUN,c('--accent'),'<b>ルンゲルン</b> 08:51着<br>ターコイズの湖。60分',9);
+  dot(m3,BRUN,c('--p2'),'<b>ブリューニク峠 1001m</b><br>ラック式区間',5);
+  dot(m3,MEIR,c('--p2'),'<b>マイリンゲン</b><br>機関車が前後入れ替わる駅',5);
+  dot(m3,BRZ,c('--accent'),'<b>ブリエンツ</b> 10:36着<br>駅・船着場・登山鉄道が隣接',9);
+  dot(m3,ROTH,c('--accent'),'<b>ロートホルン 2244m</b><br>1892年製 蒸気ラック式・片道約30分',8);
+  dot(m3,INTO,c('--ink3'),'<b>インターラーケン東駅</b><br>今回は行かない',5);
+  m3.fitBounds([[46.66,7.84],[47.08,8.30]],{padding:[14,14]});
+
+  /* ---- 4. drive ---- */
+  var m4=L.map('m4',{scrollWheelZoom:false});
+  L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m4);
+  line(m4,[MXP,BGM,BRS,VER,TRT,BZ,CAS],c('--p4'),4);
+  line(m4,[CAS,BRX,BRU,DOB,MIS],c('--p4'),4);
+  line(m4,[MIS,CTN],c('--p4'),4);
+  line(m4,[CTN,FAL,CAP,MRM],c('--accent'),3,'7 6');
+  line(m4,[MRM,CAP,FAL,CTN],c('--accent'),3,'7 6');
+  line(m4,[CTN,DOB,LNZ,MTR,MTS,ZAS],c('--p4'),4);
+  line(m4,[ZAS,BIS,EBN,GOS,HAL],c('--p4'),4);
+  line(m4,[HAL,BIS2,MON,SAL],c('--p4'),4);
+  line(m4,[SAL,RHL,ROS,KUF,INN,ZRL],c('--p4'),4);
+  line(m4,[ZRL,SEE,MIT],c('--accent'),3,'7 6');
+  line(m4,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],c('--p4'),4,'10 6');
+  dot(m4,MXP,c('--accent'),'<b>マルペンサ空港</b><br>9/18 07:00 受取／9/24 07:00 返却',9);
+  dot(m4,CAS,c('--accent'),'<b>カステルロット</b> 9/18 泊<br>MXP から約390km・4h15',8);
+  dot(m4,MIS,c('--p4'),'<b>ミズリーナ湖</b> 9/19 午前<br>トレ・チーメへの有料道路の起点',7);
+  dot(m4,MRM,c('--p4'),'<b>マルモラーダ氷河（マルガ・チャペラ）</b><br>9/19 午後。コルティナから約1h15',7);
+  dot(m4,CTN,c('--accent'),'<b>コルティナ・ダンペッツォ</b> 9/19 泊',8);
+  dot(m4,ZAS,c('--accent'),'<b>ツェル・アム・ゼー</b> 9/20 泊<br>グロースグロックナー経由で入る手もある',8);
+  dot(m4,HAL,c('--accent'),'<b>ハルシュタット</b> 9/21 終日<br>P1は8:30に満車。村中心部は進入禁止',8);
+  dot(m4,SAL,c('--accent'),'<b>ザルツブルク</b> 9/21 泊',8);
+  dot(m4,ZRL,c('--accent'),'<b>ツィール（Zirl）</b> 9/22 泊',8);
+  dot(m4,MIT,c('--p4'),'<b>ミッテンヴァルト</b><br>ツィールから約40分・日帰り',6);
+  dot(m4,BRE,c('--p4'),'<b>ブレンナー峠</b><br>9/23 通過。A13 €10.50',5);
+  dot(m4,LNZ,c('--p4'),'<b>リエンツ</b><br>グロースグロックナー経由に振る分岐点',5);
+  m4.fitBounds([[45.3,8.4],[48.1,13.9]],{padding:[12,12]});
+
+  var maps=[m1,m2,m3,m4];
+
+  /* ---- touch: 地図が縦スクロールを飲み込まないよう、タップするまで pan を切る ---- */
+  if(L.Browser.mobile){
+    maps.forEach(function(m){
+      m.dragging.disable();
+      var box=m.getContainer().parentNode,
+          lock=document.createElement('div');
+      lock.className='lock on';
+      lock.innerHTML='<span>タップして地図を操作</span>';
+      box.appendChild(lock);
+      lock.addEventListener('click',function(){
+        maps.forEach(function(o){ o.dragging.disable(); });      /* 一度に触れるのは1枚 */
+        document.querySelectorAll('.lock').forEach(function(l){ l.classList.add('on'); });
+        m.dragging.enable();
+        lock.classList.remove('on');
+      });
+    });
+    /* 地図の外を触ったら全部ロックに戻す */
+    document.addEventListener('pointerdown',function(e){
+      if(e.target.closest('.mapbox')) return;
+      maps.forEach(function(m){ m.dragging.disable(); });
+      document.querySelectorAll('.lock').forEach(function(l){ l.classList.add('on'); });
+    },true);
+  }
+
+  /* ---- tabs ---- */
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  function select(t,focus){
+    tabs.forEach(function(o){
+      var s=(o===t);
+      o.setAttribute('aria-selected',s?'true':'false');
+      o.tabIndex=s?0:-1;                                          /* roving tabindex */
+      document.getElementById(o.getAttribute('aria-controls')).hidden=!s;
+    });
+    if(focus) t.focus();
+    /* 非表示中はサイズ 0 で描画されるので、表示に戻したら測り直す */
+    setTimeout(function(){maps.forEach(function(m){m.invalidateSize();});},60);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabs.forEach(function(t,i){
+    t.addEventListener('click',function(){select(t,false);});
+    t.addEventListener('keydown',function(e){
+      var d = e.key==='ArrowRight'?1 : e.key==='ArrowLeft'?-1 : 0;
+      if(d){ e.preventDefault(); select(tabs[(i+d+tabs.length)%tabs.length],true); }
+      else if(e.key==='Home'){ e.preventDefault(); select(tabs[0],true); }
+      else if(e.key==='End'){ e.preventDefault(); select(tabs[tabs.length-1],true); }
+    });
+  });
+  setTimeout(function(){maps.forEach(function(m){m.invalidateSize();});},250);
+})();
+</script>
+</body>
+</html>

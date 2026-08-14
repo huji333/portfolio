@@ -56,6 +56,10 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: '/todo', destination: '/bucket-list', permanent: true }];
   },
+  // public/ の静的 HTML を拡張子なしで見せる。/europe は一時公開の旅程ページ。
+  async rewrites() {
+    return [{ source: '/europe', destination: '/europe.html' }];
+  },
 };
 
 export default nextConfig;
