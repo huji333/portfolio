@@ -83,11 +83,17 @@ export default function BucketListApp({ initialItems, initialFetchError }: Bucke
   // マウント後に device_uuid 付きで取り直し、liked フラグを反映する
   useEffect(() => {
     let cancelled = false;
-    fetchBucketListItems({ deviceUuid: getDeviceUuid() }).then((result) => {
-      if (cancelled || result.error) return;
-      setItems(result.items);
-      setFetchError(false);
-    });
+    fetchBucketListItems({ deviceUuid: getDeviceUuid() })
+      .then((result) => {
+        if (cancelled || result.error) return;
+        setItems(result.items);
+        setFetchError(false);
+      })
+      .catch((error: unknown) => {
+        // 握りつぶさず必ず残す。items が空のときだけエラー UI が出る（下の分岐参照）
+        console.error('bucket list の再取得に失敗しました', error);
+        if (!cancelled) setFetchError(true);
+      });
     return () => {
       cancelled = true;
     };

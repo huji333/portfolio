@@ -34,7 +34,7 @@ export type BucketListItemType = {
 export type ProjectType = {
   id: number;
   title: string;
-  link: string;
+  link: string | null;
   description: string | null;
   tags: string[];
   file: string | null;

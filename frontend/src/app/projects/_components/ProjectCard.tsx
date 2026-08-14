@@ -41,7 +41,6 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             fill
             sizes="(min-width: 768px) 33vw, 100vw"
             className="object-contain object-center"
-            priority={false}
             onError={handleError}
           />
         ) : (
@@ -78,13 +77,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     </>
   );
 
-  const isSafeLink =
-    project.link.startsWith('https://') || project.link.startsWith('http://');
+  // ローカル const に受けてから判定する。project.link のままだと TS が
+  // isSafeLink 経由の絞り込みを href まで伝播できず string | null が残る
+  const link = project.link;
+  const isSafeLink = link !== null && (link.startsWith('https://') || link.startsWith('http://'));
 
   if (isSafeLink) {
     return (
       <a
-        href={project.link}
+        href={link}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Open ${project.title} in a new tab`}

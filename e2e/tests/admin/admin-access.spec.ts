@@ -25,7 +25,8 @@ test.describe('Admin Access', () => {
 
     // Login as guest
     const guestEmail = process.env.E2E_GUEST_EMAIL ?? 'guest@example.com';
-    const guestPassword = process.env.E2E_GUEST_PASSWORD ?? 'password123';
+    const guestPassword = process.env.E2E_GUEST_PASSWORD;
+    if (!guestPassword) throw new Error('E2E_GUEST_PASSWORD is required');
     await page.goto('/users/sign_in');
     await page.getByRole('textbox', { name: 'Email' }).fill(guestEmail);
     await page.getByRole('textbox', { name: 'Password' }).fill(guestPassword);

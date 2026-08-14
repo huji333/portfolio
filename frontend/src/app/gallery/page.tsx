@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '../_components/SiteHeader';
 import GalleryApp from './_components/GalleryApp';
-import { fetchCategories } from '@/utils/categoryApi';
-import { fetchImages } from '@/utils/imageApi';
+import { fetchCategories, CATEGORY_REVALIDATE_SECONDS } from '@/utils/categoryApi';
+import { fetchImages, IMAGE_REVALIDATE_SECONDS } from '@/utils/imageApi';
 
 const description = '藤井駆陸が撮影した写真作品のギャラリー。フィールドワークの記録から日常のスナップまで、カテゴリ別に閲覧できます。';
 
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const [categoriesResult, imagesResult] = await Promise.all([
-    fetchCategories({ fetchInit: { next: { revalidate: 300 } } }),
-    fetchImages({ fetchInit: { next: { revalidate: 120 } } }),
+    fetchCategories({ fetchInit: { next: { revalidate: CATEGORY_REVALIDATE_SECONDS } } }),
+    fetchImages({ fetchInit: { next: { revalidate: IMAGE_REVALIDATE_SECONDS } } }),
   ]);
 
   return (

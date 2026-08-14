@@ -29,8 +29,18 @@ RUN bundle install && \
 
 COPY . .
 
+# assets:precompile は RAILS_ENV=production で boot するため、本番で fail-fast する
+# 設定（cdn.rb / cors.rb の ENV.fetch、storage.yml の s3_prod）がすべて評価される。
+# ビルド時には実際の値を渡せないので、ここではダミーを与えて boot だけ通す。
+# 値の検証は実行時（コンテナ起動時）の同じ ENV.fetch が担う。
 RUN bundle exec bootsnap precompile app/ lib/ && \
-    SECRET_KEY_BASE_DUMMY=1 CLOUDFRONT_BASE_URL=https://dummy ./bin/rails assets:precompile
+    SECRET_KEY_BASE_DUMMY=1 \
+    CLOUDFRONT_BASE_URL=https://dummy \
+    FRONTEND_ORIGIN=https://dummy \
+    AWS_ACCESS_KEY_ID=dummy \
+    AWS_SECRET_ACCESS_KEY=dummy \
+    AWS_BUCKET=dummy-bucket \
+    ./bin/rails assets:precompile
 
 
 # Final stage for app image
