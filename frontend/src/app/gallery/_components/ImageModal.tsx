@@ -143,7 +143,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       {/* Close button */}
       <button
         type="button"
-        aria-label="Close"
+        aria-label="閉じる"
         className="absolute top-4 right-4 text-3xl text-white cursor-pointer select-none"
         onClick={(event) => {
           event.stopPropagation();
@@ -157,7 +157,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       {hasPrevious && (
         <button
           type="button"
-          aria-label="Previous"
+          aria-label="前の画像"
           className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 flex items-center justify-center cursor-pointer group"
           onClick={(event) => {
             event.stopPropagation();
@@ -172,7 +172,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       {hasNext && (
         <button
           type="button"
-          aria-label="Next"
+          aria-label="次の画像"
           className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 flex items-center justify-center cursor-pointer group"
           onClick={(event) => {
             event.stopPropagation();
