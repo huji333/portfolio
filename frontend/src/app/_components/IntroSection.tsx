@@ -65,7 +65,7 @@ export default function IntroSection() {
                   key={label}
                   href={href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-base px-4 py-2 text-sm font-medium text-foreground transition hover:-translate-y-0.5 hover:border-accent hover:text-accent"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-light/40 text-accent">

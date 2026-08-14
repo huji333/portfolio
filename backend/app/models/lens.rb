@@ -9,7 +9,7 @@ class Lens < ApplicationRecord
   def self.resolve_from_exif(exif_name)
     return nil if exif_name.blank?
 
-    find_or_create_by!(exif_name: exif_name) { |lens| lens.name = exif_name }
+    create_or_find_by!(exif_name: exif_name) { |lens| lens.name = exif_name }
   end
 
   # EXIF 自動生成のまま表示名を整えていない機材を「未整備」とする。

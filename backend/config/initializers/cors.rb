@@ -1,6 +1,6 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins ENV['FRONTEND_ORIGIN'] || "http://localhost:3002"
+    origins Rails.env.production? ? ENV.fetch('FRONTEND_ORIGIN') : (ENV['FRONTEND_ORIGIN'] || "http://localhost:3002")
     resource "/api/*",
              headers: %w[Content-Type Accept Authorization],
              # /api 配下は書き込みエンドポイント（いいね等）を含むため GET 系以外も許可

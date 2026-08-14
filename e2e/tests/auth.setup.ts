@@ -5,7 +5,8 @@ const authFile = path.join(__dirname, '..', '.auth', 'admin.json');
 
 setup('authenticate as admin', async ({ page }) => {
   const email = process.env.E2E_ADMIN_EMAIL ?? 'admin@example.com';
-  const password = process.env.E2E_ADMIN_PASSWORD ?? 'password123';
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  if (!password) throw new Error('E2E_ADMIN_PASSWORD is required');
 
   await page.goto('/users/sign_in');
 

@@ -9,7 +9,7 @@ import { useIsClient } from '@/hooks/useIsClient';
 const FOCUSABLE_SELECTORS =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-type Props = {
+type ImageModalProps = {
   image: ImageType | null;
   onClose: () => void;
   onNext: () => void;
@@ -18,7 +18,7 @@ type Props = {
   hasPrevious: boolean;
 };
 
-export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext, hasPrevious }: Props) {
+export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext, hasPrevious }: ImageModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -128,6 +128,19 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
   const displayWidth = typeof image.width === 'number' && image.width > 0 ? image.width : 1600;
   const displayHeight = typeof image.height === 'number' && image.height > 0 ? image.height : 1066;
 
+  // 不正な日付文字列を new Date に渡すと Invalid Date になり "Invalid Date" が表示される
+  const takenAt = image.taken_at ? new Date(image.taken_at) : null;
+  const takenAtLabel =
+    takenAt && !Number.isNaN(takenAt.getTime())
+      ? takenAt.toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : null;
+
   const modalContent = (
     // Overlay
     <div
@@ -143,7 +156,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       {/* Close button */}
       <button
         type="button"
-        aria-label="Close"
+        aria-label="閉じる"
         className="absolute top-4 right-4 text-3xl text-white cursor-pointer select-none"
         onClick={(event) => {
           event.stopPropagation();
@@ -157,7 +170,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       {hasPrevious && (
         <button
           type="button"
-          aria-label="Previous"
+          aria-label="前の画像"
           className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 flex items-center justify-center cursor-pointer group"
           onClick={(event) => {
             event.stopPropagation();
@@ -172,7 +185,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
       {hasNext && (
         <button
           type="button"
-          aria-label="Next"
+          aria-label="次の画像"
           className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 flex items-center justify-center cursor-pointer group"
           onClick={(event) => {
             event.stopPropagation();
@@ -204,7 +217,6 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
               height={displayHeight}
               sizes="(min-width: 1024px) 60vw, 90vw"
               className="h-auto max-h-[70vh] w-auto object-contain"
-              priority={false}
               onError={handleImgError}
             />
           )}
@@ -223,17 +235,7 @@ export default function ImageModal({ image, onClose, onNext, onPrevious, hasNext
           <div className="flex flex-wrap gap-4 text-xs text-gray-500">
             {image.camera_name && <span>Camera: {image.camera_name}</span>}
             {image.lens_name && <span>Lens: {image.lens_name}</span>}
-            {image.taken_at && (
-              <span>
-                {new Date(image.taken_at).toLocaleString('ja-JP', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-            )}
+            {takenAtLabel && <span>{takenAtLabel}</span>}
           </div>
         </div>
       </div>

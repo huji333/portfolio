@@ -142,7 +142,7 @@ export default function ImageGrid({
   }, [hasMore, onLoadMore]);
 
   if (isLoading) {
-    return <Loading label="Loading images..." className="py-20" />;
+    return <Loading label="読み込み中..." className="py-20" />;
   }
 
   const isClickable = Boolean(onFocus);
@@ -202,7 +202,7 @@ export default function ImageGrid({
       </div>
       {hasMore && (
         <div ref={sentinelRef} className="flex justify-center py-8">
-          {isLoadingMore && <Loading label="Loading more..." />}
+          {isLoadingMore && <Loading label="追加読み込み中..." />}
         </div>
       )}
     </>
