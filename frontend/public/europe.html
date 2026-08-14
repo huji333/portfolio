@@ -18,14 +18,16 @@
     --bg:#faf9f7; --panel:#fff; --ink:#1c1b19; --ink2:#5f5a52; --ink3:#8b857b;
     --line:#e3dfd8; --accent:#a8452c;
     --warn:#8a5a00; --warn-bg:#fdf5e6;
-    --p1:#5d7396; --p2:#c2542f; --p3:#6f5a91; --p4:#3f7d5c;
+    /* フェーズ識別色。CVD 分離 ΔE 13.4 / 通常視 21.4、対背景コントラスト 3:1 以上を確認済み */
+    --p1:#3f6ea8; --p2:#c2542f; --p3:#7a4fa0; --p4:#1f7d54;
   }
   @media (prefers-color-scheme: dark){
     :root{
       --bg:#151412; --panel:#1e1d1a; --ink:#efece6; --ink2:#a8a298; --ink3:#7d776d;
       --line:#332f2a; --accent:#e69073;
       --warn:#e0b062; --warn-bg:#2a2318;
-      --p1:#93a8ca; --p2:#e88a5f; --p3:#a992c8; --p4:#6fb890;
+      /* ダークは明度を落とし直した別ステップ。単純な反転では帯を外れる */
+      --p1:#5b8ad8; --p2:#d66c2c; --p3:#a173d8; --p4:#2f9f6a;
     }
   }
   *{box-sizing:border-box}
@@ -80,6 +82,33 @@
   .kv td:first-child,.kv th:first-child{width:8.5em;padding-right:14px}
   @media(max-width:520px){ .kv td:first-child,.kv th:first-child{width:6.5em} }
 
+  /* ── 滞在の長さ／実走時間の横棒。行 = 日付・地名・バー・値 ── */
+  .chart{margin:14px 0 10px}
+  /* 地名列は最長の「ツェル・アム・ゼー」が1行に収まる幅を確保する */
+  .row{display:grid;grid-template-columns:3.4em minmax(0,9.4em) 1fr 3.6em;
+    align-items:center;gap:10px;min-height:26px}
+  .row .d{font-size:.76rem;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .row .n{font-size:.83rem;color:var(--ink);overflow-wrap:anywhere}
+  .row .v{font-size:.77rem;color:var(--ink2);font-variant-numeric:tabular-nums;text-align:right}
+  /* トラックは軸の代わり。バー本体は data-end 側だけ丸める */
+  .bar{height:10px;border-radius:0 4px 4px 0;min-width:3px}
+  .barwrap{display:flex;gap:2px}          /* セグメント間は枠線でなく 2px の地の隙間 */
+  .barwrap .bar{border-radius:0}          /* 丸めるのはデータ端＝右端だけ */
+  .barwrap .bar:last-child{border-radius:0 4px 4px 0}
+  .row:hover .bar{filter:brightness(1.08)}
+  .chart-note{font-size:.77rem;color:var(--ink3);margin:8px 0 0;line-height:1.6}
+  /* 日カードの中に置く図。地図をその日の文脈に置くための入れ物 */
+  .figure{margin:14px 0 4px}
+  .figh{font-size:.84rem;color:var(--ink2);margin:0;font-weight:600}
+  /* フェーズ色の細い帯。タイムラインと地図の色をそのまま日程に持ち込む */
+  .day{border-left:3px solid transparent;padding-left:11px}
+  .day.f1{border-left-color:var(--p1)} .day.f2{border-left-color:var(--p2)}
+  .day.f3{border-left-color:var(--p3)} .day.f4{border-left-color:var(--p4)}
+  @media(max-width:520px){
+    .row{grid-template-columns:3.1em minmax(0,6.6em) 1fr 3.2em;gap:7px}
+    .row .n{font-size:.78rem}
+  }
+
   .warn{background:var(--warn-bg);color:var(--warn);padding:11px 13px;border-radius:4px;
     font-size:.84rem;line-height:1.62;margin:0 0 18px}
   .warn b{color:inherit}
@@ -129,7 +158,7 @@
 </header>
 
 <div class="tabs" role="tablist">
-  <button class="tab" role="tab" aria-selected="true"  aria-controls="map" id="tab-map" tabindex="0">マップ</button>
+  <button class="tab" role="tab" aria-selected="true"  aria-controls="map" id="tab-map" tabindex="0">全体</button>
   <button class="tab" role="tab" aria-selected="false" aria-controls="ops" id="tab-ops" tabindex="-1">日程</button>
   <button class="tab" role="tab" aria-selected="false" aria-controls="bk"  id="tab-bk"  tabindex="-1">メモ</button>
 </div>
@@ -147,6 +176,11 @@
   <div class="mapbox"><div id="m1" class="map"></div></div>
   <p class="cap">線は駅と駅／地点と地点をつないだ経路の概略。破線は空路と日帰り往復。マーカーをタップすると内容が出ます。</p>
 
+  <h2>どこに何泊するか</h2>
+  <p class="lead">前半は腰を据えて、後半は7泊で7都市。同じ旅でも中身の密度がまるで違います。色は上の地図と同じフェーズ分けです。</p>
+  <div id="stay" class="chart"></div>
+  <p class="chart-note">全27泊。バーの長さが泊数、色がフェーズ。日付はチェックイン日です。</p>
+
   <div class="tw">
   <table>
     <thead><tr><th>期間</th><th>区間</th><th>移動</th></tr></thead>
@@ -162,33 +196,11 @@
   </table>
   </div>
 
-  <h2>コルマール（9/11 夕 – 9/12 朝）</h2>
-  <div class="mapbox"><div id="m2" class="map sm"></div></div>
-  <p class="cap">駅から旧市街の中心まで徒歩15分ほど。旧市街自体は端から端まで10分程度で、どこをどう歩いても一周してしまう規模です。</p>
-  <p class="lead">順路は決めなくていい場所です。設計しておく価値があるのは<b>入る時間帯</b>だけ。日中は観光客で埋まり、朝と夜だけ空きます。9/11 は 20時前後の日没からブルーアワー（20:40頃まで）、9/12 は 7:00–8:30。土曜なので9時を過ぎると一気に混みます。</p>
 
-  <h2>ブリューニク線（9/13）</h2>
-  <div class="mapbox"><div id="m3" class="map"></div></div>
-  <p class="cap">ルツェルン=インターラーケン・エクスプレスは毎時運行。今回はブリエンツで折り返し、インターラーケンまでは行きません。荷物はルツェルンの宿に置いたまま。</p>
 
-  <h2>レンタカー区間（9/18 – 9/24）</h2>
-  <div class="mapbox"><div id="m4" class="map"></div></div>
-  <p class="cap">実線が宿から宿への移動、破線が日帰りの往復（9/19 のミズリーナと氷河、9/22 のミッテンヴァルト）。所要は無停車の実走目安で、休憩・撮影・渋滞は含みません。</p>
 
-  <div class="tw">
-  <table>
-    <thead><tr><th>日</th><th>区間</th><th class="num">距離／実走</th><th>通行料</th></tr></thead>
-    <tbody>
-      <tr><td class="num">9/18</td><td>MXP → カステルロット</td><td class="num">約390km／4h15</td><td>伊アウトストラーダ</td></tr>
-      <tr><td class="num">9/19</td><td>カステルロット → ミズリーナ → 氷河 → コルティナ</td><td class="num">約200km／4〜5h</td><td>トレ・チーメ有料道路（行くなら）</td></tr>
-      <tr><td class="num">9/20</td><td>コルティナ → ツェル・アム・ゼー</td><td class="num">約250km／3h30</td><td>フェルバータウエルン €13</td></tr>
-      <tr><td class="num">9/21</td><td>ツェル・アム・ゼー → ハルシュタット → ザルツブルク</td><td class="num">約185km／3h15</td><td>ハルシュタット駐車 €6〜10</td></tr>
-      <tr><td class="num">9/22</td><td>ザルツブルク → ツィール（＋ミッテンヴァルト往復）</td><td class="num">約200km／2h15 ＋70km</td><td>独アウトバーン経由は無料</td></tr>
-      <tr><td class="num">9/23</td><td>ツィール → ブレンナー → ヴェローナ → マルペンサ</td><td class="num"><b>約600km／6h15</b></td><td>ブレンナー €10.50 ＋ 伊</td></tr>
-      <tr><td class="num">9/24</td><td>マルペンサ 07:00 返却 → 昼の便で NRT</td><td class="num">—</td><td>—</td></tr>
-    </tbody>
-  </table>
-  </div>
+
+
 
 </section>
 
@@ -234,6 +246,12 @@
     <div class="leg"><div class="t">17:30頃</div><div class="c"><b>Strasbourg → Colmar</b><span class="meta">TER 約30分・頻発・予約不要</span></div></div>
     <div class="leg"><div class="t">20:00〜<br>20:40</div><div class="c"><b>コルマール旧市街（日没後）</b><span class="meta">夕食を先に済ませておく</span></div></div>
     <div class="note w"><b>工事回避：</b>パリ〜バーゼルの TGV Lyria 直通は 2026/8/17〜10/29 の工事で運休・迂回・約1時間増の対象。この LGV Est（ストラスブール線）経由はその区間を踏まない。</div>
+    <div class="figure">
+    <h3 class="figh">コルマール（9/11 夕 – 9/12 朝）</h3>
+    <div class="mapbox"><div id="m2" class="map sm"></div></div>
+    <p class="cap">駅から旧市街の中心まで徒歩15分ほど。旧市街自体は端から端まで10分程度で、どこをどう歩いても一周してしまう規模です。</p>
+    <p class="lead">順路は決めなくていい場所です。設計しておく価値があるのは<b>入る時間帯</b>だけ。日中は観光客で埋まり、朝と夜だけ空きます。9/11 は 20時前後の日没からブルーアワー（20:40頃まで）、9/12 は 7:00–8:30。土曜なので9時を過ぎると一気に混みます。</p>
+    </div>
     <span class="stay">泊：コルマール</span>
   </div>
 
@@ -258,6 +276,11 @@
     <div class="leg"><div class="t">15:36頃</div><div class="c"><b>Brienz → Luzern</b><span class="meta">約1時間30分。同じ線を夕方の光でもう一度</span></div></div>
     <div class="note w"><b>蒸気とは限らない。</b>ロートホルン鉄道は日によってディーゼル運転になり、運行期間も年で動きます（おおむね6月〜10月中旬）。蒸気に乗りたいなら当年の運行日程を先に見ておくこと。</div>
     <div class="note"><b>雨天代替：</b>ブリエンツ湖の遊覧船＋木彫り博物館＋バレンベルク野外博物館。完全に崩れたらルツェルン→チューリッヒ（45分）でクンストハウス／Pavillon Le Corbusier／チューリッヒ・ヴェスト。</div>
+    <div class="figure">
+    <h3 class="figh">ブリューニク線（9/13）</h3>
+    <div class="mapbox"><div id="m3" class="map"></div></div>
+    <p class="cap">ルツェルン=インターラーケン・エクスプレスは毎時運行。今回はブリエンツで折り返し、インターラーケンまでは行きません。荷物はルツェルンの宿に置いたまま。</p>
+    </div>
     <span class="stay">泊：ルツェルン ②（13日の晩）</span>
   </div>
 
@@ -308,6 +331,29 @@
   </div>
 
   <p class="phase">レンタカー ── ドロミテ・オーストリア</p>
+
+  <h2>レンタカー区間（9/18 – 9/24）</h2>
+  <div class="mapbox"><div id="m4" class="map"></div></div>
+  <p class="cap">実線が宿から宿への移動、破線が日帰りの往復（9/19 のミズリーナと氷河、9/22 のミッテンヴァルト）。所要は無停車の実走目安で、休憩・撮影・渋滞は含みません。</p>
+
+  <h3 class="figh">1日あたりの実走時間</h3>
+  <div id="drive" class="chart"></div>
+  <p class="chart-note">無停車の目安。9/22 はミッテンヴァルト往復（片道40分）を含む。休憩・給油・撮影・渋滞は入っていません。</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>日</th><th>区間</th><th class="num">距離／実走</th><th>通行料</th></tr></thead>
+    <tbody>
+      <tr><td class="num">9/18</td><td>MXP → カステルロット</td><td class="num">約390km／4h15</td><td>伊アウトストラーダ</td></tr>
+      <tr><td class="num">9/19</td><td>カステルロット → ミズリーナ → 氷河 → コルティナ</td><td class="num">約200km／4〜5h</td><td>トレ・チーメ有料道路（行くなら）</td></tr>
+      <tr><td class="num">9/20</td><td>コルティナ → ツェル・アム・ゼー</td><td class="num">約250km／3h30</td><td>フェルバータウエルン €13</td></tr>
+      <tr><td class="num">9/21</td><td>ツェル・アム・ゼー → ハルシュタット → ザルツブルク</td><td class="num">約185km／3h15</td><td>ハルシュタット駐車 €6〜10</td></tr>
+      <tr><td class="num">9/22</td><td>ザルツブルク → ツィール（＋ミッテンヴァルト往復）</td><td class="num">約200km／2h15<br>＋往復70km／1h20</td><td>独アウトバーン経由は無料</td></tr>
+      <tr><td class="num">9/23</td><td>ツィール → ブレンナー → ヴェローナ → マルペンサ</td><td class="num"><b>約600km／6h15</b></td><td>ブレンナー €10.50 ＋ 伊</td></tr>
+      <tr><td class="num">9/24</td><td>マルペンサ 07:00 返却 → 昼の便で NRT</td><td class="num">—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
 
   <div class="day">
     <div class="day-h"><span class="date">9/18</span><span class="dow">金</span><span class="route">MXP 07:00 受取 → カステルロット</span></div>
@@ -439,6 +485,18 @@
   function line(m,pts,color,w,dash){
     L.polyline(pts,{color:color,weight:w||4,opacity:.85,dashArray:dash}).addTo(m);
   }
+  /* 隠れたタブの中の地図は幅 0 で初期化されるため、fitBounds がそのまま効かない。
+     表示に戻って実寸が付いた時点で測り直せるよう、範囲を持たせておく。 */
+  function fit(m,bounds,pad){
+    m._fit=function(){ m.fitBounds(bounds,{padding:pad}); };
+    m._fit();
+  }
+  function remeasure(){
+    maps.forEach(function(m){
+      m.invalidateSize();
+      if(m._fit && !m._fitted && m.getContainer().offsetWidth>0){ m._fit(); m._fitted=true; }
+    });
+  }
 
   var LON=[51.5074,-0.1278], OXF=[51.7520,-1.2577], MRS=[43.2965,5.3698],
       LYO=[45.7640,4.8357], PAR=[48.8566,2.3522], STR=[48.5850,7.7340],
@@ -495,7 +553,7 @@
   dot(m1,HAL,c('--p4'),'<b>ハルシュタット</b><br>9/21 終日',7);
   dot(m1,SAL,c('--p4'),'<b>ザルツブルク</b><br>9/21 泊',7);
   dot(m1,ZRL,c('--p4'),'<b>ツィール</b><br>9/22 泊（ミッテンヴァルトは日帰り）',7);
-  m1.fitBounds([[42.9,-1.6],[52.2,14.0]],{padding:[10,10]});
+  fit(m1,[[42.9,-1.6],[52.2,14.0]],[10,10]);
 
   /* ---- 2. Colmar ---- */
   var m2=L.map('m2',{scrollWheelZoom:false}).setView([48.0768,7.3540],15);
@@ -525,7 +583,7 @@
   dot(m3,BRZ,c('--accent'),'<b>ブリエンツ</b> 10:36着<br>駅・船着場・登山鉄道が隣接',9);
   dot(m3,ROTH,c('--accent'),'<b>ロートホルン 2244m</b><br>1892年製 蒸気ラック式・片道約30分',8);
   dot(m3,INTO,c('--ink3'),'<b>インターラーケン東駅</b><br>今回は行かない',5);
-  m3.fitBounds([[46.66,7.84],[47.08,8.30]],{padding:[14,14]});
+  fit(m3,[[46.66,7.84],[47.08,8.30]],[14,14]);
 
   /* ---- 4. drive ---- */
   var m4=L.map('m4',{scrollWheelZoom:false});
@@ -553,9 +611,65 @@
   dot(m4,MIT,c('--p4'),'<b>ミッテンヴァルト</b><br>ツィールから約40分・日帰り',6);
   dot(m4,BRE,c('--p4'),'<b>ブレンナー峠</b><br>9/23 通過。A13 €10.50',5);
   dot(m4,LNZ,c('--p4'),'<b>リエンツ</b><br>グロースグロックナー経由に振る分岐点',5);
-  m4.fitBounds([[45.3,8.4],[48.1,13.9]],{padding:[12,12]});
+  fit(m4,[[45.3,8.4],[48.1,13.9]],[12,12]);
 
   var maps=[m1,m2,m3,m4];
+
+  /* ---- 横棒チャート ----------------------------------------------------
+     行 = 日付・地名・バー・値。値は必ず直接ラベルで出す（tooltip 頼みにしない）。
+     どちらも下に等価な表があるので、色だけが情報を担う場面は無い。          */
+  function chart(el,rows,max,fmt){
+    var f=document.createDocumentFragment();
+    rows.forEach(function(r){
+      var row=document.createElement('div'); row.className='row';
+      var total=r.seg.reduce(function(a,b){return a+b;},0);
+      row.innerHTML='<span class="d">'+r.date+'</span><span class="n">'+r.name+'</span>';
+      var wrap=document.createElement('div'); wrap.className='barwrap';
+      wrap.style.width=(total/max*100)+'%';
+      r.seg.forEach(function(v){
+        var b=document.createElement('div'); b.className='bar';
+        b.style.background='var(--p'+r.p+')';
+        b.style.flex=v;                       /* セグメント比率。隙間は CSS gap の 2px */
+        wrap.appendChild(b);
+      });
+      row.appendChild(wrap);
+      row.insertAdjacentHTML('beforeend','<span class="v">'+fmt(total)+'</span>');
+      row.title=r.name+' — '+fmt(total);
+      f.appendChild(row);
+    });
+    el.appendChild(f);
+  }
+
+  /* 滞在（泊数）。合計27泊 */
+  chart(document.getElementById('stay'),[
+    {date:'8/28',name:'ロンドン',seg:[7],p:1},   {date:'9/4', name:'マルセイユ',seg:[2],p:1},
+    {date:'9/6', name:'リヨン',seg:[1],p:1},     {date:'9/7', name:'パリ',seg:[4],p:1},
+    {date:'9/11',name:'コルマール',seg:[1],p:2}, {date:'9/12',name:'ルツェルン',seg:[2],p:2},
+    {date:'9/14',name:'ボローニャ',seg:[1],p:3}, {date:'9/15',name:'ベネチア',seg:[2],p:3},
+    {date:'9/17',name:'ミラノ',seg:[1],p:3},     {date:'9/18',name:'カステルロット',seg:[1],p:4},
+    {date:'9/19',name:'コルティナ',seg:[1],p:4}, {date:'9/20',name:'ツェル・アム・ゼー',seg:[1],p:4},
+    {date:'9/21',name:'ザルツブルク',seg:[1],p:4},{date:'9/22',name:'ツィール',seg:[1],p:4},
+    {date:'9/23',name:'マルペンサ周辺',seg:[1],p:4}
+  ],7,function(n){return n+'泊';});
+
+  /* 実走時間。9/22 だけ 本移動＋日帰り往復 の2本立て */
+  chart(document.getElementById('drive'),[
+    {date:'9/18',name:'→ カステルロット',seg:[4.25],p:4},
+    {date:'9/19',name:'ミズリーナ・氷河',seg:[4.5],p:4},
+    {date:'9/20',name:'→ ツェル・アム・ゼー',seg:[3.5],p:4},
+    {date:'9/21',name:'→ ザルツブルク',seg:[3.25],p:4},
+    {date:'9/22',name:'→ ツィール',seg:[2.25,1.33],p:4},
+    {date:'9/23',name:'→ マルペンサ',seg:[6.25],p:4}
+  ],6.25,function(h){
+    var m=Math.round(h*60); return Math.floor(m/60)+'h'+('0'+(m%60)).slice(-2);
+  });
+
+  /* ---- 日カードにフェーズ色を配る（見出しの並び順から導く） ---- */
+  [].forEach.call(document.querySelectorAll('#ops .phase'),function(ph,i){
+    for(var n=ph.nextElementSibling; n && !n.classList.contains('phase'); n=n.nextElementSibling){
+      if(n.classList.contains('day')) n.classList.add('f'+(i+1));
+    }
+  });
 
   /* ---- touch: 地図が縦スクロールを飲み込まないよう、タップするまで pan を切る ---- */
   if(L.Browser.mobile){
@@ -592,7 +706,7 @@
     });
     if(focus) t.focus();
     /* 非表示中はサイズ 0 で描画されるので、表示に戻したら測り直す */
-    setTimeout(function(){maps.forEach(function(m){m.invalidateSize();});},60);
+    setTimeout(remeasure,60);
     window.scrollTo({top:0,behavior:'smooth'});
   }
   tabs.forEach(function(t,i){
@@ -604,7 +718,7 @@
       else if(e.key==='End'){ e.preventDefault(); select(tabs[tabs.length-1],true); }
     });
   });
-  setTimeout(function(){maps.forEach(function(m){m.invalidateSize();});},250);
+  setTimeout(remeasure,250);
 })();
 </script>
 </body>
