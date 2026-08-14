@@ -16,7 +16,7 @@ export default function MobileMenu({ navItems, styles }: MobileMenuProps) {
   const pathname = usePathname();
 
   useEffect(() => {
-    setIsOpen(false); // eslint-disable-line react-hooks/set-state-in-effect -- close menu on navigation
+    setIsOpen(false);
   }, [pathname]);
 
   const toggleMenu = () => setIsOpen((prev) => !prev);
