@@ -56,7 +56,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: '/todo', destination: '/bucket-list', permanent: true }];
   },
-  // public/ の静的 HTML を拡張子なしで見せる。/europe は一時公開の旅程ページ。
+  // 一時公開の旅程ページ 1 枚だけ。public/*.html を一般に拡張子なしで見せる規則ではない。
+  // 一時ページなので sitemap.ts にも載せていない（robots 上はクロール可）。
   async rewrites() {
     return [{ source: '/europe', destination: '/europe.html' }];
   },

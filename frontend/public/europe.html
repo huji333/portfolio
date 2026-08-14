@@ -10,24 +10,27 @@
 <meta property="og:title" content="ヨーロッパ 2026 8/28 → 9/24 行程">
 <meta property="og:description" content="ロンドン → マルセイユ → パリ ／ アルザス・スイス ／ 北イタリア ／ ドロミテ・オーストリア">
 <meta property="og:locale" content="ja_JP">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
   :root{
     --bg:#faf9f7; --panel:#fff; --ink:#1c1b19; --ink2:#5f5a52; --ink3:#8b857b;
     --line:#e3dfd8; --accent:#a8452c;
     --warn:#8a5a00; --warn-bg:#fdf5e6;
-    /* フェーズ識別色。CVD 分離 ΔE 13.4 / 通常視 21.4、対背景コントラスト 3:1 以上を確認済み */
-    --p1:#3f6ea8; --p2:#c2542f; --p3:#7a4fa0; --p4:#1f7d54;
+    /* フェーズは時間順の段階なので名義色ではなく順序ランプ。accent と同系の単一色相
+       4段で、後半ほど濃い。ordinal 検証（単調性・段差・明端コントラスト）を通してある */
+    --p1:#d9a893; --p2:#c07051; --p3:#a8452c; --p4:#71291a;
   }
   @media (prefers-color-scheme: dark){
     :root{
       --bg:#151412; --panel:#1e1d1a; --ink:#efece6; --ink2:#a8a298; --ink3:#7d776d;
       --line:#332f2a; --accent:#e69073;
       --warn:#e0b062; --warn-bg:#2a2318;
-      /* ダークは明度を落とし直した別ステップ。単純な反転では帯を外れる */
-      --p1:#5b8ad8; --p2:#d66c2c; --p3:#a173d8; --p4:#2f9f6a;
+      /* ダークは向きが逆。地から浮く明るい側を後半に割り当てる */
+      --p1:#a3502f; --p2:#cb7350; --p3:#e39a76; --p4:#f5c0a6;
     }
   }
   *{box-sizing:border-box}
@@ -64,10 +67,11 @@
   .lock.on{display:flex}
   .lock span{background:var(--panel);color:var(--ink2);border:1px solid var(--line);
     border-radius:999px;padding:5px 13px;font-size:.78rem;box-shadow:0 1px 4px rgba(0,0,0,.14)}
-  .cap{font-size:.77rem;color:var(--ink3);margin:0 0 20px;line-height:1.6}
+  .cap,.chart-note{font-size:.77rem;color:var(--ink3);line-height:1.6}
+  .cap{margin:0 0 20px}
   .legend{display:flex;flex-wrap:wrap;gap:5px 14px;margin:0 0 6px;font-size:.78rem}
   .legend span{display:flex;align-items:center;gap:5px;color:var(--ink2)}
-  .legend i{width:18px;height:3px;border-radius:2px;display:block}
+  .legend i{width:16px;height:8px;border-radius:2px;display:block}
   .leaflet-container{font:inherit;font-size:.8rem;background:var(--panel)}
 
   table{width:100%;border-collapse:collapse;font-size:.84rem;margin:6px 0 20px}
@@ -80,7 +84,6 @@
   /* 項目名／内容の2列表。1列目が細く潰れて1文字ずつ折り返すのを防ぐ */
   .kv{table-layout:fixed}
   .kv td:first-child,.kv th:first-child{width:8.5em;padding-right:14px}
-  @media(max-width:520px){ .kv td:first-child,.kv th:first-child{width:6.5em} }
 
   /* ── 滞在の長さ／実走時間の横棒。行 = 日付・地名・バー・値 ── */
   .chart{margin:14px 0 10px}
@@ -91,27 +94,15 @@
   .row .n{font-size:.83rem;color:var(--ink);overflow-wrap:anywhere}
   .row .v{font-size:.77rem;color:var(--ink2);font-variant-numeric:tabular-nums;text-align:right}
   /* トラックは軸の代わり。バー本体は data-end 側だけ丸める */
-  .bar{height:10px;border-radius:0 4px 4px 0;min-width:3px}
+  .bar{height:10px;min-width:3px}
   .barwrap{display:flex;gap:2px}          /* セグメント間は枠線でなく 2px の地の隙間 */
-  .barwrap .bar{border-radius:0}          /* 丸めるのはデータ端＝右端だけ */
-  .barwrap .bar:last-child{border-radius:0 4px 4px 0}
+  .barwrap .bar:last-child{border-radius:0 4px 4px 0}   /* 丸めるのはデータ端だけ */
   .row:hover .bar{filter:brightness(1.08)}
-  .chart-note{font-size:.77rem;color:var(--ink3);margin:8px 0 0;line-height:1.6}
-  /* 日カードの中に置く図。地図をその日の文脈に置くための入れ物 */
-  .figure{margin:14px 0 4px}
+  .chart-note{margin:8px 0 0}
   .figh{font-size:.84rem;color:var(--ink2);margin:0;font-weight:600}
-  /* フェーズ色の細い帯。タイムラインと地図の色をそのまま日程に持ち込む */
-  .day{border-left:3px solid transparent;padding-left:11px}
-  .day.f1{border-left-color:var(--p1)} .day.f2{border-left-color:var(--p2)}
-  .day.f3{border-left-color:var(--p3)} .day.f4{border-left-color:var(--p4)}
-  @media(max-width:520px){
-    .row{grid-template-columns:3.1em minmax(0,6.6em) 1fr 3.2em;gap:7px}
-    .row .n{font-size:.78rem}
-  }
 
   .warn{background:var(--warn-bg);color:var(--warn);padding:11px 13px;border-radius:4px;
     font-size:.84rem;line-height:1.62;margin:0 0 18px}
-  .warn b{color:inherit}
 
   .phase{font-size:.74rem;font-weight:700;letter-spacing:.06em;color:var(--ink3);
     margin:34px 0 0;padding-bottom:4px;border-bottom:1px solid var(--line)}
@@ -139,14 +130,21 @@
   ol.chk{list-style:decimal;padding-left:22px;margin:0 0 20px;font-size:.88rem}
   ol.chk li{margin-bottom:9px}
   ol.chk small{display:block;color:var(--ink2);font-size:.79rem;margin-top:1px}
-  ol.chk li.crit b{color:var(--warn)}
 
   footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
     font-size:.75rem;color:var(--ink3)}
   footer p{font-size:inherit}
   footer a{color:inherit}
-  @media(max-width:520px){ .t{flex:0 0 62px;font-size:.78rem} h1{font-size:1.2rem}
-    .map{height:340px} .map.sm{height:280px} .tab{font-size:.8rem} }
+  /* モバイルの上書きはこの1か所に集約する */
+  @media(max-width:520px){
+    h1{font-size:1.2rem}
+    .tab{font-size:.8rem}
+    .map{height:340px}
+    .t{flex:0 0 62px;font-size:.78rem}
+    .kv td:first-child,.kv th:first-child{width:6.5em}
+    .row{grid-template-columns:3.1em minmax(0,6.6em) 1fr 3.2em;gap:7px}
+    .row .n{font-size:.78rem}
+  }
 </style>
 </head>
 <body>
@@ -190,7 +188,7 @@
       <tr><td class="num"><b>9/6–9/7</b></td><td>リヨン</td><td>1泊。TGV 約1時間40分</td></tr>
       <tr><td class="num"><b>9/7–9/11</b></td><td>パリ</td><td>4泊。TGV 約2時間</td></tr>
       <tr><td class="num"><b>9/11–9/14</b></td><td>ストラスブール → コルマール → ルツェルン</td><td>TGV 1時間46分＋TER・SBB。コルマール1泊・ルツェルン2泊</td></tr>
-      <tr><td class="num"><b>9/14–9/17</b></td><td>ボローニャ → ベネチア → ミラノ</td><td>9/14 夕方 合流。EC＋Frecciarossa</td></tr>
+      <tr><td class="num"><b>9/14–9/17</b></td><td>ボローニャ → ベネチア → ミラノ</td><td>9/14 夕方 合流。ボローニャ1泊・ベネチア1泊・ミラノ2泊</td></tr>
       <tr><td class="num"><b>9/18–9/24</b></td><td>ドロミテ → オーストリア → ミラノ</td><td>MXP 発着レンタカー</td></tr>
     </tbody>
   </table>
@@ -246,12 +244,7 @@
     <div class="leg"><div class="t">17:30頃</div><div class="c"><b>Strasbourg → Colmar</b><span class="meta">TER 約30分・頻発・予約不要</span></div></div>
     <div class="leg"><div class="t">20:00〜<br>20:40</div><div class="c"><b>コルマール旧市街（日没後）</b><span class="meta">夕食を先に済ませておく</span></div></div>
     <div class="note w"><b>工事回避：</b>パリ〜バーゼルの TGV Lyria 直通は 2026/8/17〜10/29 の工事で運休・迂回・約1時間増の対象。この LGV Est（ストラスブール線）経由はその区間を踏まない。</div>
-    <div class="figure">
-    <h3 class="figh">コルマール（9/11 夕 – 9/12 朝）</h3>
-    <div class="mapbox"><div id="m2" class="map sm"></div></div>
-    <p class="cap">駅から旧市街の中心まで徒歩15分ほど。旧市街自体は端から端まで10分程度で、どこをどう歩いても一周してしまう規模です。</p>
-    <p class="lead">順路は決めなくていい場所です。設計しておく価値があるのは<b>入る時間帯</b>だけ。日中は観光客で埋まり、朝と夜だけ空きます。9/11 は 20時前後の日没からブルーアワー（20:40頃まで）、9/12 は 7:00–8:30。土曜なので9時を過ぎると一気に混みます。</p>
-    </div>
+    <div class="note">旧市街は端から端まで徒歩10分。どう歩いても一周してしまうので、決めるべきは順路ではなく<b>入る時間帯</b>だけです。日中は観光客で埋まり、空くのは日没後と朝。9/11 は 20時前後の日没からブルーアワー（20:40頃まで）、9/12 は 7:00–8:30。土曜なので9時を過ぎると一気に混みます。</div>
     <span class="stay">泊：コルマール</span>
   </div>
 
@@ -276,11 +269,7 @@
     <div class="leg"><div class="t">15:36頃</div><div class="c"><b>Brienz → Luzern</b><span class="meta">約1時間30分。同じ線を夕方の光でもう一度</span></div></div>
     <div class="note w"><b>蒸気とは限らない。</b>ロートホルン鉄道は日によってディーゼル運転になり、運行期間も年で動きます（おおむね6月〜10月中旬）。蒸気に乗りたいなら当年の運行日程を先に見ておくこと。</div>
     <div class="note"><b>雨天代替：</b>ブリエンツ湖の遊覧船＋木彫り博物館＋バレンベルク野外博物館。完全に崩れたらルツェルン→チューリッヒ（45分）でクンストハウス／Pavillon Le Corbusier／チューリッヒ・ヴェスト。</div>
-    <div class="figure">
-    <h3 class="figh">ブリューニク線（9/13）</h3>
-    <div class="mapbox"><div id="m3" class="map"></div></div>
-    <p class="cap">ルツェルン=インターラーケン・エクスプレスは毎時運行。今回はブリエンツで折り返し、インターラーケンまでは行きません。荷物はルツェルンの宿に置いたまま。</p>
-    </div>
+    <div class="note">この線は毎時運行なので、途中下車の組み替えは当日でも効きます。今回はブリエンツで折り返し、インターラーケンまでは行きません。</div>
     <span class="stay">泊：ルツェルン ②（13日の晩）</span>
   </div>
 
@@ -314,20 +303,23 @@
     <div class="day-h"><span class="date">9/15</span><span class="dow">火</span><span class="route">ボローニャ → ベネチア（単独先行）</span></div>
     <div class="leg"><div class="t">06:30〜<br>07:00台</div><div class="c"><b>Bologna Centrale 発</b><span class="meta">Frecciarossa / Italo 約1時間30分</span></div></div>
     <div class="leg"><div class="t">08:00〜<br>08:30</div><div class="c"><b>Venezia S. Lucia 着</b><span class="meta">宿または駅の荷物預けへ。ビエンナーレを朝から。会場は 10:00／11:00 開場</span></div></div>
-    <div class="note">グループと同じ電車で動かない。これがビエンナーレ初日を丸ごと確保する方法。</div>
-    <span class="stay">泊：ベネチア</span>
+    <div class="note">グループと同じ電車で動かない。ベネチアは1泊しかないので、一本早く出るぶんがそのままビエンナーレの時間になります。</div>
+    <span class="stay">泊：ベネチア（9/15 の1泊のみ）</span>
   </div>
 
   <div class="day">
-    <div class="day-h"><span class="date">9/16</span><span class="dow">水</span><span class="route">ベネチア ── ビエンナーレ2日目</span></div>
-    <span class="stay">泊：ベネチア</span>
+    <div class="day-h"><span class="date">9/16</span><span class="dow">水</span><span class="route">ベネチア → ミラノ</span></div>
+    <div class="leg"><div class="t">午前</div><div class="c"><b>ビエンナーレの続き</b><span class="meta">前日に回りきれなかった会場を午前で。荷物は駅かホテルに預けたまま</span></div></div>
+    <div class="leg"><div class="t">午後</div><div class="c"><b>Venezia → Milano</b><span class="meta">Frecciarossa 約2時間30分</span></div></div>
+    <div class="note">ベネチアが1泊になったぶん、ビエンナーレは<b>9/15 終日＋9/16 午前</b>の実質1日半。会場を絞って回る前提で考えておくこと。</div>
+    <span class="stay">泊：ミラノ（2連泊の1泊目）</span>
   </div>
 
   <div class="day">
-    <div class="day-h"><span class="date">9/17</span><span class="dow">木</span><span class="route">ベネチア → ミラノ</span></div>
-    <div class="leg"><div class="t">—</div><div class="c"><b>Venezia → Milano</b><span class="meta">Frecciarossa 約2時間30分</span></div></div>
+    <div class="day-h"><span class="date">9/17</span><span class="dow">木</span><span class="route">ミラノ 終日</span></div>
+    <div class="leg"><div class="t">終日</div><div class="c"><b>ミラノ</b><span class="meta">移動のない唯一の中日。ドゥオモ／ブレラ／ナヴィリオ。翌日からの長距離ドライブ前の休息日にもなる</span></div></div>
     <div class="note w"><b>翌朝 07:00 に MXP でレンタカー受取。</b>ミラノ中心部からマルペンサは列車で約50分。始発の Malpensa Express は 05:25 前後なので、5人分の荷物を持って動くなら<b>マルペンサ周辺に泊まる方が確実</b>。</div>
-    <span class="stay">泊：ミラノ</span>
+    <span class="stay">泊：ミラノ（2連泊の2泊目）</span>
   </div>
 
   <p class="phase">レンタカー ── ドロミテ・オーストリア</p>
@@ -345,7 +337,7 @@
     <thead><tr><th>日</th><th>区間</th><th class="num">距離／実走</th><th>通行料</th></tr></thead>
     <tbody>
       <tr><td class="num">9/18</td><td>MXP → カステルロット</td><td class="num">約390km／4h15</td><td>伊アウトストラーダ</td></tr>
-      <tr><td class="num">9/19</td><td>カステルロット → ミズリーナ → 氷河 → コルティナ</td><td class="num">約200km／4〜5h</td><td>トレ・チーメ有料道路（行くなら）</td></tr>
+      <tr><td class="num">9/19</td><td>カステルロット → ミズリーナ → 氷河 → コルティナ</td><td class="num">約200km／4h30</td><td>トレ・チーメ有料道路（行くなら）</td></tr>
       <tr><td class="num">9/20</td><td>コルティナ → ツェル・アム・ゼー</td><td class="num">約250km／3h30</td><td>フェルバータウエルン €13</td></tr>
       <tr><td class="num">9/21</td><td>ツェル・アム・ゼー → ハルシュタット → ザルツブルク</td><td class="num">約185km／3h15</td><td>ハルシュタット駐車 €6〜10</td></tr>
       <tr><td class="num">9/22</td><td>ザルツブルク → ツィール（＋ミッテンヴァルト往復）</td><td class="num">約200km／2h15<br>＋往復70km／1h20</td><td>独アウトバーン経由は無料</td></tr>
@@ -368,7 +360,7 @@
     <div class="leg"><div class="t">午前</div><div class="c"><b>カステルロット → ミズリーナ湖</b><span class="meta">約2時間（ブレッサノーネ → ヴァル・プステリア → ドッビアーコ経由）</span></div></div>
     <div class="leg"><div class="t">午後</div><div class="c"><b>ミズリーナ → コルティナ → 氷河（マルモラーダ方面）</b><span class="meta">コルティナからファルツァーレゴ峠経由で約1時間15分</span></div></div>
     <div class="leg"><div class="t">夕</div><div class="c"><b>コルティナへ戻る</b><span class="meta">約1時間15分</span></div></div>
-    <div class="note w"><b>この旅で一番きつい日。</b>ミズリーナはコルティナの<b>北東</b>、マルモラーダは<b>南西</b>で、方角が真逆です。峠道を1日で往復することになり、実走4〜5時間。<b>どちらかを削るか、氷河を9/20の朝に回す</b>方が現実的。ミズリーナからトレ・チーメへ上がる道は別料金の有料道路なので、行くなら当年の料金と開通状況を確認。</div>
+    <div class="note w"><b>この旅で一番きつい日。</b>ミズリーナはコルティナの<b>北東</b>、マルモラーダは<b>南西</b>で、方角が真逆です。峠道を1日で往復することになり、実走4時間半。<b>どちらかを削るか、氷河を9/20の朝に回す</b>方が現実的。ミズリーナからトレ・チーメへ上がる道は別料金の有料道路なので、行くなら当年の料金と開通状況を確認。</div>
     <span class="stay">泊：コルティナ</span>
   </div>
 
@@ -459,7 +451,7 @@
     <li><b>コルマールは順路より時間帯</b><small>旧市街は端から端まで徒歩10分。どう歩いても一周してしまうので、決めるべきは「いつ入るか」だけ。日中は観光客で埋まり、空くのは日没後と朝8時半まで。</small></li>
     <li><b>ブリューニク線は進行方向の右側</b><small>マイリンゲンで機関車が前後に付け替わるので、行きも帰りも右が正解になる。</small></li>
     <li><b>スイスの日曜は商店が全休</b><small>9/13 が日曜なので、買い出しがあるなら 9/12 のうちに。</small></li>
-    <li><b>ベネチアはグループと同じ電車で動かない</b><small>9/15 に一本早く出るだけで、ビエンナーレの初日が丸ごと手に入る。</small></li>
+    <li><b>ベネチアはグループと同じ電車で動かない</b><small>滞在は1泊だけ。9/15 に一本早く出るかどうかで、ビエンナーレに使える時間が半日変わる。</small></li>
     <li><b>ドロミテの峠道は距離より時間で見る</b><small>9/19 の 200km は実走4〜5時間。平地の感覚で計画すると必ず溢れる。</small></li>
     <li><b>マルペンサ返却の前夜は空港周辺に</b><small>ミラノ中心部からだと始発の Malpensa Express が 05:25 前後。荷物を持って動く朝としては厳しい。</small></li>
   </ol>
@@ -476,7 +468,9 @@
 (function(){
   var css=getComputedStyle(document.documentElement);
   function c(n){return css.getPropertyValue(n).trim();}
-  var TILE='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  /* 74 回の getComputedStyle 読みが DOM 挿入と交互に走っていたので先に確定させる */
+  var P1=P1, P2=P2, P3=P3, P4=P4, ACC=ACC;
+  var TILE='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       ATTR='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
   function dot(m,p,color,label,size){
     L.circleMarker(p,{radius:size||6,color:'#fff',weight:2,fillColor:color,fillOpacity:1})
@@ -485,18 +479,34 @@
   function line(m,pts,color,w,dash){
     L.polyline(pts,{color:color,weight:w||4,opacity:.85,dashArray:dash}).addTo(m);
   }
-  /* 隠れたタブの中の地図は幅 0 で初期化されるため、fitBounds がそのまま効かない。
-     表示に戻って実寸が付いた時点で測り直せるよう、範囲を持たせておく。 */
-  function fit(m,bounds,pad){
-    m._fit=function(){ m.fitBounds(bounds,{padding:pad}); };
-    m._fit();
-  }
-  function remeasure(){
-    maps.forEach(function(m){
+  /* 隠れたタブの中の地図は幅 0 で初期化されるので fitBounds がそのまま効かない。
+     「箱が実寸を持った」瞬間をタイマーで当てにいかず ResizeObserver で観測する。
+     これでタブ切替・端末回転・ウィンドウリサイズが同じ1本の経路になる。
+     生成と登録を1つにしておかないと、地図を足したとき maps への追加を忘れて
+     隠れたタブの中で灰色のまま出る（このページが一度踏んだ罠）。 */
+  var maps=[];
+  function makeMap(id,bounds,pad){
+    var m=L.map(id,{scrollWheelZoom:false});
+    L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m);
+    maps.push(m);
+    /* 生成時に必ず一度張る。ビューが無い Leaflet はタイルもレイヤも描かないので、
+       これを「実寸が付いてから」に後回しにすると地図が空のまま出る。 */
+    m.fitBounds(bounds,{padding:pad});
+    /* ただし隠れたタブの中では幅 0 で計算されてズームが振り切れる。実寸が付いたら
+       張り直す。ユーザーが動かしたあとは尊重して触らない。
+       ResizeObserver は初回観測が発火しないことがあるため、これは「後から効く」
+       補助であって初期化の手段ではない（タブ切替は下の remeasure が拾う）。 */
+    var pristine=true;
+    m.on('dragstart zoomstart',function(){ pristine=false; });
+    m.__refit=function(){
+      if(!m.getContainer().offsetWidth) return;
       m.invalidateSize();
-      if(m._fit && !m._fitted && m.getContainer().offsetWidth>0){ m._fit(); m._fitted=true; }
-    });
+      if(pristine){ m.fitBounds(bounds,{padding:pad}); pristine=true; }
+    };
+    new ResizeObserver(m.__refit).observe(m.getContainer());   /* 端末回転・窓リサイズ */
+    return m;
   }
+  function remeasure(){ maps.forEach(function(m){ m.__refit(); }); }
 
   var LON=[51.5074,-0.1278], OXF=[51.7520,-1.2577], MRS=[43.2965,5.3698],
       LYO=[45.7640,4.8357], PAR=[48.8566,2.3522], STR=[48.5850,7.7340],
@@ -519,125 +529,79 @@
       BRE=[47.0000,11.5100];
 
   /* ---- 1. overview ---- */
-  var m1=L.map('m1',{scrollWheelZoom:false});
-  L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m1);
-  line(m1,[LON,OXF],c('--p1'),3,'5 6');
-  line(m1,[LON,MRS],c('--p1'),3,'9 8');
-  line(m1,[MRS,LYO,PAR],c('--p1'));
-  line(m1,[PAR,STR,COL,BAS,LUZ],c('--p2'));
-  line(m1,[LUZ,LUN,BRZ],c('--p2'),3,'6 7');
-  line(m1,[BRZ,LUN,LUZ],c('--p2'),3,'6 7');
-  line(m1,[LUZ,AG,BELL,LUGA,COMO,MIL,VER,MOD,BOL],c('--p3'));
-  line(m1,[BOL,FER,PAD,VEN],c('--p3'));
-  line(m1,[VEN,PAD,VER,BRS,MIL],c('--p3'),3,'4 5');
-  line(m1,[MIL,MXP,BGM,BRS,VER,TRT,BZ,CAS,BRX,BRU,DOB,MIS,CTN,LNZ,MTR,MTS,ZAS,BIS,EBN,GOS,HAL,BIS2,MON,SAL,RHL,ROS,KUF,INN,ZRL],c('--p4'));
-  line(m1,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],c('--p4'),3,'7 6');
+  var m1=makeMap('m1',[[42.9,-1.6],[52.2,14.0]],[10,10]);
+  line(m1,[LON,OXF],P1,3,'5 6');
+  line(m1,[LON,MRS],P1,3,'9 8');
+  line(m1,[MRS,LYO,PAR],P1);
+  line(m1,[PAR,STR,COL,BAS,LUZ],P2);
+  line(m1,[LUZ,LUN,BRZ],P2,3,'6 7');
+  line(m1,[LUZ,AG,BELL,LUGA,COMO,MIL,VER,MOD,BOL],P3);
+  line(m1,[BOL,FER,PAD,VEN],P3);
+  line(m1,[VEN,PAD,VER,BRS,MIL],P3,3,'4 5');
+  line(m1,[MIL,MXP,BGM,BRS,VER,TRT,BZ,CAS,BRX,BRU,DOB,MIS,CTN,LNZ,MTR,MTS,ZAS,BIS,EBN,GOS,HAL,BIS2,MON,SAL,RHL,ROS,KUF,INN,ZRL],P4);
+  line(m1,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],P4,3,'7 6');
 
-  dot(m1,LON,c('--p1'),'<b>ロンドン</b><br>8/28 14:00 着 ／ 7泊',9);
-  dot(m1,OXF,c('--p1'),'<b>オックスフォード</b><br>ロンドンから日帰り圏',5);
-  dot(m1,MRS,c('--p1'),'<b>マルセイユ</b><br>9/4 16:00 着 ／ 2泊',8);
-  dot(m1,LYO,c('--p1'),'<b>リヨン</b><br>9/6 1泊',7);
-  dot(m1,PAR,c('--p1'),'<b>パリ</b><br>9/7〜9/10 の4泊 ／ 9/11 朝発',9);
-  dot(m1,STR,c('--p2'),'<b>ストラスブール</b><br>9/11 半日',6);
-  dot(m1,COL,c('--p2'),'<b>コルマール</b><br>9/11 泊。夕景＋翌早朝',8);
-  dot(m1,LUZ,c('--p2'),'<b>ルツェルン</b><br>9/12・9/13 の2連泊',9);
-  dot(m1,BRZ,c('--p2'),'<b>ブリエンツ</b><br>9/13 ロートホルン蒸気登山鉄道',6);
-  dot(m1,MOD,c('--p3'),'<b>モデナ</b><br>9/14 フェラーリ（stretch goal）',5);
-  dot(m1,BOL,c('--p3'),'<b>ボローニャ</b><br>9/14 夕方 合流・泊',8);
-  dot(m1,VEN,c('--p3'),'<b>ベネチア</b><br>9/15・9/16 ビエンナーレ',9);
-  dot(m1,MIL,c('--p3'),'<b>ミラノ</b><br>9/17 泊',7);
-  dot(m1,MXP,c('--p4'),'<b>マルペンサ空港</b><br>9/18 07:00 レンタカー受取<br>9/24 07:00 返却・昼の便で NRT',8);
-  dot(m1,CAS,c('--p4'),'<b>カステルロット</b><br>9/18 泊',7);
-  dot(m1,CTN,c('--p4'),'<b>コルティナ</b><br>9/19 泊',7);
-  dot(m1,ZAS,c('--p4'),'<b>ツェル・アム・ゼー</b><br>9/20 泊',7);
-  dot(m1,HAL,c('--p4'),'<b>ハルシュタット</b><br>9/21 終日',7);
-  dot(m1,SAL,c('--p4'),'<b>ザルツブルク</b><br>9/21 泊',7);
-  dot(m1,ZRL,c('--p4'),'<b>ツィール</b><br>9/22 泊（ミッテンヴァルトは日帰り）',7);
-  fit(m1,[[42.9,-1.6],[52.2,14.0]],[10,10]);
-
-  /* ---- 2. Colmar ---- */
-  var m2=L.map('m2',{scrollWheelZoom:false}).setView([48.0768,7.3540],15);
-  L.tileLayer(TILE,{attribution:ATTR,maxZoom:19}).addTo(m2);
-  line(m2,[[48.0725,7.3452],[48.0745,7.3505],[48.0768,7.3585]],c('--accent'),4,'8 7');
-  dot(m2,[48.0725,7.3452],c('--ink2'),'<b>コルマール駅</b><br>旧市街まで徒歩15分',7);
-  dot(m2,[48.0768,7.3585],c('--accent'),'<b>旧市街の中心</b><br>コイフュス（旧税関）／グラン・リュ',8);
-  dot(m2,[48.0750,7.3600],c('--accent'),'<b>プティット・ヴニーズ</b><br>運河沿い。早朝と日没後だけ空く',8);
-  dot(m2,[48.0800,7.3565],c('--ink3'),'<b>ウンターリンデン美術館</b><br>9:00開館',6);
-  dot(m2,[48.0812,7.3612],c('--ink3'),'<b>シャン・ド・マルス公園</b>',6);
-
-  /* ---- 3. Brünig ---- */
-  var m3=L.map('m3',{scrollWheelZoom:false});
-  L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m3);
-  var SARN=[46.8960,8.2460],GISW=[46.8340,8.1870],KAIS=[46.8180,8.1720],
-      BRUN=[46.7580,8.1470],MEIR=[46.7270,8.1860],ROTH=[46.7870,8.0470],INTO=[46.6900,7.8690];
-  line(m3,[LUZ,SARN,GISW,KAIS,LUN,BRUN,MEIR,BRZ],c('--p2'),5);
-  line(m3,[BRZ,INTO],c('--ink3'),3,'4 7');
-  line(m3,[BRZ,ROTH],c('--accent'),4,'7 5');
-  dot(m3,LUZ,c('--accent'),'<b>ルツェルン</b><br>08:06 発',9);
-  dot(m3,SARN,c('--p2'),'<b>ザルネン</b><br>ロッカーあり',5);
-  dot(m3,GISW,c('--p2'),'<b>ギスヴィル</b>',5);
-  dot(m3,KAIS,c('--p2'),'<b>カイザーシュトゥール</b><br>拡張案：ここで降りて湖畔6km・1時間半歩く',5);
-  dot(m3,LUN,c('--accent'),'<b>ルンゲルン</b> 08:51着<br>ターコイズの湖。60分',9);
-  dot(m3,BRUN,c('--p2'),'<b>ブリューニク峠 1001m</b><br>ラック式区間',5);
-  dot(m3,MEIR,c('--p2'),'<b>マイリンゲン</b><br>機関車が前後入れ替わる駅',5);
-  dot(m3,BRZ,c('--accent'),'<b>ブリエンツ</b> 10:36着<br>駅・船着場・登山鉄道が隣接',9);
-  dot(m3,ROTH,c('--accent'),'<b>ロートホルン 2244m</b><br>1892年製 蒸気ラック式・片道約30分',8);
-  dot(m3,INTO,c('--ink3'),'<b>インターラーケン東駅</b><br>今回は行かない',5);
-  fit(m3,[[46.66,7.84],[47.08,8.30]],[14,14]);
+  dot(m1,LON,P1,'<b>ロンドン</b><br>8/28 14:00 着 ／ 7泊',9);
+  dot(m1,OXF,P1,'<b>オックスフォード</b><br>ロンドンから日帰り圏',5);
+  dot(m1,MRS,P1,'<b>マルセイユ</b><br>9/4 16:00 着 ／ 2泊',8);
+  dot(m1,LYO,P1,'<b>リヨン</b><br>9/6 1泊',7);
+  dot(m1,PAR,P1,'<b>パリ</b><br>9/7〜9/10 の4泊 ／ 9/11 朝発',9);
+  dot(m1,STR,P2,'<b>ストラスブール</b><br>9/11 半日',6);
+  dot(m1,COL,P2,'<b>コルマール</b><br>9/11 泊。夕景＋翌早朝',8);
+  dot(m1,LUZ,P2,'<b>ルツェルン</b><br>9/12・9/13 の2連泊',9);
+  dot(m1,BRZ,P2,'<b>ブリエンツ</b><br>9/13 ロートホルン蒸気登山鉄道',6);
+  dot(m1,MOD,P3,'<b>モデナ</b><br>9/14 フェラーリ（stretch goal）',5);
+  dot(m1,BOL,P3,'<b>ボローニャ</b><br>9/14 夕方 合流・泊',8);
+  dot(m1,VEN,P3,'<b>ベネチア</b><br>9/15 泊。ビエンナーレ',9);
+  dot(m1,MIL,P3,'<b>ミラノ</b><br>9/16・9/17 の2泊',7);
+  dot(m1,MXP,P4,'<b>マルペンサ空港</b><br>9/18 07:00 レンタカー受取<br>9/24 07:00 返却・昼の便で NRT',8);
+  dot(m1,CAS,P4,'<b>カステルロット</b><br>9/18 泊',7);
+  dot(m1,CTN,P4,'<b>コルティナ</b><br>9/19 泊',7);
+  dot(m1,ZAS,P4,'<b>ツェル・アム・ゼー</b><br>9/20 泊',7);
+  dot(m1,HAL,P4,'<b>ハルシュタット</b><br>9/21 終日',7);
+  dot(m1,SAL,P4,'<b>ザルツブルク</b><br>9/21 泊',7);
+  dot(m1,ZRL,P4,'<b>ツィール</b><br>9/22 泊（ミッテンヴァルトは日帰り）',7);
 
   /* ---- 4. drive ---- */
-  var m4=L.map('m4',{scrollWheelZoom:false});
-  L.tileLayer(TILE,{attribution:ATTR,maxZoom:18}).addTo(m4);
-  line(m4,[MXP,BGM,BRS,VER,TRT,BZ,CAS],c('--p4'),4);
-  line(m4,[CAS,BRX,BRU,DOB,MIS],c('--p4'),4);
-  line(m4,[MIS,CTN],c('--p4'),4);
-  line(m4,[CTN,FAL,CAP,MRM],c('--accent'),3,'7 6');
-  line(m4,[MRM,CAP,FAL,CTN],c('--accent'),3,'7 6');
-  line(m4,[CTN,DOB,LNZ,MTR,MTS,ZAS],c('--p4'),4);
-  line(m4,[ZAS,BIS,EBN,GOS,HAL],c('--p4'),4);
-  line(m4,[HAL,BIS2,MON,SAL],c('--p4'),4);
-  line(m4,[SAL,RHL,ROS,KUF,INN,ZRL],c('--p4'),4);
-  line(m4,[ZRL,SEE,MIT],c('--accent'),3,'7 6');
-  line(m4,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],c('--p4'),4,'10 6');
-  dot(m4,MXP,c('--accent'),'<b>マルペンサ空港</b><br>9/18 07:00 受取／9/24 07:00 返却',9);
-  dot(m4,CAS,c('--accent'),'<b>カステルロット</b> 9/18 泊<br>MXP から約390km・4h15',8);
-  dot(m4,MIS,c('--p4'),'<b>ミズリーナ湖</b> 9/19 午前<br>トレ・チーメへの有料道路の起点',7);
-  dot(m4,MRM,c('--p4'),'<b>マルモラーダ氷河（マルガ・チャペラ）</b><br>9/19 午後。コルティナから約1h15',7);
-  dot(m4,CTN,c('--accent'),'<b>コルティナ・ダンペッツォ</b> 9/19 泊',8);
-  dot(m4,ZAS,c('--accent'),'<b>ツェル・アム・ゼー</b> 9/20 泊<br>グロースグロックナー経由で入る手もある',8);
-  dot(m4,HAL,c('--accent'),'<b>ハルシュタット</b> 9/21 終日<br>P1は8:30に満車。村中心部は進入禁止',8);
-  dot(m4,SAL,c('--accent'),'<b>ザルツブルク</b> 9/21 泊',8);
-  dot(m4,ZRL,c('--accent'),'<b>ツィール（Zirl）</b> 9/22 泊',8);
-  dot(m4,MIT,c('--p4'),'<b>ミッテンヴァルト</b><br>ツィールから約40分・日帰り',6);
-  dot(m4,BRE,c('--p4'),'<b>ブレンナー峠</b><br>9/23 通過。A13 €10.50',5);
-  dot(m4,LNZ,c('--p4'),'<b>リエンツ</b><br>グロースグロックナー経由に振る分岐点',5);
-  fit(m4,[[45.3,8.4],[48.1,13.9]],[12,12]);
-
-  var maps=[m1,m2,m3,m4];
+  var m4=makeMap('m4',[[45.3,8.4],[48.1,13.9]],[12,12]);
+  line(m4,[MXP,BGM,BRS,VER,TRT,BZ,CAS],P4,4);
+  line(m4,[CAS,BRX,BRU,DOB,MIS],P4,4);
+  line(m4,[MIS,CTN],P4,4);
+  line(m4,[CTN,FAL,CAP,MRM],ACC,3,'7 6');
+  line(m4,[CTN,DOB,LNZ,MTR,MTS,ZAS],P4,4);
+  line(m4,[ZAS,BIS,EBN,GOS,HAL],P4,4);
+  line(m4,[HAL,BIS2,MON,SAL],P4,4);
+  line(m4,[SAL,RHL,ROS,KUF,INN,ZRL],P4,4);
+  line(m4,[ZRL,SEE,MIT],ACC,3,'7 6');
+  line(m4,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],P4,4,'10 6');
+  dot(m4,MXP,ACC,'<b>マルペンサ空港</b><br>9/18 07:00 受取／9/24 07:00 返却',9);
+  dot(m4,CAS,ACC,'<b>カステルロット</b> 9/18 泊<br>MXP から約390km・4h15',8);
+  dot(m4,MIS,P4,'<b>ミズリーナ湖</b> 9/19 午前<br>トレ・チーメへの有料道路の起点',7);
+  dot(m4,MRM,P4,'<b>マルモラーダ氷河（マルガ・チャペラ）</b><br>9/19 午後。コルティナから約1h15',7);
+  dot(m4,CTN,ACC,'<b>コルティナ・ダンペッツォ</b> 9/19 泊',8);
+  dot(m4,ZAS,ACC,'<b>ツェル・アム・ゼー</b> 9/20 泊<br>グロースグロックナー経由で入る手もある',8);
+  dot(m4,HAL,ACC,'<b>ハルシュタット</b> 9/21 終日<br>P1は8:30に満車。村中心部は進入禁止',8);
+  dot(m4,SAL,ACC,'<b>ザルツブルク</b> 9/21 泊',8);
+  dot(m4,ZRL,ACC,'<b>ツィール（Zirl）</b> 9/22 泊',8);
+  dot(m4,MIT,P4,'<b>ミッテンヴァルト</b><br>ツィールから約40分・日帰り',6);
+  dot(m4,BRE,P4,'<b>ブレンナー峠</b><br>9/23 通過。A13 €10.50',5);
+  dot(m4,LNZ,P4,'<b>リエンツ</b><br>グロースグロックナー経由に振る分岐点',5);
 
   /* ---- 横棒チャート ----------------------------------------------------
      行 = 日付・地名・バー・値。値は必ず直接ラベルで出す（tooltip 頼みにしない）。
      どちらも下に等価な表があるので、色だけが情報を担う場面は無い。          */
-  function chart(el,rows,max,fmt){
-    var f=document.createDocumentFragment();
-    rows.forEach(function(r){
-      var row=document.createElement('div'); row.className='row';
-      var total=r.seg.reduce(function(a,b){return a+b;},0);
-      row.innerHTML='<span class="d">'+r.date+'</span><span class="n">'+r.name+'</span>';
-      var wrap=document.createElement('div'); wrap.className='barwrap';
-      wrap.style.width=(total/max*100)+'%';
-      r.seg.forEach(function(v){
-        var b=document.createElement('div'); b.className='bar';
-        b.style.background='var(--p'+r.p+')';
-        b.style.flex=v;                       /* セグメント比率。隙間は CSS gap の 2px */
-        wrap.appendChild(b);
-      });
-      row.appendChild(wrap);
-      row.insertAdjacentHTML('beforeend','<span class="v">'+fmt(total)+'</span>');
-      row.title=r.name+' — '+fmt(total);
-      f.appendChild(row);
-    });
-    el.appendChild(f);
+  function chart(el,rows,fmt){
+    var totals=rows.map(function(r){ return r.seg.reduce(function(a,b){return a+b;},0); }),
+        max=Math.max.apply(null,totals);      /* 目盛は行から導く。手で渡すと必ずずれる */
+    el.innerHTML=rows.map(function(r,i){
+      return '<div class="row"><span class="d">'+r.date+'</span>'
+           + '<span class="n">'+r.name+'</span>'
+           + '<div class="barwrap" style="width:'+(totals[i]/max*100)+'%">'
+           + r.seg.map(function(v){        /* セグメント間の隙間は CSS gap の 2px */
+               return '<div class="bar" style="flex:'+v+';background:var(--p'+r.p+')"></div>';
+             }).join('')
+           + '</div><span class="v">'+fmt(totals[i])+'</span></div>';
+    }).join('');
   }
 
   /* 滞在（泊数）。合計27泊 */
@@ -645,12 +609,12 @@
     {date:'8/28',name:'ロンドン',seg:[7],p:1},   {date:'9/4', name:'マルセイユ',seg:[2],p:1},
     {date:'9/6', name:'リヨン',seg:[1],p:1},     {date:'9/7', name:'パリ',seg:[4],p:1},
     {date:'9/11',name:'コルマール',seg:[1],p:2}, {date:'9/12',name:'ルツェルン',seg:[2],p:2},
-    {date:'9/14',name:'ボローニャ',seg:[1],p:3}, {date:'9/15',name:'ベネチア',seg:[2],p:3},
-    {date:'9/17',name:'ミラノ',seg:[1],p:3},     {date:'9/18',name:'カステルロット',seg:[1],p:4},
+    {date:'9/14',name:'ボローニャ',seg:[1],p:3}, {date:'9/15',name:'ベネチア',seg:[1],p:3},
+    {date:'9/16',name:'ミラノ',seg:[2],p:3},     {date:'9/18',name:'カステルロット',seg:[1],p:4},
     {date:'9/19',name:'コルティナ',seg:[1],p:4}, {date:'9/20',name:'ツェル・アム・ゼー',seg:[1],p:4},
     {date:'9/21',name:'ザルツブルク',seg:[1],p:4},{date:'9/22',name:'ツィール',seg:[1],p:4},
     {date:'9/23',name:'マルペンサ周辺',seg:[1],p:4}
-  ],7,function(n){return n+'泊';});
+  ],function(n){return n+'泊';});
 
   /* 実走時間。9/22 だけ 本移動＋日帰り往復 の2本立て */
   chart(document.getElementById('drive'),[
@@ -660,43 +624,42 @@
     {date:'9/21',name:'→ ザルツブルク',seg:[3.25],p:4},
     {date:'9/22',name:'→ ツィール',seg:[2.25,1.33],p:4},
     {date:'9/23',name:'→ マルペンサ',seg:[6.25],p:4}
-  ],6.25,function(h){
+  ],function(h){
     var m=Math.round(h*60); return Math.floor(m/60)+'h'+('0'+(m%60)).slice(-2);
   });
 
-  /* ---- 日カードにフェーズ色を配る（見出しの並び順から導く） ---- */
-  [].forEach.call(document.querySelectorAll('#ops .phase'),function(ph,i){
-    for(var n=ph.nextElementSibling; n && !n.classList.contains('phase'); n=n.nextElementSibling){
-      if(n.classList.contains('day')) n.classList.add('f'+(i+1));
-    }
-  });
 
-  /* ---- touch: 地図が縦スクロールを飲み込まないよう、タップするまで pan を切る ---- */
-  if(L.Browser.mobile){
-    maps.forEach(function(m){
-      m.dragging.disable();
-      var box=m.getContainer().parentNode,
-          lock=document.createElement('div');
+  /* ---- 指で操作する端末では、地図が縦スクロールを飲み込む。タップするまで pan を切る。
+     判定は UA（L.Browser.mobile）ではなくポインタの種別で。UA だと iPadOS が
+     デスクトップを名乗るため、いちばん困る端末が素通りする。
+     「いまどれが操作可能か」は1つの変数に持たせ、書き手も setActive 1つに絞る。 ---- */
+  if(matchMedia('(pointer: coarse)').matches){
+    var locks=maps.map(function(m){
+      var lock=document.createElement('div');
       lock.className='lock on';
       lock.innerHTML='<span>タップして地図を操作</span>';
-      box.appendChild(lock);
-      lock.addEventListener('click',function(){
-        maps.forEach(function(o){ o.dragging.disable(); });      /* 一度に触れるのは1枚 */
-        document.querySelectorAll('.lock').forEach(function(l){ l.classList.add('on'); });
-        m.dragging.enable();
-        lock.classList.remove('on');
-      });
+      m.getContainer().parentNode.appendChild(lock);
+      lock.addEventListener('click',function(){ setActive(m); });
+      return lock;
     });
+    function setActive(target){
+      maps.forEach(function(m,i){
+        var on=(m===target);
+        m.dragging[on?'enable':'disable']();
+        locks[i].classList.toggle('on',!on);
+      });
+    }
+    setActive(null);
     /* 地図の外を触ったら全部ロックに戻す */
     document.addEventListener('pointerdown',function(e){
-      if(e.target.closest('.mapbox')) return;
-      maps.forEach(function(m){ m.dragging.disable(); });
-      document.querySelectorAll('.lock').forEach(function(l){ l.classList.add('on'); });
+      if(!e.target.closest('.mapbox')) setActive(null);
     },true);
   }
 
   /* ---- tabs ---- */
-  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var tabs=document.querySelectorAll('.tab');
+  /* hidden / tabindex の書き手は select() だけ。markup は既定タブを
+     aria-selected で1回宣言するのみ（JS 無効時のために hidden も置いてある） */
   function select(t,focus){
     tabs.forEach(function(o){
       var s=(o===t);
@@ -705,12 +668,13 @@
       document.getElementById(o.getAttribute('aria-controls')).hidden=!s;
     });
     if(focus) t.focus();
-    /* 非表示中はサイズ 0 で描画されるので、表示に戻したら測り直す */
-    setTimeout(remeasure,60);
-    window.scrollTo({top:0,behavior:'smooth'});
+    setTimeout(remeasure,60);   /* 非表示中は幅 0 で描かれるので、出したら測り直す */
   }
   tabs.forEach(function(t,i){
-    t.addEventListener('click',function(){select(t,false);});
+    t.addEventListener('click',function(){
+      select(t,false);
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
     t.addEventListener('keydown',function(e){
       var d = e.key==='ArrowRight'?1 : e.key==='ArrowLeft'?-1 : 0;
       if(d){ e.preventDefault(); select(tabs[(i+d+tabs.length)%tabs.length],true); }
@@ -718,7 +682,8 @@
       else if(e.key==='End'){ e.preventDefault(); select(tabs[tabs.length-1],true); }
     });
   });
-  setTimeout(remeasure,250);
+  /* 既定タブを markup から読み直して適用する（属性を二重管理しない） */
+  select([].filter.call(tabs,function(t){return t.getAttribute('aria-selected')==='true';})[0]||tabs[0],false);
 })();
 </script>
 </body>
