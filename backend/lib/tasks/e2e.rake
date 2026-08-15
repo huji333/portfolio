@@ -14,11 +14,15 @@ namespace :e2e do
 end
 
 def seed_users
-  pw = 'password123'
-  User.create!(email: 'admin@example.com', password: pw,
-               password_confirmation: pw, role: :admin)
-  User.create!(email: 'guest@example.com', password: pw,
-               password_confirmation: pw, role: :guest)
+  # Playwright 側（e2e/tests/auth.setup.ts）と同じ ENV を読む。
+  # 片方だけ設定するとログインが通らないため、既定値もここに揃える。
+  admin_pw = ENV.fetch('E2E_ADMIN_PASSWORD', 'password123')
+  User.create!(email: ENV.fetch('E2E_ADMIN_EMAIL', 'admin@example.com'), password: admin_pw,
+               password_confirmation: admin_pw, role: :admin)
+
+  guest_pw = ENV.fetch('E2E_GUEST_PASSWORD', 'password123')
+  User.create!(email: ENV.fetch('E2E_GUEST_EMAIL', 'guest@example.com'), password: guest_pw,
+               password_confirmation: guest_pw, role: :guest)
 end
 
 def seed_camera_and_lens
