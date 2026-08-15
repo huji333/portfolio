@@ -22,6 +22,12 @@ jobs:
       POSTGRES_DB: portfolio_test
       NEXT_PUBLIC_API_BASE_URL: http://localhost:3000/api
       API_BASE_URL: http://localhost:3000/api
+      # seed（e2e:seed）と Playwright（auth.setup.ts）が同じ資格情報を読むための唯一の定義。
+      # 使い捨ての test DB 専用で、本番の認証情報とは無関係。
+      E2E_ADMIN_EMAIL: admin@example.com
+      E2E_ADMIN_PASSWORD: password123
+      E2E_GUEST_EMAIL: guest@example.com
+      E2E_GUEST_PASSWORD: password123
 
     services:
       postgres:
