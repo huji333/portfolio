@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_14_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_14_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,14 +40,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_14_000000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
-  end
-
-  create_table "articles", force: :cascade do |t|
-    t.text "content", null: false
-    t.datetime "created_at", null: false
-    t.integer "status", default: 0, null: false
-    t.string "title", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "bucket_list_items", force: :cascade do |t|
@@ -128,14 +120,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_14_000000) do
     t.string "tags", default: [], null: false, array: true
     t.string "title", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "publishments", force: :cascade do |t|
-    t.bigint "article_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "published_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
-    t.datetime "updated_at", null: false
-    t.index ["article_id"], name: "index_publishments_on_article_id"
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -279,7 +263,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_14_000000) do
   add_foreign_key "image_categories", "images"
   add_foreign_key "images", "cameras"
   add_foreign_key "images", "lenses"
-  add_foreign_key "publishments", "articles"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
