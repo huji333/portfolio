@@ -6,8 +6,11 @@
 <title>ヨーロッパ 2026 8/28 → 9/24 行程</title>
 <meta name="description" content="ロンドンから北イタリア・ドロミテ・オーストリアまで、2026年8月28日〜9月24日のヨーロッパ行程。地図と日程、走ってみて効いてくるメモ。">
 <meta name="color-scheme" content="light dark">
-<!-- 直リンクで共有するだけのページ。検索には出さない（robots.txt は allow のまま
-     ── Disallow にするとクローラがこの noindex を読めなくなる）。OG は残す。 -->
+<!-- 直リンクで共有するだけのページ。検索には出さない。
+     robots.txt は allow のまま ── Disallow にするとクローラがこの noindex を
+     読めなくなり、他所からリンクされたときに URL だけ索引される。
+     /europe と /europe.html はこの同じファイルを返すので、meta 1枚で両方に効く
+     （next.config.ts に X-Robots-Tag を足す必要はない）。OG は共有用に残す。 -->
 <meta name="robots" content="noindex, nofollow">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ヨーロッパ 2026 8/28 → 9/24 行程">
@@ -16,7 +19,7 @@
 <meta property="og:image" content="/og-image.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico">
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
   :root{
@@ -210,7 +213,7 @@
   <h2>どこに何泊するか</h2>
   <p class="lead">前半は腰を据えて、後半は7泊で7都市。同じ旅でも中身の密度がまるで違います。色は上の地図と同じフェーズ分けです。</p>
   <div id="stay" class="chart"></div>
-  <p class="chart-note">全27泊。バーの長さが泊数、色がフェーズ。日付はチェックイン日です。</p>
+  <p class="chart-note"><span id="stay-total"></span>バーの長さが泊数、色がフェーズ。日付はチェックイン日です。</p>
 
   <div class="tw">
   <table>
@@ -349,7 +352,7 @@
 
   <div class="day">
     <div class="day-h"><span class="date">9/8</span><span class="dow">火</span><span class="route">パリ 自由行動 ①</span></div>
-    <div class="note w"><b>ルーヴルは火曜が休館日です。</b>この日には行けません。<b>ルーヴルは 9/9（水）へ</b> ── 水曜と金曜は 21:00 までの夜間開館があり、そこが一番空きます。<br>今日に振るなら<b>オルセー</b>（火曜開館・木曜21:45まで夜間開館）、<b>オランジュリー</b>、<b>ロダン美術館</b>、<b>ピカソ美術館</b>、<b>ケ・ブランリー</b>。</div>
+    <div class="note w"><b>ルーヴルは火曜が休館日です。</b>この日には行けません。<b>ルーヴルは 9/9（水）へ</b>。<br>今日に振るなら<b>オルセー</b>（火曜開館・木曜21:45まで夜間開館）、<b>オランジュリー</b>、<b>ロダン美術館</b>、<b>ピカソ美術館</b>、<b>ケ・ブランリー</b>。</div>
     <div class="note"><b>ポンピドゥーは計画に入れないこと。</b>2025年9月から<b>2030年まで全面改修で閉館中</b>です。古い記事に載っていても、行っても閉まっています。</div>
     <span class="stay">泊：パリ</span>
   </div>
@@ -585,9 +588,9 @@
 
   <h2>この旅で効いてくる小ネタ</h2>
   <ol class="chk">
-    <li><b>ルーヴルは火曜が休館</b><small>9/8 には行けない。水曜（9/9）に回せば 21:00 までの夜間開館があり、17時以降は日中より明らかに空く。ポンピドゥーは2030年まで改修で閉館中なので、そもそも候補から外す。</small></li>
-    <li><b>ロンドンは Oyster を買わなくていい</b><small>手持ちのコンタクトレスか Apple Pay で運賃も1日上限も同じ。ただし<b>1人1枚を自分専用に</b>使うこと ── 複数人で回すと上限が働かない。ゾーン1–5 の上限は £15.30。</small></li>
-    <li><b>ビグルズウェイドは Oyster の圏外</b><small>9/2 はタッチだけでは行けない。「最寄り駅 → Biggleswade」を経路 via London で1枚買えば、地下鉄の乗り換え区間も運賃に含まれる（Cross London Transfer）。ただし途中下車は不可。</small></li>
+    <li><b>ルーヴルは火曜が休館</b><small>9/8 には行けないので 9/9 に回す。ポンピドゥーは2030年まで改修で閉館中なので、そもそも候補から外す。</small></li>
+    <li><b>ロンドンは Oyster を買わなくていい</b><small>コンタクトレスで運賃も上限も同じ。ただし<b>1人1枚を自分専用に</b> ── 複数人で回すと上限が働かない。</small></li>
+    <li><b>ビグルズウェイドは Oyster の圏外</b><small>9/2 はタッチだけでは行けない。経路 via London の通し券を1枚買う。</small></li>
     <li><b>8/30–8/31 は西ロンドンが機能しない</b><small>ノッティングヒル・カーニバル。周辺の駅は終日閉鎖か出口専用になる。8/31 は祝日でもあり、<b>バンクホリデー週末は鉄道の計画運休が入る定番</b>。SWR の週末運行を前夜に確認する。</small></li>
     <li><b>イフ島はミストラル次第</b><small>9/5 の船は強風で欠航する。前夜と当日朝に運航状況を見て、駄目なら市内に振る。最終便が早いので 9/4 の夕方への前倒しは効かない。</small></li>
     <li><b>コルマールは順路より時間帯</b><small>旧市街は端から端まで徒歩10分。どう歩いても一周してしまうので、決めるべきは「いつ入るか」だけ。日中は観光客で埋まり、空くのは日没後と朝8時半まで。</small></li>
@@ -696,8 +699,8 @@
   line(m1,[MIL,MXP,BGM,BRS,VER,TRT,BZ,CAS,BRX,BRU,DOB,MIS,CTN,LNZ,MTR,MTS,ZAS,BIS,EBN,GOS,HAL,BIS2,MON,SAL,RHL,ROS,KUF,INN,ZRL],P4);
   line(m1,[ZRL,INN,BRE,BZ,TRT,VER,BRS,BGM,MXP],P4,3,'7 6');
 
-  dot(m1,LON,P1,'<b>ロンドン</b><br>8/28 14:00 着 ／ 7泊',9);
-  dot(m1,OXF,P1,'<b>オックスフォード</b><br>ロンドンから日帰り圏',5);
+  dot(m1,LON,P1,'<b>ロンドン</b><br>8/28 14:00 着 ／ 5泊',9);
+  dot(m1,OXF,P1,'<b>オックスフォード</b><br>9/2 から2泊',6);
   dot(m1,MRS,P1,'<b>マルセイユ</b><br>9/4 16:00 着 ／ 2泊',8);
   dot(m1,LYO,P1,'<b>リヨン</b><br>9/6 1泊',7);
   dot(m1,PAR,P1,'<b>パリ</b><br>9/7〜9/10 の4泊 ／ 9/11 朝発',9);
@@ -759,8 +762,8 @@
     }).join('');
   }
 
-  /* 滞在（泊数）。合計27泊 */
-  chart(document.getElementById('stay'),[
+  /* 滞在（泊数）。合計は配列から導く ── 手で書くと必ずずれる */
+  var STAY=[
     {date:'8/28',name:'ロンドン',seg:[5],p:1},   {date:'9/2', name:'オックスフォード',seg:[2],p:1},
     {date:'9/4', name:'マルセイユ',seg:[2],p:1},
     {date:'9/6', name:'リヨン',seg:[1],p:1},     {date:'9/7', name:'パリ',seg:[4],p:1},
@@ -770,7 +773,10 @@
     {date:'9/19',name:'コルティナ',seg:[1],p:4}, {date:'9/20',name:'ツェル・アム・ゼー',seg:[1],p:4},
     {date:'9/21',name:'ザルツブルク',seg:[1],p:4},{date:'9/22',name:'ツィール',seg:[1],p:4},
     {date:'9/23',name:'マルペンサ周辺',seg:[1],p:4}
-  ],function(n){return n+'泊';});
+  ];
+  chart(document.getElementById('stay'),STAY,function(n){return n+'泊';});
+  document.getElementById('stay-total').textContent =
+    '全' + STAY.reduce(function(a,r){ return a+r.seg[0]; },0) + '泊。';
 
   /* 実走時間。9/22 だけ 本移動＋日帰り往復 の2本立て */
   chart(document.getElementById('drive'),[
