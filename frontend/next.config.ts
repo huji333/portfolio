@@ -64,6 +64,17 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
+      // 旅程ページは直リンクで共有するだけ。HTML 側の meta と二重にしているのは、
+      // rewrite を通らない /europe.html を直接踏まれても効かせるため。
+      // robots.txt は allow のまま ── Disallow にするとクローラが noindex を読めない。
+      {
+        source: '/europe',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
+      {
+        source: '/europe.html',
+        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+      },
     ];
   },
   async redirects() {
