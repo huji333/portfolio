@@ -11,28 +11,16 @@ RSpec.describe UnattachedBlobsCleanupJob, type: :job do
     blob
   end
 
-  it 'purges unattached blobs older than 24 hours' do
+  it 'purges only stale unattached blobs, keeping fresh and attached ones' do
     stale_blob = create_blob(created_at: 25.hours.ago)
-
-    described_class.perform_now
-
-    expect(ActiveStorage::Blob.exists?(stale_blob.id)).to be(false)
-  end
-
-  it 'keeps unattached blobs newer than 24 hours' do
     fresh_blob = create_blob(created_at: 1.hour.ago)
-
-    described_class.perform_now
-
-    expect(ActiveStorage::Blob.exists?(fresh_blob.id)).to be(true)
-  end
-
-  it 'keeps attached blobs regardless of age' do
     image = create(:image, :draft)
     image.file.blob.update!(created_at: 25.hours.ago)
 
     described_class.perform_now
 
+    expect(ActiveStorage::Blob.exists?(stale_blob.id)).to be(false)
+    expect(ActiveStorage::Blob.exists?(fresh_blob.id)).to be(true)
     expect(ActiveStorage::Blob.exists?(image.file.blob.id)).to be(true)
   end
 end

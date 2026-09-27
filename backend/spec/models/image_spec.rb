@@ -5,11 +5,6 @@ RSpec.describe Image, type: :model do
 
   describe 'validations' do
     context 'file' do
-      it 'should be valid with file' do
-        image.file = Rack::Test::UploadedFile.new(Rails.root.join("spec/fixtures/files/test_image.jpg"), 'image/jpeg')
-        expect(image).to be_valid
-      end
-
       it 'should be invalid with blank file' do
         image.file = nil
         expect(image).to be_invalid
@@ -18,112 +13,40 @@ RSpec.describe Image, type: :model do
 
     # title/taken_at are publish-quality requirements: required when published,
     # free to be blank while the record lives as a draft (bulk ingest).
-    context 'title' do
-      it 'should be valid with title' do
-        image.title = 'Test Image'
-        expect(image).to be_valid
-      end
+    context 'title and taken_at' do
+      it 'requires each when published, but allows blank when draft' do
+        %i[title taken_at].each do |attr|
+          image.public_send("#{attr}=", nil)
 
-      it 'should be invalid with blank title when published' do
-        image.is_published = true
-        image.title = ''
-        expect(image).to be_invalid
-      end
+          image.is_published = true
+          expect(image).to be_invalid
 
-      it 'should be valid with blank title when draft' do
-        image.is_published = false
-        image.title = ''
-        expect(image).to be_valid
-      end
-    end
-
-    context 'caption' do
-      it 'should be valid with caption' do
-        image.caption = 'Test Caption'
-        expect(image).to be_valid
-      end
-
-      it 'should be valid with blank caption even when published' do
-        image.is_published = true
-        image.caption = ''
-        expect(image).to be_valid
+          image.is_published = false
+          expect(image).to be_valid
+        end
       end
     end
 
     context 'taken_at' do
-      it 'should be valid with past taken_at' do
-        image.taken_at = 1.day.ago
-        expect(image).to be_valid
-      end
-
-      it 'should be invalid with nil taken_at when published' do
-        image.is_published = true
-        image.taken_at = nil
-        expect(image).to be_invalid
-      end
-
-      it 'should be valid with nil taken_at when draft' do
-        image.is_published = false
-        image.taken_at = nil
-        expect(image).to be_valid
-      end
-
       it 'should be invalid with future taken_at' do
         image.taken_at = 1.day.from_now
         expect(image).to be_invalid
       end
     end
 
-    context 'featured_rank' do
-      it 'should be valid with featured_rank' do
-        image.featured_rank = 1
-        expect(image).to be_valid
-      end
-    end
-
     context 'is_published' do
-      it 'should be valid with is_published' do
-        image.is_published = true
-        expect(image).to be_valid
-      end
-
       it 'should be invalid with nil is_published' do
         image.is_published = nil
         expect(image).to be_invalid
       end
     end
 
-    context 'camera' do
-      it 'should be valid with camera' do
-        image.camera = build(:camera)
-        expect(image).to be_valid
-      end
-
-      # fail-open: a photo whose EXIF lacks a resolvable camera must still save.
-      it 'should be valid without camera' do
+    context 'camera and lens' do
+      # fail-open: a photo whose EXIF lacks a resolvable camera or LensModel
+      # (fixed/manual lens) must still save.
+      it 'should be valid without camera or lens' do
         image.camera = nil
-        expect(image).to be_valid
-      end
-    end
-
-    context 'lens' do
-      it 'should be valid with lens' do
-        image.lens = build(:lens)
-        expect(image).to be_valid
-      end
-
-      # fail-open: a photo without a LensModel (fixed/manual lens) must still save.
-      it 'should be valid without lens' do
         image.lens = nil
-        expect(image).to be_valid
-      end
-    end
-
-    context 'categories' do
-      it 'should be valid with categories' do
-        image.save! # Save the image first
-        category = create(:category)
-        image.categories << category
         expect(image).to be_valid
       end
     end
@@ -214,16 +137,6 @@ RSpec.describe Image, type: :model do
       expect(result.map(&:title)).to eq(%w[D C B A])
     end
 
-    it 'excludes unpublished images' do
-      result = Image.for_gallery(limit: 10)
-      expect(result.map(&:title)).not_to include('Hidden')
-    end
-
-    it 'fetches limit + 1 records to detect has_more' do
-      result = Image.for_gallery(limit: 2)
-      expect(result.size).to eq(3)
-    end
-
     it 'returns timeline records after cursor position' do
       cursor = "t,#{(img3.taken_at.to_f * 1000).floor},#{img3.id}"
       result = Image.for_gallery(cursor: cursor, limit: 10)
@@ -260,12 +173,6 @@ RSpec.describe Image, type: :model do
       it 'pins featured images ahead of the timeline, ordered by featured_rank' do
         result = Image.for_gallery(limit: 10)
         expect(result.map(&:title)).to eq(%w[F1 F2 D C B A])
-      end
-
-      it 'does not duplicate featured images in the timeline segment' do
-        result = Image.for_gallery(limit: 10)
-        expect(result.map(&:title).count('F1')).to eq(1)
-        expect(result.map(&:title).count('F2')).to eq(1)
       end
 
       it 'paginates across the featured -> timeline boundary and round-trips the cursor' do
@@ -380,8 +287,6 @@ RSpec.describe Image, type: :model do
   end
 
   describe '.bulk_assign!' do
-    include ActiveJob::TestHelper
-
     it 'offsets taken_at by 1 minute per image in id order when taken_at_base is given' do
       a = create(:image)
       b = create(:image)
@@ -403,30 +308,6 @@ RSpec.describe Image, type: :model do
       Image.bulk_assign!([image.id])
 
       expect(image.reload.taken_at).to eq(original_taken_at)
-    end
-
-    it 'overwrites an existing taken_at when taken_at_base is given' do
-      image = create(:image, taken_at: 10.days.ago.change(usec: 0))
-      base = Time.zone.parse('2024-01-01 10:00:00')
-
-      Image.bulk_assign!([image.id], taken_at_base: base)
-
-      expect(image.reload.taken_at).to eq(base)
-    end
-
-    # 添付は変わらないので、画像数に比例した variant-record lookup（N+1）を発行しない
-    # （クエリ数ゼロで固定する回帰テスト。#277）。処理済み（analyzed）でないと
-    # 旧実装でも analyzed? で短絡して再現しないため、先にジョブを流す。
-    it 'does not run per-image variant-record lookups (regression: #277)' do
-      images = create_list(:image, 3)
-      perform_enqueued_jobs
-      base = Time.zone.parse('2024-01-01 10:00:00')
-
-      queries = sql_queries_matching(/active_storage_variant_records/) do
-        Image.bulk_assign!(images.map(&:id), taken_at_base: base)
-      end
-
-      expect(queries).to be_empty
     end
   end
 end

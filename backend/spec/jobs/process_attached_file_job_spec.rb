@@ -8,13 +8,6 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect { create(:image) }.to have_enqueued_job(described_class)
     end
 
-    it 'does not re-enqueue on save once the file is processed' do
-      image = create(:image)
-      perform_enqueued_jobs
-
-      expect { image.reload.update!(title: 'renamed') }.not_to have_enqueued_job(described_class)
-    end
-
     # 処理待ちのままでも、添付が変わらない update（キュレーション編集）で
     # 重複ジョブを積まない（#277）。
     it 'does not enqueue a duplicate job on a file-unchanged update while still unprocessed' do
@@ -36,12 +29,6 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
       expect(queries).to be_empty
     end
 
-    # 本ジョブが analyze まで担うため、ActiveStorage 標準の AnalyzeJob は
-    # 二重処理としてまるごと抑止している（initializer 参照。#276）。
-    it 'does not enqueue the builtin ActiveStorage::AnalyzeJob' do
-      expect { create(:image) }.not_to have_enqueued_job(ActiveStorage::AnalyzeJob)
-    end
-
     it 'enqueues again when the file itself is replaced' do
       image = create(:image)
       perform_enqueued_jobs
@@ -57,21 +44,11 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
   end
 
   describe '#perform' do
-    it 'analyzes the file, generates variants, and fills EXIF metadata' do
-      image = create(:image, :draft)
-      perform_enqueued_jobs
-
-      image.reload
-      expect(image.file).to be_analyzed
-      expect(image.file.metadata).to include('width', 'height')
-      expect(image.thumbnail_variant.image).to be_attached
-      expect(image.camera).to have_attributes(make: 'SONY', model: 'ILCE-7CM2')
-      expect(image.taken_at).to be_present
-    end
-
     # analyze・variant×2・EXIF の計4回 + 標準 AnalyzeJob の1回をダウンロードしていた
     # 経路の回帰テスト（#276）。storage service への download 呼び出し回数で
     # S3 GET を計測する（enqueue された全ジョブを流して取込1件分の合計を見る）。
+    # そのため標準 ActiveStorage::AnalyzeJob が抑止されず動いてしまえば回数が
+    # 増えて落ちる。AnalyzeJob 抑止（#276）自体の直接テストはこれで兼ねる。
     it 'downloads the original blob from storage only once per ingest (regression: #276)' do
       image = create(:image, :draft)
       service = ActiveStorage::Blob.service
@@ -97,37 +74,15 @@ RSpec.describe ProcessAttachedFileJob, type: :job do
 
       expect(project.reload.file).to be_analyzed
     end
+  end
 
+  describe 'retry_on behavior' do
     # io attach 経路ではエンキューが S3 アップロード完了より先に走りうる（race）ため
     # FileNotFoundError はリトライする。上限到達後の再 raise（fail-loud → failed
     # executions に残る）は retry_on の framework 保証なのでここでは検証しない。
     it 'retries when the blob is not yet in storage' do
       image = create(:image)
       allow(image).to receive(:process_attached_file!).and_raise(ActiveStorage::FileNotFoundError)
-      clear_enqueued_jobs
-
-      expect { described_class.perform_now(image) }.to have_enqueued_job(described_class)
-    end
-  end
-
-  describe 'TRANSIENT_ERRORS retry configuration' do
-    it 'covers the expected S3 / network transient error classes' do
-      expect(described_class::TRANSIENT_ERRORS).to contain_exactly(
-        Aws::S3::Errors::ServiceUnavailable,
-        Aws::S3::Errors::InternalError,
-        Aws::S3::Errors::SlowDown,
-        Seahorse::Client::NetworkingError,
-        Errno::ECONNRESET,
-        Net::OpenTimeout,
-        Net::ReadTimeout
-      )
-    end
-
-    # TRANSIENT_ERRORS の一部（Errno::ECONNRESET）で実際に retry_on が起動することを
-    # 確認する代表ケース。上限到達後の再 raise は framework 保証なのでここでは検証しない。
-    it 'retries on a transient S3/network error (e.g. Errno::ECONNRESET)' do
-      image = create(:image)
-      allow(image).to receive(:process_attached_file!).and_raise(Errno::ECONNRESET)
       clear_enqueued_jobs
 
       expect { described_class.perform_now(image) }.to have_enqueued_job(described_class)

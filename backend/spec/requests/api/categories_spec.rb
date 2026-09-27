@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe 'Categories API', type: :request do
   before do
-    create(:category, name: 'Test Category 1', id: 1)
-    create(:category, name: 'Test Category 2', id: 2)
+    create(:category, name: 'Test Category 1')
+    create(:category, name: 'Test Category 2')
   end
 
   context 'fetch categories' do

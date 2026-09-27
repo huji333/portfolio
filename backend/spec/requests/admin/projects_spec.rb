@@ -20,8 +20,6 @@ RSpec.describe 'Admin::Projects', type: :request do
 
       project = Project.order(:created_at).last
       expect(project.file).to be_attached
-
-      expect(project.file).to be_attached
     end
   end
 end

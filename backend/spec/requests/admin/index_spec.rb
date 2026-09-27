@@ -8,7 +8,7 @@ RSpec.describe 'Admin::Index (dashboard)', type: :request do
   before { sign_in user }
 
   describe 'GET /admin' do
-    it 'renders the three work launchers (取り込む・編纂する・並べる)' do
+    it 'renders the three work launchers and the three master links' do
       get admin_root_path
 
       expect(response).to have_http_status(:success)
@@ -16,12 +16,7 @@ RSpec.describe 'Admin::Index (dashboard)', type: :request do
       expect(response.body).to include(new_admin_image_bulk_import_path)
       expect(response.body).to include(admin_images_path(filter: 'uncurated'))
       expect(response.body).to include(arrange_admin_images_path)
-    end
-
-    it 'renders the three master links (機材・カテゴリ・プロジェクト)' do
-      get admin_root_path
-
-      expect(response).to have_http_status(:success)
+      # 機材・カテゴリ・プロジェクト
       expect(response.body).to include(admin_gear_path)
       expect(response.body).to include(admin_categories_path)
       expect(response.body).to include(admin_projects_path)
