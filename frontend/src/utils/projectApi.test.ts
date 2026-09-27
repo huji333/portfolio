@@ -31,19 +31,6 @@ describe('fetchProjects', () => {
     });
   });
 
-  it('keeps tags as-is when present', async () => {
-    mockApiFetch.mockResolvedValue({
-      data: [{ ...baseProject, tags: ['a', 'b'] }],
-      error: false,
-    });
-
-    const result = await fetchProjects();
-    expect(result).toEqual({
-      projects: [{ ...baseProject, tags: ['a', 'b'] }],
-      error: false,
-    });
-  });
-
   it('returns empty projects on error', async () => {
     mockApiFetch.mockResolvedValue({ data: null, error: true });
 

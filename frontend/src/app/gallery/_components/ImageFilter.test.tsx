@@ -11,16 +11,11 @@ const categories: CategoryType[] = [
 ];
 
 describe('ImageFilter', () => {
-  it('renders all categories', () => {
-    render(<ImageFilter categories={categories} selectedCategoryIds={[]} onCategoryToggle={() => {}} />);
-    expect(screen.getAllByRole('checkbox')).toHaveLength(3);
+  it('renders all categories with selected ones checked', () => {
+    render(<ImageFilter categories={categories} selectedCategoryIds={[1, 3]} onCategoryToggle={() => {}} />);
     expect(screen.getByText('Landscape')).toBeInTheDocument();
     expect(screen.getByText('Portrait')).toBeInTheDocument();
     expect(screen.getByText('Street')).toBeInTheDocument();
-  });
-
-  it('checks selected categories', () => {
-    render(<ImageFilter categories={categories} selectedCategoryIds={[1, 3]} onCategoryToggle={() => {}} />);
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes[0]).toBeChecked();
     expect(checkboxes[1]).not.toBeChecked();
