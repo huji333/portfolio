@@ -15,14 +15,13 @@ RSpec.describe Image, type: :model do
     # free to be blank while the record lives as a draft (bulk ingest).
     context 'title and taken_at' do
       it 'requires each when published, but allows blank when draft' do
+        # 属性ごとに作り直す（使い回すと前の属性の blank で invalid になり検証にならない）
         %i[title taken_at].each do |attr|
-          image.public_send("#{attr}=", nil)
+          published = build(:image, is_published: true, attr => nil)
+          expect(published).to be_invalid, "#{attr} should be required when published"
 
-          image.is_published = true
-          expect(image).to be_invalid
-
-          image.is_published = false
-          expect(image).to be_valid
+          draft = build(:image, is_published: false, attr => nil)
+          expect(draft).to be_valid, "#{attr} should be optional for a draft"
         end
       end
     end
