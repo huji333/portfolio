@@ -30,7 +30,12 @@ test.describe('Gallery', () => {
     const otherPhoto = page.getByRole('button', { name: 'Seed Other Photo' });
     const otherCategory = page.getByRole('checkbox', { name: 'E2E Other Category' });
 
+    // 再取得中はグリッドが一時的に消えるため、否定アサーションはロード完了後に行う。
+    // レスポンス受信後、state 反映（=チェックボックスの再有効化）まで待ってから判定する。
+    const filtered = page.waitForResponse((res) => res.url().includes('/api/images?categories='));
     await otherCategory.check();
+    await filtered;
+    await expect(otherCategory).toBeEnabled();
     await expect(otherPhoto).toBeVisible();
     await expect(seedImage).not.toBeVisible();
 
