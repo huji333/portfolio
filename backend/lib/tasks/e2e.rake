@@ -6,7 +6,8 @@ namespace :e2e do
     seed_users
     camera, lens = seed_camera_and_lens
     category = Category.create!(name: 'E2E Test Category')
-    seed_images(camera, lens, category)
+    other_category = Category.create!(name: 'E2E Other Category')
+    seed_images(camera, lens, category, other_category)
     seed_project
 
     puts 'E2E seed data created successfully.'
@@ -19,10 +20,6 @@ def seed_users
   admin_pw = ENV.fetch('E2E_ADMIN_PASSWORD', 'password123')
   User.create!(email: ENV.fetch('E2E_ADMIN_EMAIL', 'admin@example.com'), password: admin_pw,
                password_confirmation: admin_pw, role: :admin)
-
-  guest_pw = ENV.fetch('E2E_GUEST_PASSWORD', 'password123')
-  User.create!(email: ENV.fetch('E2E_GUEST_EMAIL', 'guest@example.com'), password: guest_pw,
-               password_confirmation: guest_pw, role: :guest)
 end
 
 def seed_camera_and_lens
@@ -31,29 +28,29 @@ def seed_camera_and_lens
   [camera, lens]
 end
 
-def seed_images(camera, lens, category)
+def seed_images(camera, lens, category, other_category)
   suppress_cdn_callbacks
-
-  test_image_path = Rails.root.join('spec/fixtures/files/test_image.jpg')
 
   # 並び替え画面（/admin/images/arrange）は featured のみ表示する（#273 の再設計）。
   # arrange の e2e が Seed Image 1..3 を掴めるよう featured_rank を昇順で付与する。
   3.times do |i|
-    image = Image.new(
-      title: "Seed Image #{i + 1}",
-      caption: "E2E test image #{i + 1}",
-      taken_at: Time.zone.today - i.days,
-      is_published: true,
-      featured_rank: i,
-      camera: camera,
-      lens: lens
-    )
-    image.file.attach(io: File.open(test_image_path), filename: 'test_image.jpg', content_type: 'image/jpeg')
-    image.categories << category
-    image.save!
+    create_seed_image(title: "Seed Image #{i + 1}", taken_at: Time.zone.today - i.days, featured_rank: i,
+                      camera: camera, lens: lens, categories: [category])
   end
+  # gallery のカテゴリ絞り込み e2e 用: 別カテゴリに属する非 featured の1枚。
+  # 絞り込むと Seed Image 1..3 が消え、これだけが残ることを検証する。
+  create_seed_image(title: 'Seed Other Photo', taken_at: Time.zone.today - 3.days,
+                    camera: camera, lens: lens, categories: [other_category])
 
   analyze_and_warm_variants
+end
+
+def create_seed_image(title:, categories:, **attrs)
+  image = Image.new(title: title, caption: "E2E #{title}", is_published: true, **attrs)
+  image.file.attach(io: Rails.root.join('spec/fixtures/files/test_image.jpg').open,
+                    filename: 'test_image.jpg', content_type: 'image/jpeg')
+  image.categories = categories
+  image.save!
 end
 
 def seed_project
@@ -72,7 +69,7 @@ def suppress_cdn_callbacks
 end
 
 def analyze_and_warm_variants
-  Image.where('title LIKE ?', 'Seed Image%').find_each do |image|
+  Image.where('title LIKE ?', 'Seed %').find_each do |image|
     image.file.analyze unless image.file.analyzed?
     image.thumbnail_variant&.processed
     puts "  #{image.title}: file=#{image.file.service.exist?(image.file.key)} meta=#{image.file.metadata}"

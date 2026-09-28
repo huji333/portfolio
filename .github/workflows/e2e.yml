@@ -26,8 +26,6 @@ jobs:
       # 使い捨ての test DB 専用で、本番の認証情報とは無関係。
       E2E_ADMIN_EMAIL: admin@example.com
       E2E_ADMIN_PASSWORD: password123
-      E2E_GUEST_EMAIL: guest@example.com
-      E2E_GUEST_PASSWORD: password123
 
     services:
       postgres:
