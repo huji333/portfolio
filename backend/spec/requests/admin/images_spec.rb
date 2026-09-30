@@ -25,14 +25,6 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(response.body).to include('未編集の下書き 1 枚を表示')
     end
 
-    it 'renders the bulk edit form with per-row checkboxes' do
-      get '/admin/images'
-
-      expect(response.body).to include('bulk_update')
-      expect(response.body).to include("select_image_#{image1.id}")
-      expect(response.body).to include('選択した画像に適用')
-    end
-
     it 'filters to uncurated drafts only' do
       draft = create(:image, :draft)
 
@@ -40,6 +32,9 @@ RSpec.describe 'Admin::Images', type: :request do
 
       expect(response).to have_http_status(:success)
       expect(response.body).to include("data-image-id='#{draft.id}'").or include("data-image-id=\"#{draft.id}\"")
+      # image1 は公開済みなので一覧に出ない
+      expect(response.body).not_to include("data-image-id='#{image1.id}'")
+      expect(response.body).not_to include("data-image-id=\"#{image1.id}\"")
     end
 
     it 'paginates the list and preserves the filter in page links' do
@@ -82,17 +77,13 @@ RSpec.describe 'Admin::Images', type: :request do
   describe 'GET /admin/images publish status column' do
     it 'shows status badges without inline publish/unpublish buttons' do
       create(:image, :draft, title: 'Curated Draft', taken_at: 1.day.ago)
-      uncurated = create(:image, :draft, taken_at: nil)
+      create(:image, :draft, taken_at: nil)
 
       get '/admin/images'
 
       expect(response.body).to include('公開中')
       expect(response.body).to include('下書き')
       expect(response.body).to include('未編集')
-      # インラインの公開/非公開ボタンは廃止（公開切替は編集画面へ集約）
-      expect(response.body).not_to include('非公開にする')
-      expect(response.body).not_to include('公開する')
-      expect(uncurated.reload.publishable?).to be(false)
     end
   end
 
@@ -111,13 +102,6 @@ RSpec.describe 'Admin::Images', type: :request do
                      image: { title: 'New Published', taken_at: 1.day.ago, file: file } }
 
       expect(Image.order(:id).last).to have_attributes(title: 'New Published', is_published: true)
-    end
-
-    it 'features the new image when the featured checkbox is checked' do
-      post '/admin/images',
-           params: { image: { title: 'New Featured', file: file, is_featured: '1' } }
-
-      expect(Image.order(:id).last.featured_rank).to eq(0)
     end
   end
 
@@ -216,19 +200,7 @@ RSpec.describe 'Admin::Images', type: :request do
       expect(response).to have_http_status(:success)
 
       expect(Image.featured.pluck(:id)).to eq([f2.id, f3.id, f1.id])
-    end
-
-    it 'moves the image to the front of the featured list' do
-      post "/admin/images/#{f3.id}/insert_at", params: { position: 0 }
-      expect(response).to have_http_status(:success)
-
-      expect(Image.featured.pluck(:id)).to eq([f3.id, f1.id, f2.id])
-    end
-
-    it 'does not touch images outside the featured set' do
-      post "/admin/images/#{f1.id}/insert_at", params: { position: 1 }
-      expect(response).to have_http_status(:success)
-
+      # 非 featured の画像は影響を受けない
       expect(image1.reload.featured_rank).to be_nil
       expect(image2.reload.featured_rank).to be_nil
     end

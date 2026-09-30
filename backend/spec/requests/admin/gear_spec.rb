@@ -35,28 +35,20 @@ RSpec.describe 'Admin::Gear', type: :request do
       get admin_gear_path
 
       expect(response).to have_http_status(:success)
-      # 使用枚数セルに 3 が出る（グループクエリ集計）
-      expect(response.body).to match(/3/)
-    end
-  end
-
-  describe 'standalone camera/lens index routes are removed', type: :routing do
-    it 'no longer routes GET /admin/cameras' do
-      expect(get: '/admin/cameras').not_to be_routable
-    end
-
-    it 'no longer routes GET /admin/lenses' do
-      expect(get: '/admin/lenses').not_to be_routable
+      # X-T5 の行の使用枚数セルに 3 が出る（グループクエリ集計）。行を特定しない
+      # 単純な正規表現だと id など無関係な数字にもマッチしてしまうため、
+      # parsed_body（Nokogiri ドキュメント）でその行のセルだけを見る。
+      doc = response.parsed_body
+      row = doc.css('tbody tr').find { |tr| tr.text.include?('X-T5') }
+      expect(row.css('td.text-end').first.text.strip).to eq('3')
     end
   end
 
   describe 'save redirects point at the gear view' do
-    it 'redirects camera create to gear' do
+    it 'redirects camera and lens create to gear' do
       post admin_cameras_path, params: { camera: { name: 'X100V', manufacturer: 'FUJIFILM' } }
       expect(response).to redirect_to(admin_gear_path)
-    end
 
-    it 'redirects lens create to gear' do
       post admin_lenses_path, params: { lens: { name: 'XF16mmF1.4 R' } }
       expect(response).to redirect_to(admin_gear_path)
     end

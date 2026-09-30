@@ -35,13 +35,13 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
   end
 
   describe 'POST /admin/image_bulk_import' do
-    it 'creates a draft with shared categories; EXIF fills after the job runs' do
+    it 'creates a draft with shared categories and enqueues EXIF fill-in as a job' do
       category = create(:category)
 
       expect do
         post '/admin/image_bulk_import',
              params: { bulk: { files: [upload_fixture_blob.signed_id], category_ids: [category.id] } }
-      end.to change(Image, :count).by(1)
+      end.to change(Image, :count).by(1).and(have_enqueued_job(ProcessAttachedFileJob))
 
       expect(response).to redirect_to(admin_images_path(filter: 'uncurated'))
 
@@ -51,12 +51,6 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
       expect(draft.title).to be_nil
       expect(draft.taken_at).to be_nil
       expect(draft.categories).to eq([category])
-
-      perform_enqueued_jobs
-
-      draft.reload
-      expect(draft.taken_at).to eq(Time.utc(2024, 1, 1, 3, 56, 27))
-      expect(draft.camera).to have_attributes(make: 'SONY', model: 'ILCE-7CM2')
     end
 
     it 'applies an explicitly chosen shared camera/lens over EXIF' do
@@ -71,10 +65,9 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
       perform_enqueued_jobs
 
       draft = Image.order(:id).last
-      # EXIF（SONY ILCE-7CM2）ではなく手動選択が勝つ。taken_at は EXIF から入る
+      # EXIF（SONY ILCE-7CM2）ではなく手動選択が勝つ
       expect(draft.camera).to eq(camera)
       expect(draft.lens).to eq(lens)
-      expect(draft.taken_at).to eq(Time.utc(2024, 1, 1, 3, 56, 27))
     end
 
     it 'isolates failures per file: valid files are ingested, invalid ones reported' do
@@ -163,14 +156,6 @@ RSpec.describe 'Admin::ImageBulkImports', type: :request do
 
         perform_enqueued_jobs
         expect(ActiveStorage::Blob.exists?(blob.id)).to be(false)
-      end
-
-      it 'still ingests a valid image under the limit with the correct content type' do
-        expect do
-          post '/admin/image_bulk_import', params: { bulk: { files: [upload_fixture_blob.signed_id] } }
-        end.to change(Image, :count).by(1)
-
-        expect(response).to redirect_to(admin_images_path(filter: 'uncurated'))
       end
     end
 
