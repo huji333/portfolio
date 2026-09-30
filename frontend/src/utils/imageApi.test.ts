@@ -22,25 +22,15 @@ describe('fetchImages', () => {
     expect(mockApiFetch).toHaveBeenCalledWith('/images', 'images', undefined);
   });
 
-  it('builds query string with category IDs', async () => {
+  it('builds query string with category IDs, cursor, and limit', async () => {
     mockApiFetch.mockResolvedValue({ data: emptyPaginated, error: false });
 
-    await fetchImages({ categoryIds: [1, 3] });
-    expect(mockApiFetch).toHaveBeenCalledWith('/images?categories=1%2C3', 'images', undefined);
-  });
-
-  it('builds query string with cursor', async () => {
-    mockApiFetch.mockResolvedValue({ data: emptyPaginated, error: false });
-
-    await fetchImages({ cursor: 'abc123' });
-    expect(mockApiFetch).toHaveBeenCalledWith('/images?cursor=abc123', 'images', undefined);
-  });
-
-  it('builds query string with category IDs and cursor', async () => {
-    mockApiFetch.mockResolvedValue({ data: emptyPaginated, error: false });
-
-    await fetchImages({ categoryIds: [1, 3], cursor: 'abc123' });
-    expect(mockApiFetch).toHaveBeenCalledWith('/images?categories=1%2C3&cursor=abc123', 'images', undefined);
+    await fetchImages({ categoryIds: [1, 3], cursor: 'abc123', limit: 10 });
+    expect(mockApiFetch).toHaveBeenCalledWith(
+      '/images?categories=1%2C3&cursor=abc123&limit=10',
+      'images',
+      undefined,
+    );
   });
 
   it('returns images, nextCursor, hasMore, and error status on success', async () => {

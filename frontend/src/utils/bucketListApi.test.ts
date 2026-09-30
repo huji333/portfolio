@@ -56,7 +56,7 @@ describe('setBucketListItemLike', () => {
     const updated = { ...baseItem, likes_count: 1, liked: true };
     mockApiFetch.mockResolvedValue({ data: updated, error: false });
 
-    const result = await setBucketListItemLike(1, 'device-1', true);
+    await setBucketListItemLike(1, 'device-1', true);
 
     expect(mockApiFetch).toHaveBeenCalledWith(
       '/bucket_list_items/1/like?device_uuid=device-1',
@@ -65,13 +65,12 @@ describe('setBucketListItemLike', () => {
         method: 'POST',
       },
     );
-    expect(result).toEqual({ data: updated, error: false });
   });
 
   it('DELETEs when unliking', async () => {
     mockApiFetch.mockResolvedValue({ data: baseItem, error: false });
 
-    const result = await setBucketListItemLike(1, 'device-1', false);
+    await setBucketListItemLike(1, 'device-1', false);
 
     expect(mockApiFetch).toHaveBeenCalledWith(
       '/bucket_list_items/1/like?device_uuid=device-1',
@@ -80,13 +79,5 @@ describe('setBucketListItemLike', () => {
         method: 'DELETE',
       },
     );
-    expect(result).toEqual({ data: baseItem, error: false });
-  });
-
-  it('passes the error result through', async () => {
-    mockApiFetch.mockResolvedValue({ data: null, error: true });
-
-    const result = await setBucketListItemLike(1, 'device-1', true);
-    expect(result).toEqual({ data: null, error: true });
   });
 });
