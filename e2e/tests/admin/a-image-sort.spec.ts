@@ -20,38 +20,36 @@ test.describe('Image Sort', () => {
     // Use explicit mouse operations for more reliable drag and drop
     const sourceBbox = await handle.boundingBox();
     const targetBbox = await targetRow.boundingBox();
+    if (!sourceBbox || !targetBbox) throw new Error('drag handle / target row is not laid out');
 
-    if (sourceBbox && targetBbox) {
-      const sourceX = sourceBbox.x + sourceBbox.width / 2;
-      const sourceY = sourceBbox.y + sourceBbox.height / 2;
-      const targetX = targetBbox.x + targetBbox.width / 2;
-      // Seed Image 1 の行より上までオーバーシュートする。ドラッグ中は行が
-      // リフローして bbox が古くなるため、中央狙いだと直下に入って「上へ移動」
-      // にならない。行の上端を明確に越える位置へ落とす。
-      const targetY = targetBbox.y - targetBbox.height / 2;
+    const sourceX = sourceBbox.x + sourceBbox.width / 2;
+    const sourceY = sourceBbox.y + sourceBbox.height / 2;
+    const targetX = targetBbox.x + targetBbox.width / 2;
+    // Seed Image 1 の行より上までオーバーシュートする。ドラッグ中は行が
+    // リフローして bbox が古くなるため、中央狙いだと直下に入って「上へ移動」
+    // にならない。行の上端を明確に越える位置へ落とす。
+    const targetY = targetBbox.y - targetBbox.height / 2;
 
-      await page.mouse.move(sourceX, sourceY);
-      await page.mouse.down();
-      // まず少し動かして Sortable のドラッグ開始をトリガーする
-      await page.mouse.move(sourceX, sourceY - 8, { steps: 4 });
-      // ターゲット行の上へ複数ステップで移動して確実に先頭へ差し込む
-      await page.mouse.move(targetX, targetY, { steps: 15 });
-      await page.waitForTimeout(150);
-      await page.mouse.up();
-    }
+    // 固定 sleep ではなく、ドロップ後の insert_at の完了を待つ
+    const insertAt = page.waitForResponse(
+      (res) => res.url().includes('/insert_at') && res.request().method() === 'POST',
+    );
 
-    // Wait for the sort to settle
-    await page.waitForTimeout(2000);
+    await page.mouse.move(sourceX, sourceY);
+    await page.mouse.down();
+    // まず少し動かして Sortable のドラッグ開始をトリガーする
+    await page.mouse.move(sourceX, sourceY - 8, { steps: 4 });
+    // ターゲット行の上へ複数ステップで移動して確実に先頭へ差し込む
+    await page.mouse.move(targetX, targetY, { steps: 15 });
+    await page.mouse.up();
 
-    // Verify Seed Image 3 moved above Seed Image 1
+    expect((await insertAt).ok()).toBe(true);
+
+    // DOM 上の並びではなく、サーバーに永続化された順序を再読込して検証する
+    await page.reload();
     const rows = page.locator('tbody[data-sortable-target="list"] tr');
-    const allTexts: string[] = [];
-    const rowCount = await rows.count();
-    for (let i = 0; i < rowCount; i++) {
-      allTexts.push(await rows.nth(i).innerText());
-    }
+    const allTexts = await rows.allInnerTexts();
 
-    // Find positions of seed images
     const pos3 = allTexts.findIndex((t) => t.includes('Seed Image 3'));
     const pos1 = allTexts.findIndex((t) => t.includes('Seed Image 1'));
 

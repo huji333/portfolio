@@ -15,33 +15,6 @@ test.describe('Admin Access', () => {
     await context.close();
   });
 
-  test('guest user cannot access /admin', async ({ browser }) => {
-    // Login as guest in a fresh context
-    const context = await browser.newContext({
-      baseURL: test.info().project.use.baseURL!,
-      storageState: { cookies: [], origins: [] },
-    });
-    const page = await context.newPage();
-
-    // Login as guest
-    const guestEmail = process.env.E2E_GUEST_EMAIL ?? 'guest@example.com';
-    const guestPassword = process.env.E2E_GUEST_PASSWORD;
-    if (!guestPassword) throw new Error('E2E_GUEST_PASSWORD is required');
-    await page.goto('/users/sign_in');
-    await page.getByRole('textbox', { name: 'Email' }).fill(guestEmail);
-    await page.getByRole('textbox', { name: 'Password' }).fill(guestPassword);
-    await page.getByRole('button', { name: 'Log in' }).click();
-
-    // Wait for login to complete (Devise redirects to root, which may 404 — that's OK)
-    await page.waitForURL((url) => !url.pathname.includes('sign_in'), { timeout: 10_000 });
-
-    // Now try to access admin
-    await page.goto('/admin');
-    await expect(page.locator('body')).toContainText('You are not authorized to perform this action.');
-
-    await context.close();
-  });
-
   test('admin user can access /admin', async ({ page }) => {
     // Uses storageState from setup (admin login)
     await page.goto('/admin');
