@@ -1,8 +1,7 @@
 class Admin::ImageBulkImportsController < Admin::Base
   before_action :set_form_options
 
-  # Cloudflare Tunnel の無料プランには 1 リクエスト 100MB のハード上限があるため、
-  # それを超えないよう十分な余裕を持たせてアプリ側の上限をここに定義する。
+  # Cloudflare Tunnel の 100MB 上限に十分な余裕を持たせた値（根拠は DEPLOY.md「リソース上限とアップロード上限」）。
   MAX_FILE_SIZE = 50.megabytes
 
   # vips が扱えるラスター形式のみ許可する。宣言された content_type と実バイト
