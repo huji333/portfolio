@@ -12,7 +12,8 @@ module CdnAttachedFile
   # ProcessAttachedFileJob から呼ばれる。リクエスト経路の variant_url と違い
   # rescue しない（fail-loud）：失敗は Solid Queue の failed executions に残る。
   def process_attached_file!
-    return unless file.attached?
+    # 変換不可な blob（PDF 等）は variant_for が InvariableError を投げるため処理対象外（#320）
+    return unless file.attached? && file.blob.variable?
 
     with_single_blob_download(file.blob) do
       file.analyze unless file.analyzed?
@@ -79,7 +80,8 @@ module CdnAttachedFile
   # 導出で判定する（処理状態カラムは持たない）。添付が変わった保存だけがここに来るので、
   # 既存 blob の再添付（signed_id 経由の重複添付など）で処理済みなら再エンキューしない。
   def attached_file_needs_processing?
-    return false unless file.attached?
+    # 変換不可な blob（PDF 等）で variant_for が after_commit 内で InvariableError → 500 になるのを防ぐ（#320）
+    return false unless file.attached? && file.blob.variable?
 
     !file.analyzed? || variant_limits.any? { |limit| !variant_generated?(variant_for(limit)) }
   end

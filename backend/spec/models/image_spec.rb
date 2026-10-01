@@ -11,6 +11,29 @@ RSpec.describe Image, type: :model do
       end
     end
 
+    context 'file content type' do
+      let(:pdf_blob) do
+        ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new("%PDF-1.4\n%%EOF\n"), filename: 'doc.pdf', content_type: 'application/pdf'
+        )
+      end
+
+      it 'rejects a non-image attachment instead of leaving a broken draft' do
+        image = build(:image, :draft, file: pdf_blob)
+
+        expect { expect(image.save).to be(false) }.not_to change(Image, :count)
+        expect(image.errors[:file]).to be_present
+      end
+
+      # バリデーションを素通りした非変換 blob でも after_commit が InvariableError を投げず、
+      # ジョブもエンキューされない（モデル層の二重防御）
+      it 'does not raise or enqueue processing for an invariable blob even if validation is bypassed' do
+        image = build(:image, :draft, file: pdf_blob)
+
+        expect { image.save!(validate: false) }.not_to have_enqueued_job(ProcessAttachedFileJob)
+      end
+    end
+
     # title/taken_at are publish-quality requirements: required when published,
     # free to be blank while the record lives as a draft (bulk ingest).
     context 'title and taken_at' do
