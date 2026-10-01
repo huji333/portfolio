@@ -19,7 +19,6 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'ABOUT', href: '/#about' },
   { label: 'GALLERY', href: '/gallery' },
   { label: 'PROJECTS', href: '/projects' },
-  { label: 'CONTACT', href: '/contact' },
 ];
 
 const BASE_HEADER_CLASS = 'fixed top-0 left-0 right-0 z-50 transition-colors duration-300';
