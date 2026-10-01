@@ -24,6 +24,15 @@ services:
       DATABASE_URL: postgres://backend:${BACKEND_DATABASE_PASSWORD}@db:5432/backend_production
       # Solid Queue ワーカーを Puma 内で起動（config/puma.rb の plugin を有効化）
       SOLID_QUEUE_IN_PUMA: "1"
+    # 大量取込（vips デコード + variant 生成）で VM 全体を巻き込まないための上限（#316）。
+    # Puma と Solid Queue が同一コンテナのため app/job 共通の上限。値の根拠は DEPLOY.md「リソース上限」。
+    # 注意: tmpfs の使用量はコンテナのメモリ上限にも計上される（/tmp 256m 使い切り時の実効 heap は約 1.25g）。
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
+    tmpfs:
+      - /tmp:size=256m
     depends_on:
       db:
         condition: service_healthy

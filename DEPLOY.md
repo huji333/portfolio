@@ -112,6 +112,38 @@ git -C ~/portfolio remote set-url origin https://github.com/huji333/portfolio.gi
 - **緊急時のローカルビルド**: mr2 上で従来通り
   `docker compose -f docker-compose.prod.yml up -d --build`（`build:` は残してある）
 
+## リソース上限とアップロード上限（#316）
+
+大量取込時は vips のデコード + variant 生成が同一 VM 上で連続実行される。
+`docker-compose.prod.yml` の backend（Puma + Solid Queue を同一コンテナで実行。
+app と job は別コンテナではない）に次の上限を設定している。
+
+| 項目 | 値 | 根拠 |
+| --- | --- | --- |
+| `deploy.resources.limits.memory` | `1536m` | Puma 1 worker + Solid Queue worker 1 process × 3 threads の常時 RSS（〜500MB 程度）に、アップロード上限 50MBの vips デコードを最大 3 並列で捌く余裕を足した保守的な値。VM 全体の OOM より先にコンテナ単位で kill させるのが目的 |
+| `/tmp` tmpfs | `size=256m` | 添付ファイルの tempfile（原本 ≤50MB + variant 出力）× 3 threads の最悪値（〜200MB）を収める。tmpfs はメモリ上限にも計上されるため、これ以上は増やさない。超過時は `No space left on device` でジョブが失敗するが、ディスク/VM 全体は圧迫しない |
+
+**ホストの実メモリ（2026-10-01 実測）**: mr2（VM 102）は total 3915MB / swap 3160MB。
+上限設定前の全コンテナ稼働時で used 1380MB・available 2535MB のため、backend 1.5g 上限 + db + frontend + tunnel は VM に収まる。
+VM のメモリ割当を減らす場合は backend を 1g / tmpfs 128m 程度まで下げること。
+適用後は大量取込中に `docker stats` で上限に張り付いていないか、OOM kill（`docker inspect` の `OOMKilled`）が出ていないかを確認する。
+
+### JOB_CONCURRENCY の推奨値
+
+`backend/config/queue.yml` の Solid Queue worker は `processes: JOB_CONCURRENCY`（デフォルト 1）× `threads: 3`。
+同時に vips を回す数はこの積で決まり、メモリ使用量もほぼ比例する。
+
+- **推奨: 未設定（= 1）のまま**。大量取込は時間がかかっても安全側に倒す
+- 上げる場合も 2 まで。上げるときは backend のメモリ上限と `/tmp` tmpfs も合わせて引き上げ、ホストのメモリに余裕があることを確認する
+- OOM kill や `No space left on device` が出たらまず 1 に戻す
+
+### Cloudflare Tunnel の 100MB リクエスト上限
+
+Cloudflare 無料プランは **1 リクエスト 100MB がハード上限**。超過したアップロードは途中で切られ、
+アプリ側ではチェックサム不一致として失敗するだけで原因が分かりにくい。
+このため `Admin::ImageBulkImportsController::MAX_FILE_SIZE`（50MB）は、この上限に十分な余裕を持たせた値にしている。
+アップロード上限を上げる場合は 100MB を超えないこと（有料プランへ移行しない限り不可）。
+
 ## セキュリティ上の判断メモ（2026-07）
 
 - push 型（Actions → Tailscale SSH）を選択。pull 型（mr2 が GHCR をポーリング）は
