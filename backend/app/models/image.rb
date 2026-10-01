@@ -17,6 +17,8 @@ class Image < ApplicationRecord
   PUBLISH_REQUIREMENTS = %i[title taken_at].freeze
 
   validates :file, presence: true
+  # variant 変換できない添付（PDF 等）を弾く。モデル層で全経路（フォーム・バルク・API）を一律に塞ぐ。
+  validate :file_is_image
   # Records exist as drafts first (bulk ingest); title/taken_at are
   # publish-quality requirements, not record-existence requirements.
   PUBLISH_REQUIREMENTS.each { |attr| validates attr, presence: true, if: :is_published? }
@@ -95,6 +97,13 @@ class Image < ApplicationRecord
     self.taken_at ||= exif.taken_at
     self.camera ||= Camera.resolve_from_exif(make: exif.make, model: exif.model)
     self.lens ||= Lens.resolve_from_exif(exif.lens_model)
+  end
+
+  def file_is_image
+    return unless file.attached?
+
+    # process 側のガードと同じ判定（variable?）に揃える。image/ 前方一致だと SVG 等が通り variant なしで残る
+    errors.add(:file, 'must be an image') unless file.blob.variable?
   end
 
   def taken_at_is_in_the_past
