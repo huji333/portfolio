@@ -123,10 +123,9 @@ app と job は別コンテナではない）に次の上限を設定してい�
 | `deploy.resources.limits.memory` | `1536m` | Puma 1 worker + Solid Queue worker 1 process × 3 threads の常時 RSS（〜500MB 程度）に、アップロード上限 50MBの vips デコードを最大 3 並列で捌く余裕を足した保守的な値。VM 全体の OOM より先にコンテナ単位で kill させるのが目的 |
 | `/tmp` tmpfs | `size=256m` | 添付ファイルの tempfile（原本 ≤50MB + variant 出力）× 3 threads の最悪値（〜200MB）を収める。tmpfs はメモリ上限にも計上されるため、これ以上は増やさない。超過時は `No space left on device` でジョブが失敗するが、ディスク/VM 全体は圧迫しない |
 
-**要確認（値は暫定）**: docker1（mr2, VM 102）の割当メモリは `homelab/machines.yaml` に記録がなく、
-この値は「4GB 以上ある」前提の仮置き。`ssh mr2 free -m` で実メモリを確認し、
-backend 上限 + db（postgres）+ frontend（Next.js）+ tunnel の合計が VM のメモリに収まるか見直すこと
-（VM が 2GB 台なら backend は 1g / tmpfs 128m 程度まで下げる）。
+**ホストの実メモリ（2026-10-01 実測）**: mr2（VM 102）は total 3915MB / swap 3160MB。
+上限設定前の全コンテナ稼働時で used 1380MB・available 2535MB のため、backend 1.5g 上限 + db + frontend + tunnel は VM に収まる。
+VM のメモリ割当を減らす場合は backend を 1g / tmpfs 128m 程度まで下げること。
 適用後は大量取込中に `docker stats` で上限に張り付いていないか、OOM kill（`docker inspect` の `OOMKilled`）が出ていないかを確認する。
 
 ### JOB_CONCURRENCY の推奨値
