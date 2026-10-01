@@ -102,7 +102,8 @@ class Image < ApplicationRecord
   def file_is_image
     return unless file.attached?
 
-    errors.add(:file, 'must be an image') unless file.content_type.to_s.start_with?('image/')
+    # process 側のガードと同じ判定（variable?）に揃える。image/ 前方一致だと SVG 等が通り variant なしで残る
+    errors.add(:file, 'must be an image') unless file.blob.variable?
   end
 
   def taken_at_is_in_the_past

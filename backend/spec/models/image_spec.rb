@@ -25,6 +25,17 @@ RSpec.describe Image, type: :model do
         expect(image.errors[:file]).to be_present
       end
 
+      it 'rejects an image/* attachment that cannot be varied (SVG)' do
+        svg_blob = ActiveStorage::Blob.create_and_upload!(
+          io: StringIO.new('<svg xmlns="http://www.w3.org/2000/svg"/>'),
+          filename: 'icon.svg', content_type: 'image/svg+xml'
+        )
+        image = build(:image, :draft, file: svg_blob)
+
+        expect(image.save).to be(false)
+        expect(image.errors[:file]).to be_present
+      end
+
       # バリデーションを素通りした非変換 blob でも after_commit が InvariableError を投げず、
       # ジョブもエンキューされない（モデル層の二重防御）
       it 'does not raise or enqueue processing for an invariable blob even if validation is bypassed' do
