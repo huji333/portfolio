@@ -42,7 +42,7 @@ const GridImage = memo(function GridImage({ src, fallbackSrc, alt, width, height
   );
 });
 
-const GRID_GAP_PX = 16; // matches Tailwind gap-4
+const GRID_GAP_PX = 8; // grid の gap（style で適用し、行 span 計算と単一ソースにする）
 const ROW_HEIGHT_PX = 8; // base row height for masonry grid
 const ROW_UNIT_PX = ROW_HEIGHT_PX + GRID_GAP_PX;
 const DEFAULT_COLUMN_WIDTH = 320;
@@ -96,18 +96,21 @@ export default function ImageGrid({
   hasMore = false,
   onLoadMore,
 }: ImageGridProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // callback ref + state で保持する。isLoading 中は grid の div が unmount され、復帰時は
+  // 別 DOM 要素になるため、useRef + [] の effect だと ResizeObserver が破棄済み要素を見続け、
+  // 以降の幅変化（カテゴリ絞り込みで scrollbar の有無が変わる等）が columnWidth に反映されず
+  // rowSpan が不足して行間が潰れる。
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
 
   useEffect(() => {
-    const element = containerRef.current;
+    const element = container;
     if (!element) {
       return undefined;
     }
 
-    setContainerWidth(element.getBoundingClientRect().width);
-
+    // observe() 直後に初回コールバックが届くため、初期幅の同期 setState は不要
     const observer = new ResizeObserver((entries) => {
       const [entry] = entries;
       if (entry) {
@@ -118,7 +121,7 @@ export default function ImageGrid({
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, []);
+  }, [container]);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
@@ -147,13 +150,13 @@ export default function ImageGrid({
 
   const isClickable = Boolean(onFocus);
   const columnWidth = getColumnWidth(containerWidth);
-  const gridStyles = { gridAutoRows: `${ROW_HEIGHT_PX}px` } as const;
+  const gridStyles = { gridAutoRows: `${ROW_HEIGHT_PX}px`, gap: `${GRID_GAP_PX}px` } as const;
 
   return (
     <>
       <div
-        ref={containerRef}
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
+        ref={setContainer}
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
         style={gridStyles}
       >
         {images.map((image, index) => {
