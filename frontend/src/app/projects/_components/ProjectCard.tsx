@@ -2,13 +2,16 @@
 
 import { useCallback, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { buildProjectsHref, toggleTag } from '@/utils/projectTagFilter';
 import type { ProjectType } from '@/utils/types';
 
 type ProjectCardProps = {
   project: ProjectType;
+  selectedTags?: string[];
 };
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, selectedTags }: ProjectCardProps) {
   const primarySrc = project.thumbnail ?? project.file;
   const [imageSrc, setImageSrc] = useState(primarySrc);
   const [imgFailed, setImgFailed] = useState(false);
@@ -24,14 +27,28 @@ export default function ProjectCard({ project }: ProjectCardProps) {
     [imageSrc, project.thumbnail, project.file],
   );
 
-  const wrapperClasses = `flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-xs transition hover:-translate-y-1 hover:border-accent hover:shadow-lg${
-    project.link
-      ? ' focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background'
-      : ''
-  }`;
+  // ローカル const に受けてから判定する。project.link のままだと TS が
+  // isSafeLink 経由の絞り込みを href まで伝播できず string | null が残る
+  const link = project.link;
+  const isSafeLink = link !== null && (link.startsWith('https://') || link.startsWith('http://'));
+  const selected = selectedTags ?? [];
 
-  const content = (
+  const titleContent = (
     <>
+      {project.title}
+      {isSafeLink && (
+        <>
+          <span className="sr-only">（新しいタブで開く）</span>
+          <span aria-hidden className="text-lg text-accent">
+            ↗
+          </span>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <article className="relative flex h-full flex-col rounded-2xl border border-accent-light/60 bg-background p-5 shadow-xs transition hover:-translate-y-1 hover:border-accent hover:shadow-lg has-[a.card-link:focus-visible]:ring-2 has-[a.card-link:focus-visible]:ring-accent/60 has-[a.card-link:focus-visible]:ring-offset-2 has-[a.card-link:focus-visible]:ring-offset-background">
       <div className="relative w-full overflow-hidden rounded-xl">
         <div className="aspect-4/3" />
         {imageSrc && !imgFailed ? (
@@ -50,12 +67,18 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         )}
       </div>
       <div className="mt-5 flex flex-1 flex-col gap-3 text-foreground">
-        <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          {project.title}
-          {project.link && (
-            <span aria-hidden className="text-base text-accent">
-              ↗
-            </span>
+        <h3 className="text-lg font-semibold text-foreground">
+          {isSafeLink ? (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-link flex items-center gap-2 focus:outline-hidden after:absolute after:inset-0 after:content-['']"
+            >
+              {titleContent}
+            </a>
+          ) : (
+            <span className="flex items-center gap-2">{titleContent}</span>
           )}
         </h3>
         {project.description && (
@@ -63,38 +86,28 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         )}
         {project.tags.length > 0 && (
           <ul className="mt-auto flex flex-wrap gap-2">
-            {project.tags.map((tag) => (
-              <li
-                key={tag}
-                className="rounded-full border border-accent-light/60 px-2.5 py-0.5 text-xs text-foreground/70"
-              >
-                {tag}
-              </li>
-            ))}
+            {project.tags.map((tag) => {
+              const isSelected = selected.includes(tag);
+              return (
+                <li key={tag}>
+                  <Link
+                    href={buildProjectsHref(toggleTag(selected, tag))}
+                    scroll={selectedTags !== undefined ? false : undefined}
+                    className={`relative z-10 inline-block rounded-full border px-2.5 py-0.5 text-xs transition hover:border-accent ${
+                      isSelected
+                        ? 'border-accent bg-accent/10 text-foreground'
+                        : 'border-accent-light/60 text-foreground/70'
+                    }`}
+                  >
+                    {tag}
+                    {isSelected && <span className="sr-only">（選択中）</span>}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
-    </>
+    </article>
   );
-
-  // ローカル const に受けてから判定する。project.link のままだと TS が
-  // isSafeLink 経由の絞り込みを href まで伝播できず string | null が残る
-  const link = project.link;
-  const isSafeLink = link !== null && (link.startsWith('https://') || link.startsWith('http://'));
-
-  if (isSafeLink) {
-    return (
-      <a
-        href={link}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`Open ${project.title} in a new tab`}
-        className={wrapperClasses}
-      >
-        {content}
-      </a>
-    );
-  }
-
-  return <div className={wrapperClasses}>{content}</div>;
 }
