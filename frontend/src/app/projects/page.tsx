@@ -15,12 +15,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
+type PageProps = {
+  searchParams: Promise<{ tags?: string | string[] }>;
+};
+
+export default function Page({ searchParams }: PageProps) {
   return (
     <>
       <SiteHeader />
       <Suspense fallback={<Loading className="mx-auto w-full max-w-6xl px-4 py-10" label="Loading projects…" />}>
-        <ProjectApp />
+        <ProjectApp searchParams={searchParams} />
       </Suspense>
     </>
   );
