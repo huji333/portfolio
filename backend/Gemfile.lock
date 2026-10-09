@@ -420,6 +420,7 @@ DEPENDENCIES
   haml-rails
   image_processing (~> 2.1)
   importmap-rails
+  json (< 3)
   mission_control-jobs
   pagy (~> 43.6)
   pg (~> 1.5)

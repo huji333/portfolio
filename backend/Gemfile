@@ -25,6 +25,10 @@ gem "stimulus-rails"
 
 gem "rack-cors"
 
+# json 3 は ActiveSupport 8.1.3.1 の JSON.parse(json, opts) 呼び出しと非互換で、
+# blob metadata の読み出し（analyzed? 等）が ArgumentError になる。Rails 側の対応まで固定。
+gem "json", "< 3"
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
