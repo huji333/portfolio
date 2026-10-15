@@ -170,7 +170,7 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     jmespath (1.6.2)
-    json (2.21.2)
+    json (3.0.2)
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
     logger (1.7.0)
@@ -420,7 +420,7 @@ DEPENDENCIES
   haml-rails
   image_processing (~> 2.1)
   importmap-rails
-  json (< 3)
+  json (< 4)
   mission_control-jobs
   pagy (~> 43.7)
   pg (~> 1.5)
