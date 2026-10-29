@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # json 3 で rspec が全滅するため Gemfile で "< 3" に固定中。解消するまで major を止める (#419)
+      - dependency-name: "json"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -15,6 +19,14 @@ updates:
       # eslint-config-next が eslint 10 対応を出すまで major を止める (#177)
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+    groups:
+      # react と react-dom はバージョン完全一致が必須。別 PR だと片方だけ上がり test が全滅する (#420)
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
 
   - package-ecosystem: "npm"
     directory: "/e2e"
