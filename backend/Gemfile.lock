@@ -225,7 +225,7 @@ GEM
     nokogiri (1.19.4-x86_64-linux-gnu)
       racc (~> 1.4)
     orm_adapter (0.5.0)
-    pagy (43.7.0)
+    pagy (43.8.1)
       json
       uri
       yaml
@@ -424,7 +424,7 @@ DEPENDENCIES
   importmap-rails
   json (< 3)
   mission_control-jobs
-  pagy (~> 43.7)
+  pagy (~> 43.8)
   pg (~> 1.7)
   puma (>= 6.4)
   rack-cors
