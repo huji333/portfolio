@@ -54,7 +54,7 @@ gem "devise"
 # 管理画面 画像一覧のページネーション（全件ロード回避）
 gem "pagy", "~> 43.7"
 
-gem "image_processing", "~> 2.1"
+gem "image_processing", "~> 2.2"
 # image_processing 2.0 dropped its automatic ruby-vips dependency, so declare it explicitly
 gem "ruby-vips", "~> 2.2"
 
