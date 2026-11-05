@@ -1,10 +1,19 @@
 Rails.application.routes.draw do
-  devise_for :users, controllers: { registrations: 'users/registrations' }
+  devise_for :users, controllers: {
+    registrations: 'users/registrations',
+    sessions: 'users/sessions'
+  }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Active Storage 既定の direct upload を admin 認証付きコントローラで上書きする。
+  # 同じパスをアプリ側で先に定義すると、engine 側の active_storage/direct_uploads#create
+  # より先に照合される。名前付きルート rails_direct_uploads（フォームの
+  # data-direct-upload-url）は engine 側のものがそのまま同じパスを生成する。
+  post "#{ActiveStorage.routes_prefix}/direct_uploads" => 'admin/direct_uploads#create'
 
   namespace :admin do
     root to: 'index#index'

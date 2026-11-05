@@ -94,6 +94,14 @@ jobs:
           audience: ${{ vars.TS_AUDIENCE }}
           tags: tag:ci
 
+      - name: Validate image tag
+        # IMAGE_TAG は ssh の remote コマンドに連結されるため、commit SHA 以外を拒否する
+        run: |
+          if ! [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::image_tag must be a 40-char commit SHA: $IMAGE_TAG"
+            exit 1
+          fi
+
       - name: Deploy to mr2
         # git pull を前置: bin/deploy 自体の更新を反映してから実行する
         # （script 内の pull だけだと script 新規追加/更新時に古いものが走る）

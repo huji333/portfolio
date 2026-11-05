@@ -25,6 +25,23 @@ RSpec.describe Project, type: :model do
     end
   end
 
+  describe '#display_url' do
+    # 変換不可な添付は variant を持たない正常系。元ファイルの URL も error ログも出さない
+    it 'returns nil without logging an error for a non-variable file' do
+      project = create(:project)
+      project.file.attach(
+        io: Rails.root.join('spec/fixtures/files/not_an_image.txt').open,
+        filename: 'not_an_image.txt',
+        content_type: 'text/plain'
+      )
+      allow(Rails.logger).to receive(:error)
+
+      expect(project.display_url).to be_nil
+      expect(project.thumbnail_url).to be_nil
+      expect(Rails.logger).not_to have_received(:error)
+    end
+  end
+
   describe '#tags=' do
     it 'normalizes a comma-separated string, passes arrays through, and defaults to []' do
       project.tags = 'Rails, Next.js , PostgreSQL'

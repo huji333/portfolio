@@ -29,10 +29,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# env files (can opt-in for committing if needed)
+# env files: イメージ（GHCR に push）に secret を入れないため例外なく除外する。
+# NEXT_PUBLIC_* は Dockerfile の build-arg で渡す。
 .env*
-!.env.example
-!.env.local
 # vercel
 .vercel
 
