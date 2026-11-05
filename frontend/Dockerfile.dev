@@ -15,7 +15,8 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable && \
   yarn cache clean
 
-COPY .env.local ./
+# .env.local はイメージに入れない（.dockerignore で .env* を除外）。dev は
+# docker-compose.yml の ./frontend:/app マウント越しに実行時に読む。
 COPY . .
 
 EXPOSE 3002
