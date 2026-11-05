@@ -41,6 +41,21 @@ RSpec.describe 'Images API', type: :request do
         expect(payload['file']).to start_with(cdn_base_url)
       end
 
+      # variant 生成に失敗しても元ファイル（EXIF 付きのフルサイズ）の URL は返さない
+      it 'omits images whose variant fails instead of exposing the original file' do
+        original_keys = Image.published.map { |image| image.file.key }
+        allow_any_instance_of(ActiveStorage::VariantWithRecord)
+          .to receive(:processed).and_raise(StandardError, 'S3 down')
+        allow(Rails.logger).to receive(:error)
+
+        get '/api/images'
+
+        expect(response).to have_http_status(:success)
+        expect(response.parsed_body['images']).to be_empty
+        original_keys.each { |key| expect(response.body).not_to include(key) }
+        expect(Rails.logger).to have_received(:error).with(/variant_url failed/).at_least(:once)
+      end
+
       it 'allows thumbnail to be nil when not generated' do
         allow_any_instance_of(Image).to receive(:thumbnail_url).and_return(nil)
 

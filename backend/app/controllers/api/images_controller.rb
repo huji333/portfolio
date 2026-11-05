@@ -10,7 +10,9 @@ class Api::ImagesController < ApplicationController
     images = all_images.take(limit)
 
     render json: {
-      images: images.map { |image| image_json(image) },
+      # 表示用 variant の URL が取れない画像（variant 生成失敗）は返さない。frontend は
+      # file を必須として扱う。cursor は filter 前の images.last から作るので、続きは欠けない。
+      images: images.filter_map { |image| image_json(image) },
       next_cursor: has_more ? next_cursor(images.last) : nil,
       has_more: has_more
     }
@@ -41,13 +43,16 @@ class Api::ImagesController < ApplicationController
   end
 
   def image_json(image)
+    display_url = image.display_url
+    return unless display_url
+
     width, height = file_dimensions(image.file)
     {
       id: image.id,
       title: image.title,
       caption: image.caption,
       taken_at: image.taken_at,
-      file: image.display_url,
+      file: display_url,
       thumbnail: image.thumbnail_url,
       width: width,
       height: height,

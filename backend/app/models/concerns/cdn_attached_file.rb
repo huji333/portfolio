@@ -33,12 +33,6 @@ module CdnAttachedFile
 
   private
 
-  def file_url
-    return unless file.attached?
-
-    build_cdn_url(file.key) || active_storage_url_for(file)
-  end
-
   def variant_for(limit)
     file.variant(resize_to_limit: limit) if file.attached?
   end
@@ -52,13 +46,15 @@ module CdnAttachedFile
     build_cdn_url(variant.key) || active_storage_url_for(variant)
   rescue StandardError => e
     # error 固定（warn からの意図的な格上げ）: 2026-06-18 の S3 アップロード失敗インシデントでは
-    # variant_generated? が DB のみを見るため silent fallback が唯一の手がかりだった。
+    # variant_generated? が DB のみを見るため、このログが唯一の手がかりだった。
     # variant_key / blob_id を含めて grep・件数集計できるようにする（storage:verify_variants と対）。
     Rails.logger.error(
-      "variant_url fallback (#{log_reference}): #{e.class} #{e.message} " \
+      "variant_url failed (#{log_reference}): #{e.class} #{e.message} " \
       "variant_key=#{variant&.key.inspect} blob_id=#{file.blob&.id.inspect}"
     )
-    file_url
+    # 元ファイルの URL には落とさない。元ファイルは EXIF（撮影位置を含みうる）を残した
+    # フルサイズで、公開 API（Api::ImagesController / Api::ProjectsController）に出てしまう。
+    nil
   end
 
   def thumbnail_limit = self.class::THUMBNAIL_LIMIT
