@@ -38,8 +38,11 @@ module CdnAttachedFile
   end
 
   def variant_url(limit)
+    # 変換不可な blob（PDF 等）は variant を持たない正常系。下の rescue で error ログを
+    # 出すと S3 障害の手がかり（後述）に混ざるため、ここで nil を返す（process 側と同じ判定）
+    return unless file.attached? && file.blob.variable?
+
     variant = variant_for(limit)
-    return unless variant
 
     ensure_variant_processed(variant)
 
