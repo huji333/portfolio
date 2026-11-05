@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-RSpec.describe 'Auth rate limiting', type: :request do
-  before { AuthRateLimit::STORE.clear }
-  after { AuthRateLimit::STORE.clear }
+RSpec.describe 'Login rate limiting', type: :request do
+  before { Users::SessionsController::RATE_LIMIT_STORE.clear }
+  after { Users::SessionsController::RATE_LIMIT_STORE.clear }
 
   let(:user) { create(:user, :admin) }
 
@@ -10,7 +10,7 @@ RSpec.describe 'Auth rate limiting', type: :request do
     let(:bad_credentials) { { user: { email: user.email, password: 'wrong-password' } } }
 
     it 'returns 429 once the attempt limit is exceeded' do
-      AuthRateLimit::MAX_ATTEMPTS.times do
+      Users::SessionsController::MAX_LOGIN_ATTEMPTS.times do
         post user_session_path, params: bad_credentials
         expect(response).not_to have_http_status(:too_many_requests)
       end
@@ -28,19 +28,8 @@ RSpec.describe 'Auth rate limiting', type: :request do
     end
   end
 
-  describe 'POST /users/password' do
-    # 存在しない email でもリクエストは数える（メールは送らないので mailer の設定に依存しない）
-    let(:reset_params) { { user: { email: 'nobody@example.com' } } }
-
-    it 'returns 429 once the reset request limit is exceeded' do
-      AuthRateLimit::MAX_ATTEMPTS.times do
-        post user_password_path, params: reset_params
-        expect(response).not_to have_http_status(:too_many_requests)
-      end
-
-      post user_password_path, params: reset_params
-
-      expect(response).to have_http_status(:too_many_requests)
-    end
+  # mailer 未設定のまま再設定メールの申請を受けると 500 になっていたため、機能ごと外している
+  it 'does not expose the password reset routes' do
+    expect(Rails.application.routes.url_helpers).not_to respond_to(:user_password_path)
   end
 end
